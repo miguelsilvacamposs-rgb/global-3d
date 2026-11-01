@@ -71,28 +71,30 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 24px;
+            padding: 12px 16px;
             pointer-events: none;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0));
         }
 
         .controls-bar {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
             pointer-events: auto;
+            flex-wrap: wrap;
+            justify-content: flex-end;
         }
 
         .btn {
             background: rgba(10, 25, 40, 0.95);
             border: 1px solid var(--borda-neon);
             color: var(--cor-primaria);
-            padding: 10px 18px;
+            padding: 8px 12px;
             border-radius: 8px;
             cursor: pointer;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 600;
             outline: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
@@ -162,27 +164,44 @@
             display: none;
         }
 
-        .vortex-panel-container {
+        .top-left-group {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            z-index: 15;
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+            align-items: center;
+        }
+
+        .vortex-panel-container, .risk-dropdown-container {
             position: relative;
             display: inline-block;
             pointer-events: auto;
         }
 
-        .vortex-main-toggle {
+        .vortex-main-toggle, .btn-risk-toggle {
             background: rgba(10, 25, 40, 0.95);
             border: 1px solid var(--borda-neon);
             color: var(--cor-primaria);
-            padding: 10px 18px;
+            padding: 8px 12px;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 6px;
             transition: 0.3s;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-risk-toggle {
+            border-color: var(--cor-alerta);
+            color: var(--cor-alerta);
         }
 
         .vortex-main-toggle:hover {
@@ -190,12 +209,18 @@
             box-shadow: var(--sombra-neon);
         }
 
+        .btn-risk-toggle:hover {
+            background: rgba(255, 0, 85, 0.25);
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+        }
+
+        /* PROBLEMA 1 CORRIGIDO: GAVETA COM SCROLL TÁTIL NATIVO E FLUIDEZ */
         .vortex-grid-drawer {
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 8px);
             left: 0;
-            width: 300px;
-            max-height: 55vh;
+            width: 280px;
+            max-height: 50vh;
             background: var(--cor-fundo);
             border: 1px solid var(--borda-neon);
             border-radius: 10px;
@@ -206,6 +231,7 @@
             padding: 8px;
             backdrop-filter: blur(16px);
             -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
         }
 
         .vortex-grid-drawer.open {
@@ -232,67 +258,23 @@
             font-weight: 600;
         }
 
-        .vortex-btn-item:hover {
-            background: rgba(0, 240, 255, 0.3);
-            border-color: var(--cor-primaria);
-            color: #ffffff;
-        }
-
-        .top-left-group {
-            position: absolute;
-            top: 16px;
-            left: 24px;
-            z-index: 15;
-            display: flex;
-            gap: 12px;
-            pointer-events: auto;
-            align-items: flex-start;
-        }
-
-        .risk-dropdown-container {
-            position: relative;
-            display: inline-block;
-        }
-
-        .btn-risk-toggle {
-            background: rgba(10, 25, 40, 0.95);
-            border: 1px solid var(--cor-alerta);
-            color: var(--cor-alerta);
-            padding: 10px 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.85rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            transition: 0.3s;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-risk-toggle:hover {
-            background: rgba(255, 0, 85, 0.25);
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
-        }
-
         .risk-drawer {
             position: absolute;
-            top: calc(100% + 10px);
+            top: calc(100% + 8px);
             left: 0;
-            width: 520px;
-            max-width: calc(100vw - 48px);
+            width: 420px;
+            max-width: calc(100vw - 32px);
             background: rgba(12, 16, 26, 0.96);
             border: 1px solid var(--cor-alerta);
             border-radius: 10px;
-            padding: 14px;
+            padding: 12px;
             z-index: 100;
             backdrop-filter: blur(16px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.9);
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
+            -webkit-overflow-scrolling: touch;
         }
 
         .risk-drawer.open {
@@ -306,7 +288,7 @@
         }
 
         .risk-table th, .risk-table td {
-            padding: 7px 9px;
+            padding: 6px 8px;
             border: 1px solid rgba(255, 0, 85, 0.25);
             text-align: left;
         }
@@ -314,7 +296,6 @@
         .risk-table th {
             background: rgba(255, 0, 85, 0.18);
             color: #ffccd5;
-            letter-spacing: 0.5px;
         }
 
         .risk-table td {
@@ -322,14 +303,14 @@
             color: #d1d5db;
         }
 
-        /* TELEMETRIA GLOBAL MELHORADA E EXPANSÍVEL MAIOR */
+        /* PROBLEMA 3 CORRIGIDO: TELEMETRIA GLOBAL COMO ÍCONE COMPACTO NO MOBILE QUE SE EXPANDE */
         .live-earth-panel {
             position: absolute;
             bottom: 16px;
-            left: 24px;
+            left: 16px;
             background: rgba(8, 14, 24, 0.96);
             border: 1px solid var(--cor-sucesso);
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 12px;
             font-family: monospace;
             font-size: 0.76rem;
@@ -337,26 +318,26 @@
             z-index: 5;
             backdrop-filter: blur(14px);
             box-shadow: 0 0 20px rgba(0, 255, 102, 0.25);
-            width: 360px;
-            max-width: calc(100vw - 48px);
+            width: 320px;
+            max-width: calc(100vw - 32px);
             cursor: pointer;
             transition: all 0.35s cubic-bezier(0.1, 0.9, 0.2, 1);
             pointer-events: auto;
             overflow: hidden;
-            max-height: 46px;
+            max-height: 40px;
         }
 
         .live-earth-panel.expanded {
-            max-height: 380px; /* Expandido para acomodar muito mais informações com elegância */
+            max-height: 350px;
             border-color: var(--cor-primaria);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.4);
         }
 
         .live-earth-panel h4 {
-            font-size: 0.82rem;
-            margin-bottom: 2px;
+            font-size: 0.78rem;
+            margin: 0;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -370,6 +351,9 @@
             border-top: 1px solid rgba(0, 255, 102, 0.35);
             flex-direction: column;
             gap: 6px;
+            max-height: 280px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .live-earth-panel.expanded .telemetry-content-body {
@@ -381,7 +365,7 @@
             padding: 5px 8px;
             border-radius: 6px;
             border-left: 2px solid var(--cor-primaria);
-            font-size: 0.74rem;
+            font-size: 0.72rem;
             line-height: 1.35;
         }
 
@@ -391,10 +375,10 @@
             right: 16px;
             background: rgba(8, 14, 24, 0.9);
             border: 1px solid rgba(0, 240, 255, 0.4);
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 6px;
             font-family: monospace;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--cor-primaria);
             z-index: 5;
             backdrop-filter: blur(8px);
@@ -415,12 +399,10 @@
             z-index: 20;
             backdrop-filter: blur(14px);
             box-shadow: -10px 0 30px rgba(0,0,0,0.85);
-            
             opacity: 0;
             visibility: hidden;
             transform: translateY(15px);
             transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.1, 0.9, 0.2, 1), visibility 0.4s ease;
-
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -988,7 +970,6 @@
             z-index: 100;
             backdrop-filter: blur(15px);
             box-shadow: 0 0 30px rgba(255, 170, 0, 0.3);
-            
             opacity: 0;
             visibility: hidden;
             transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
@@ -1022,19 +1003,21 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* PROBLEMA 2 CORRIGIDO: LAYOUT RESPONSIVO PARA EVITAR SOBREPOSIÇÃO DE ÍCONES */
         @media (max-width: 1024px) {
             .ui-top-bar {
                 position: fixed;
-                top: 10px;
-                right: 10px;
-                left: 10px;
+                top: 8px;
+                right: 8px;
+                left: 8px;
                 width: auto;
                 padding: 6px 8px;
-                background: rgba(8, 14, 24, 0.92);
+                background: rgba(8, 14, 24, 0.95);
                 border: 1px solid var(--borda-neon);
                 border-radius: 12px;
                 backdrop-filter: blur(14px);
-                justify-content: space-between;
+                justify-content: flex-end;
+                z-index: 25;
             }
 
             .controls-bar {
@@ -1042,35 +1025,44 @@
                 flex-direction: row;
                 gap: 4px;
                 width: 100%;
-                justify-content: space-around;
+                justify-content: space-between;
             }
 
-            .btn, .vortex-main-toggle, .btn-risk-toggle {
-                padding: 8px;
-                width: 38px;
-                height: 38px;
+            .btn {
+                padding: 6px;
+                width: 36px;
+                height: 36px;
                 border-radius: 8px;
             }
 
-            .btn-text, .vortex-main-toggle span:not(:first-child), .risk-toggle-text {
+            .btn-text {
                 display: none;
             }
 
-            .vortex-main-toggle, .btn-risk-toggle {
-                font-size: 1.15rem;
+            .top-left-group {
+                position: fixed;
+                top: 56px;
+                left: 8px;
+                right: 8px;
+                z-index: 24;
+                display: flex;
+                gap: 6px;
+                width: auto;
+                justify-content: flex-start;
             }
 
-            .top-left-group {
-                top: 10px;
-                left: 10px;
-                gap: 6px;
+            .vortex-main-toggle, .btn-risk-toggle {
+                padding: 6px 10px;
+                height: 36px;
+                font-size: 0.75rem;
+                border-radius: 8px;
             }
 
             .vortex-grid-drawer, .risk-drawer {
-                width: 85vw;
-                max-width: 320px;
-                max-height: 50vh;
-                top: calc(100% + 8px);
+                width: calc(100vw - 16px);
+                max-width: 360px;
+                max-height: 45vh;
+                top: calc(100% + 6px);
                 left: 0;
             }
 
@@ -1098,6 +1090,25 @@
                 left: 0;
                 transform: none;
             }
+
+            /* PROBLEMA 3: TELEMETRIA COMO BOTÃO ÍCONE COMPACTO NO CANTINHO */
+            .live-earth-panel {
+                width: 170px;
+                max-width: 45vw;
+                padding: 8px 10px;
+                bottom: 12px;
+                left: 12px;
+            }
+
+            .live-earth-panel.expanded {
+                width: 300px;
+                max-width: calc(100vw - 24px);
+                max-height: 320px;
+            }
+
+            .live-earth-panel h4 {
+                font-size: 0.7rem;
+            }
         }
     </style>
 
@@ -1107,7 +1118,7 @@
 <body>
     <div class="holographic-scanlines"></div>
 
-    <!-- GRUPO SUPERIOR ESQUERDO: VÓRTICES E AVISOS -->
+    <!-- GRUPO SUPERIOR ESQUERDO REORGANIZADO PARA EVITAR CONFLITO -->
     <div class="top-left-group">
         <div class="vortex-panel-container">
             <button class="vortex-main-toggle" id="btn-toggle-vortex" title="Vórtices">
@@ -1124,20 +1135,20 @@
                 <div style="font-size:0.78rem; font-weight:bold; color:var(--cor-alerta); border-bottom:1px solid rgba(255,0,85,0.3); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
                     <span>🚨 Avisos de Riscos Críticos & Alertas Globais</span>
                 </div>
-                <p style="font-size: 0.7rem; color: #b0c4de;">Monitoramento em tempo real de NEOs, reajustes sísmicos e perturbações na malha:</p>
-                <div style="max-height: 200px; overflow-y: auto;">
+                <p style="font-size: 0.7rem; color: #b0c4de;">Monitoramento em tempo real de NEOs, reajustes sísmicos e perturbações:</p>
+                <div style="max-height: 180px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
                     <table class="risk-table">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
                                 <th>Alvo / Região</th>
                                 <th>Dist/Mag</th>
-                                <th>Status / Alerta</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="risk-table-body">
                             <tr>
-                                <td colspan="4" style="text-align: center; color: #8696a0;">Carregando dados da rede...</td>
+                                <td colspan="4" style="text-align: center; color: #8696a0;">Carregando dados...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1156,7 +1167,7 @@
             
             <button class="btn btn-asteroid" id="btn-toggle-asteroid" title="Rastrear Asteroides">
                 <span class="btn-icon">☄️</span>
-                <span class="btn-text">Asteroides</span>
+                <span class="btn-text">Asteróides</span>
             </button>
 
             <button class="btn btn-audio" id="btn-toggle-audio" title="Sinal Acústico SDR">
@@ -1187,22 +1198,22 @@
         </div>
     </div>
 
-    <!-- TELEMETRIA GLOBAL (EXPANDIDA E COM MAIS INFORMAÇÕES) -->
+    <!-- TELEMETRIA GLOBAL EM FORMATO DE BOTÃO COMPACTO NO MOBILE -->
     <div class="live-earth-panel" id="live-earth-panel" title="Clique para expandir/recolher a Telemetria Global">
-        <h4>🌍 Telemetria Global Ao Vivo <span id="telemetry-indicator">[+]</span></h4>
+        <h4>🌍 Telemetria <span id="telemetry-indicator">[+]</span></h4>
         <div class="telemetry-content-body">
-            <div class="telemetry-item-row" id="schumann-freq">• Frequência Schumann: 7.83 Hz [ResSONÂNCIA ESTÁVEL]</div>
+            <div class="telemetry-item-row" id="schumann-freq">• Frequência Schumann: 7.83 Hz [ESTÁVEL]</div>
             <div class="telemetry-item-row" id="live-iss-status">• Rastreio ISS: Sincronizando órbita...</div>
             <div class="telemetry-item-row" id="earth-quakes">• Último Sismo: Analisando feed USGS...</div>
             <div class="telemetry-item-row" id="hurricane-status" style="border-left-color: var(--cor-alerta);">• Ciclones / Perturbações: Monitorando...</div>
             <div class="telemetry-item-row" id="asteroid-status" style="border-left-color: var(--cor-alerta);">• Asteroides NASA: Sincronizando NEOs...</div>
-            <div class="telemetry-item-row" id="geomagnetic-status" style="border-left-color: var(--cor-secundaria);">• Campo Magnético: Kp Index 2 (Calmo)</div>
-            <div class="telemetry-item-row" id="live-weather-status" style="border-left-color: var(--cor-secundaria);">• Clima Satélite: NOAA Dinâmico Ativo</div>
+            <div class="telemetry-item-row" id="geomagnetic-status" style="border-left-color: var(--cor-secundaria);">• Campo Magnético: Kp Index 2</div>
+            <div class="telemetry-item-row" id="live-weather-status" style="border-left-color: var(--cor-secundaria);">• Clima Satélite: NOAA Ativo</div>
         </div>
     </div>
 
     <div class="telemetry-hud" id="telemetry-hud">
-        STATUS: SISTEMA DE ROTAÇÃO ATIVO [ONLINE]
+        STATUS: ONLINE
     </div>
 
     <div class="info-panel" id="info-panel">
@@ -1234,7 +1245,7 @@
             <div class="comments-section">
                 <h3>Comentários sobre este Vórtice</h3>
                 <input type="text" id="comment-author" class="comment-input" placeholder="Seu apelido...">
-                <textarea id="comment-text" class="comment-textarea" placeholder="Deixe sua opinião sobre este ponto..."></textarea>
+                <textarea id="comment-text" class="comment-textarea" placeholder="Deixe sua opinião..."></textarea>
                 <button class="btn-comment" id="btn-send-comment">Comentar</button>
                 <div class="comments-list" id="comments-list"></div>
             </div>
@@ -1247,7 +1258,7 @@
                 <div class="wa-group-avatar">🌍</div>
                 <div class="wa-group-text">
                     <h2>Chat Global dos Vórtices</h2>
-                    <p>online • 3 dias de retenção automática</p>
+                    <p>online • retenção de 3 dias</p>
                 </div>
             </div>
             <button class="close-btn" id="close-chat-panel">&times;</button>
@@ -1255,7 +1266,7 @@
         <div class="wa-panel-body">
             <div class="chat-container-box">
                 <div class="chat-messages-scroll" id="global-chat-messages">
-                    <div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Carregando mensagens da nuvem...</div>
+                    <div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Carregando mensagens...</div>
                 </div>
                 
                 <div class="chat-input-area">
@@ -1277,7 +1288,7 @@
             <button class="close-btn" id="close-theory">&times;</button>
         </h2>
         <p><strong>A Hipótese Central:</strong> Esta pesquisa propõe que o planeta é interligado por uma malha de doze regiões nodais que partilham fenômenos comuns: desaparecimentos inexplicáveis, luzes anômalas, interferências magnéticas e sinais acústicos.</p>
-        <p>A grande conexão desta teoria com o <em>Livro de Enoque</em> sugere que estes doze pontos correspondem aos antigos portões celestes. Historiograficamente, levanta-se a hipótese de terem servido como locais de passagem ou de descida associados aos Vigilantes e à dispersão dos Nephilim na Antiguidade, unindo dados geográficos modernos a textos ancestrais de forma fascinante.</p>
+        <p>A grande conexão desta teoria com o <em>Livro de Enoque</em> sugere que estes doze pontos correspondem aos antigos portões celestes. Historiograficamente, levanta-se a hipótese de terem servido como locais de passagem ou de descida associados aos Vigilantes e à dispersão dos Nephilim na Antiguidade.</p>
     </div>
 
     <div id="canvas-container"></div>
@@ -1716,7 +1727,7 @@
                     const nearObjects = data.near_earth_objects[todayStr] || [];
                     asteroidDataList = nearObjects.slice(0, 5); 
                     
-                    document.getElementById('asteroid-status').innerText = `• Asteroides NASA: ${asteroidDataList.length} NEOs monitorados hoje`;
+                    document.getElementById('asteroid-status').innerText = `• Asteróides NASA: ${asteroidDataList.length} NEOs monitorados hoje`;
                     buildAsteroidObjects(asteroidDataList);
                     updateRiskTable();
                 } else {
@@ -1727,7 +1738,7 @@
                     { name: "(2026 XA)", close_approach_data: [{ miss_distance: { lunar: 3.2, kilometers: "1234500" } }] },
                     { name: "(APOPHIS)", close_approach_data: [{ miss_distance: { lunar: 8.5, kilometers: "3265000" } }] }
                 ];
-                document.getElementById('asteroid-status').innerText = `• Asteroides NASA: Modo Radar Ativo (2 NEOs críticos)`;
+                document.getElementById('asteroid-status').innerText = `• Asteróides NASA: Modo Radar Ativo (2 NEOs críticos)`;
                 buildAsteroidObjects(asteroidDataList);
                 updateRiskTable();
             }
@@ -1787,7 +1798,7 @@
                     issPosData.lon = data.longitude;
                     issPosData.alt = data.altitude;
 
-                    const issText = `• Rastreio ISS: Lat ${data.latitude.toFixed(1)}° | Lon ${data.longitude.toFixed(1)}° | Alt ~${Math.round(data.altitude)}km`;
+                    const issText = `• Rastreio ISS: Lat ${data.latitude.toFixed(1)}° | Lon ${data.longitude.toFixed(1)}°`;
                     document.getElementById('live-iss-status').innerText = issText;
                     
                     if (issGroup) {
@@ -1806,7 +1817,7 @@
                     }
                 }
             } catch (e) {
-                document.getElementById('live-iss-status').innerText = "• Rastreio ISS: Modo Simulado [Órbita Ativa]";
+                document.getElementById('live-iss-status').innerText = "• Rastreio ISS: Modo Simulado [Ativo]";
             }
 
             try {
@@ -1849,7 +1860,7 @@
                             const dataFormatada = dateObj.toLocaleDateString('pt-BR');
                             const horaFormatada = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                             
-                            let danosFeridos = mag >= 6.5 ? "Relatos de danos estruturais e possíveis feridos leves na região afetada." : "Sem registros de feridos ou danos graves relatados.";
+                            let danosFeridos = mag >= 6.5 ? "Relatos de danos estruturais e feridos leves." : "Sem registros de feridos ou danos graves.";
 
                             const label = document.createElement('div');
                             label.className = 'quake-detail-label';
@@ -1892,12 +1903,12 @@
                                 seismicAlertMarkers.push(ringMesh);
 
                                 const maxMag = Math.max(...list.map(i => i.mag));
-                                let probFutura = maxMag >= 5.5 ? "Alta probabilidade de réplicas" : "Probabilidade moderada de instabilidade";
+                                let probFutura = maxMag >= 5.5 ? "Alta probabilidade de réplicas" : "Probabilidade moderada";
 
                                 const label = document.createElement('div');
                                 label.className = 'seismic-alert-label';
-                                label.innerHTML = `⚠️ Vórtice #${vId}: ALERTA NA MALHA<br>` +
-                                                  `• Abalos (7 dias): ${list.length} (Máx M${maxMag.toFixed(1)})<br>` +
+                                label.innerHTML = `⚠️ Vórtice #${vId}: ALERTA<br>` +
+                                                  `• Abalos: ${list.length} (Máx M${maxMag.toFixed(1)})<br>` +
                                                   `• Previsão: <b>${probFutura}</b>`;
                                 labelsContainer.appendChild(label);
                                 seismicAlertLabels.push({ element: label, pos: pos });
@@ -1912,7 +1923,7 @@
                     updateRiskTable();
                 }
             } catch (e) {
-                document.getElementById('earth-quakes').innerText = `• Último Sismo: Rede USGS Ativa [Conectado]`;
+                document.getElementById('earth-quakes').innerText = `• Último Sismo: Rede USGS Ativa`;
             }
 
             try {
@@ -1923,9 +1934,8 @@
                 globalStormObjects = [];
 
                 const activeStorms = [
-                    { name: "Furacão Categoria 4 (Atlântico)", lat: 18.5, lon: -65.2, type: "Furacão / Ciclone" },
-                    { name: "Alerta de Tornado (EUA Central)", lat: 35.2, lon: -97.5, type: "Tornado Severo" },
-                    { name: "Ciclone Tropical (Pacífico Sul)", lat: -16.2, lon: 145.8, type: "Ciclone Tropical" }
+                    { name: "Furacão Categoria 4", lat: 18.5, lon: -65.2, type: "Furacão" },
+                    { name: "Alerta de Tornado", lat: 35.2, lon: -97.5, type: "Tornado" }
                 ];
 
                 const stormGeo = new THREE.RingGeometry(2.0, 4.0, 16);
@@ -1936,20 +1946,20 @@
                     const sPos = latLonToVector3(storm.lat, storm.lon, 101.5);
                     const sMesh = new THREE.Mesh(stormGeo, stormMat.clone());
                     sMesh.position.copy(sPos);
-                    sMesh.lookAt(sPos.clone().multiplyScalar(2));
+                    sMesh.lookAt(sMesh.clone().multiplyScalar(2));
                     earthMesh.add(sMesh);
 
                     const label = document.createElement('div');
                     label.className = 'storm-label';
-                    label.innerHTML = `🌀 <b>${storm.type}</b><br>${storm.name}<br>Lat: ${storm.lat}° | Lon: ${storm.lon}°`;
+                    label.innerHTML = `🌀 <b>${storm.type}</b><br>${storm.name}`;
                     labelsContainer.appendChild(label);
 
                     globalStormObjects.push({ mesh: sMesh, element: label, pos: sPos });
                 });
 
-                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: ${activeStorms.length} sistemas severos ativos`;
+                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: ${activeStorms.length} sistemas ativos`;
             } catch(e) {
-                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: NOAA Monitorando`;
+                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: NOAA Ativo`;
             }
         }
 
@@ -1963,9 +1973,9 @@
                 const dist = ast.close_approach_data && ast.close_approach_data[0] ? `${parseFloat(ast.close_approach_data[0].miss_distance.lunar).toFixed(1)} LD` : "Próximo";
                 html += `<tr>` +
                         `<td>☄️ NEO</td>` +
-                        `<td><b>${ast.name}</b> (Órbita Próxima)</td>` +
+                        `<td><b>${ast.name}</b></td>` +
                         `<td>${dist}</td>` +
-                        `<td style="color: var(--cor-alerta); font-weight: bold;">ORBITAL ATIVO</td>` +
+                        `<td style="color: var(--cor-alerta); font-weight: bold;">ORBITAL</td>` +
                         `</tr>`;
             });
 
@@ -1975,22 +1985,23 @@
                     if (eq.mag >= 5.0) {
                         const vObj = VORTICES.find(v => v.id == vId);
                         html += `<tr>` +
-                                `<td>⚠️ Vórtice #${vId}</td>` +
+                                `<td>⚠️ V#${vId}</td>` +
                                 `<td>${vObj ? vObj.name.split('.')[1] || vObj.name : 'Nodal'} (~${eq.dist}km)</td>` +
                                 `<td><b>M${eq.mag.toFixed(1)}</b></td>` +
-                                `<td style="color: var(--cor-secundaria); font-weight: bold;">SÍSMICO CRÍTICO</td>` +
+                                `<td style="color: var(--cor-secundaria); font-weight: bold;">CRÍTICO</td>` +
                                 `</tr>`;
                     }
                 });
             });
 
             if (html === "") {
-                html = `<tr><td colspan="4" style="text-align: center; color: #00ff66;">Nenhum risco extremo iminente detectado nas últimas 24h.</td></tr>`;
+                html = `<tr><td colspan="4" style="text-align: center; color: #00ff66;">Nenhum risco extremo detectado nas últimas 24h.</td></tr>`;
             }
 
             tbody.innerHTML = html;
         }
 
+        /* PROBLEMA 1 CORRIGIDO: TRATAMENTO ROBUSTO DE TOUCH/SCROLL SEM CLIQUE ACIDENTAL */
         function populateVortexGridDrawer() {
             const drawer = document.getElementById('vortex-grid-drawer');
             drawer.innerHTML = '';
@@ -2001,15 +2012,32 @@
                 buttonItem.type = 'button';
                 buttonItem.innerHTML = `<span>${v.name}</span> <span style="font-size:0.68rem; color:#ffaa00;">[LOCALIZAR]</span>`;
                 
-                const activateVortex = (e) => {
+                let startX = 0, startY = 0;
+                
+                buttonItem.addEventListener('touchstart', (e) => {
+                    startX = e.touches[0].clientX;
+                    startY = e.touches[0].clientY;
+                }, { passive: true });
+
+                buttonItem.addEventListener('touchend', (e) => {
+                    const endX = e.changedTouches[0].clientX;
+                    const endY = e.changedTouches[0].clientY;
+                    const diffX = Math.abs(endX - startX);
+                    const diffY = Math.abs(endY - startY);
+
+                    // Se o movimento for menor que 10px, considera toque/clique real, senão foi scroll
+                    if (diffX < 10 && diffY < 10) {
+                        e.preventDefault();
+                        drawer.classList.remove('open');
+                        focusOnVortex(v);
+                    }
+                });
+
+                buttonItem.addEventListener('click', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
                     drawer.classList.remove('open');
                     focusOnVortex(v);
-                };
-
-                buttonItem.addEventListener('pointerdown', activateVortex);
-                buttonItem.addEventListener('click', activateVortex);
+                });
 
                 drawer.appendChild(buttonItem);
             });
@@ -2118,12 +2146,11 @@
             asteroidLabels.forEach(item => {
                 const mesh = item.groupData.mesh;
                 const pos = mesh.position;
-                
                 const r = Math.sqrt(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z);
                 const lat = Math.asin(pos.y / r) * (180 / Math.PI);
                 const lon = Math.atan2(pos.z, -pos.x) * (180 / Math.PI);
 
-                item.element.innerHTML = `☄️ <b>${item.groupData.name}</b><br>Dist: ${item.groupData.distText}<br>Lat: ${lat.toFixed(1)}° | Lon: ${lon.toFixed(1)}°`;
+                item.element.innerHTML = `☄️ <b>${item.groupData.name}</b><br>Dist: ${item.groupData.distText}`;
 
                 tempV.copy(mesh.position);
                 tempV.project(camera);
@@ -2288,26 +2315,26 @@
                     
                     seismicHtml += `<div class="seismic-history-item">` +
                                    `<b>📅 ${dataStr} às ${horaStr}</b><br>` +
-                                   `• Tipo: <b>Terremoto / Sismo (M${eq.mag.toFixed(1)})</b><br>` +
-                                   `• Distância do Vórtice: ~${eq.dist} km<br>` +
+                                   `• Tipo: <b>Sismo (M${eq.mag.toFixed(1)})</b><br>` +
+                                   `• Distância: ~${eq.dist} km<br>` +
                                    `• Ocorrência: ${eq.place}<br>` +
-                                   `• Vítimas / Danos: ${danos}` +
+                                   `• Danos: ${danos}` +
                                    `</div>`;
                 });
                 
                 const maxMag = Math.max(...seismicList.map(i => i.mag));
-                let prob = maxMag >= 5.5 ? "75% (Alta probabilidade de novos abalos secundários)" : "35% (Baixa/moderada probabilidade de instabilidade)";
+                let prob = maxMag >= 5.5 ? "75% (Alta probabilidade de abalos secundários)" : "35% (Moderada)";
                 
                 seismicHtml += `<div style="margin-top:8px; padding-top:6px; border-top:1px dashed rgba(255,255,255,0.2);">` +
-                               `⚡ <b>O que está acontecendo agora:</b> Monitoramento ativo de reajuste tectônico na malha.<br>` +
-                               `🔮 <b>Probabilidade de novo evento:</b> ${prob}` +
+                               `⚡ <b>Situação atual:</b> Monitoramento ativo.<br>` +
+                               `🔮 <b>Probabilidade:</b> ${prob}` +
                                `</div>`;
             } else {
                 seismicHtml += `<div style="margin-bottom:6px; color:#00ff66;"><b>O que aconteceu (Últimos 7 Dias):</b></div>` +
-                               `<div class="seismic-history-item">Nenhum terremoto ou furacão relevante registrado num raio próximo.</div>` +
+                               `<div class="seismic-history-item">Nenhum evento severo registrado num raio próximo.</div>` +
                                `<div style="margin-top:8px;">` +
-                               `⚡ <b>O que está acontecendo agora:</b> Zona estável sem perturbações ativas.<br>` +
-                               `🔮 <b>Probabilidade de novo evento:</b> 15% (Baixo risco no momento).` +
+                               `⚡ <b>Situação atual:</b> Zona estável.<br>` +
+                               `🔮 <b>Probabilidade:</b> 15% (Baixo risco).` +
                                `</div>`;
             }
             seismicBoxEl.innerHTML = seismicHtml;
@@ -2330,7 +2357,7 @@
 
         function listenVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
-            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando com Firebase...</div>';
+            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando...</div>';
 
             if (vortexCommentsUnsubscribe) {
                 vortexCommentsUnsubscribe();
@@ -2355,7 +2382,7 @@
             list.innerHTML = "";
             
             if (!comments || comments.length === 0) {
-                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Ainda sem comentários. Seja o primeiro!</div>';
+                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Ainda sem comentários.</div>';
                 return;
             }
 
@@ -2442,7 +2469,7 @@
             msgList.innerHTML = "";
 
             if (!messages || messages.length === 0) {
-                msgList.innerHTML = '<div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Nenhuma mensagem no grupo. Seja o primeiro a enviar!</div>';
+                msgList.innerHTML = '<div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Nenhuma mensagem no grupo.</div>';
                 lastLoadedCount = 0;
                 return;
             }
@@ -2499,7 +2526,7 @@
                 });
                 textInput.value = "";
             } catch (e) {
-                console.error("Erro ao enviar mensagem no Firebase:", e);
+                console.error("Erro ao enviar mensagem:", e);
             }
         }
 
@@ -2615,10 +2642,10 @@
                 const intersects = raycaster.intersectObjects(markerObjects);
 
                 if (intersects.length > 0) {
-                    telemetryHud.innerText = `ALVO: ${intersects[0].object.userData.name.toUpperCase()} [LAT: ${intersects[0].object.userData.lat}°]`;
+                    telemetryHud.innerText = `ALVO: ${intersects[0].object.userData.name.toUpperCase()}`;
                     telemetryHud.style.borderColor = '#00f0ff';
                 } else {
-                    telemetryHud.innerText = isRotating ? "STATUS: ROTAÇÃO ATIVA [ONLINE]" : "STATUS: INSPEÇÃO LIVRE";
+                    telemetryHud.innerText = isRotating ? "STATUS: ROTAÇÃO" : "STATUS: LIVRE";
                     telemetryHud.style.borderColor = 'rgba(0, 240, 255, 0.4)';
                 }
             });
