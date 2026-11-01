@@ -126,7 +126,7 @@
             padding: 10px;
         }
 
-        /* Painel Lateral com Scroll Corrigido */
+        /* Painel Lateral com Transição Suave e Zoom Ajustado */
         .info-panel {
             position: absolute;
             top: 0;
@@ -140,8 +140,9 @@
             z-index: 20;
             backdrop-filter: blur(14px);
             box-shadow: -10px 0 30px rgba(0,0,0,0.85);
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: translateX(100%) scale(0.95);
+            opacity: 0;
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
@@ -149,7 +150,8 @@
         }
 
         .info-panel.visible {
-            transform: translateX(0);
+            transform: translateX(0) scale(1);
+            opacity: 1;
         }
         
         .panel-header {
@@ -518,7 +520,7 @@
             margin-bottom: 10px;
         }
 
-        /* LAYOUT MOBILE: Menu Lateral Flutuante na Vertical */
+        /* LAYOUT MOBILE OTIMIZADO: Menu Compacto e Painel Suave com Gaveta */
         @media (max-width: 1024px) {
             .ui-top-bar {
                 position: absolute;
@@ -530,7 +532,7 @@
                 align-items: flex-start;
                 gap: 10px;
                 padding: 12px;
-                background: rgba(5, 10, 18, 0.9);
+                background: rgba(5, 10, 18, 0.92);
                 border: 1px solid rgba(0, 240, 255, 0.3);
                 border-radius: 10px;
                 backdrop-filter: blur(10px);
@@ -553,6 +555,30 @@
             }
             .ui-header p {
                 display: none;
+            }
+
+            /* Perfil do Vórtice Suave e Compacto no Mobile (Evita Jumpscare e cobre menos a tela) */
+            .info-panel {
+                width: 92vw;
+                max-width: 380px;
+                height: auto;
+                max-height: 80vh;
+                top: 50%;
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%) scale(0.85);
+                border-radius: 14px;
+                border: 1px solid rgba(0, 240, 255, 0.6);
+                box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+            }
+
+            .info-panel.visible {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            .img-container {
+                height: 140px;
             }
         }
     </style>
@@ -967,13 +993,11 @@
             document.getElementById('info-panel').classList.add('visible');
         }
 
-        /* SISTEMA DE NUVEM REAL COMPARTILHADO (GLOBAL VIA NPOINT.IO / API PÚBLICA) */
         async function loadVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
             list.innerHTML = '<div style="color: #00f0ff; font-size: 0.75rem; text-align: center; padding: 5px;">Sincronizando comentários globais...</div>';
             
             try {
-                // Usando npoint.io como base de dados pública compartilhada globalmente em tempo real
                 const res = await fetch(`https://api.npoint.io/vortex_comments_${vortexId}`);
                 if (res.ok) {
                     const data = await res.json();
@@ -984,7 +1008,6 @@
                 }
             } catch (e) {}
 
-            // Fallback para api pública de teste caso a nuvem primária esteja criando o bin
             renderCommentsList([]);
         }
 
@@ -1027,16 +1050,13 @@
             currentComments.push(newComment);
             renderCommentsList(currentComments);
 
-            // Grava na nuvem pública global para que qualquer celular ou notebook do mundo veja instantaneamente
             try {
                 await fetch(`https://api.npoint.io/vortex_comments_${currentVortexId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(currentComments)
                 });
-            } catch (e) {
-                // Método alternativo de gravação global via jsonbin/jsonstorage se necessário
-            }
+            } catch (e) {}
 
             textInput.value = "";
         }
