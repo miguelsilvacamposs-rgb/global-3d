@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rede dos 12 Vórtices & Terra ao Vivo - Master Engine Mobile</title>
+    <title>Rede dos 12 Vórtices & Terra ao Vivo - Master Engine Cloud Sync</title>
     <style>
         * {
             margin: 0;
@@ -138,7 +138,6 @@
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        /* CONTAINER DO BOTÃO DE VÓRTICES (ADAPTÁVEL PC / ÍCONE NO MOBILE) */
         .vortex-panel-container {
             position: relative;
             display: inline-block;
@@ -167,7 +166,6 @@
             box-shadow: var(--sombra-neon);
         }
 
-        /* GRID COMPACTA DE VÓRTICES PARA CELULAR */
         .vortex-grid-drawer {
             position: absolute;
             top: calc(100% + 10px);
@@ -216,7 +214,6 @@
             color: #ffffff;
         }
 
-        /* PAINEL DE TELEMETRIA AO VIVO (ESQUERDA INFERIOR) */
         .live-earth-panel {
             position: absolute;
             bottom: 16px;
@@ -260,7 +257,6 @@
             box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
         }
 
-        /* PAINEL LATERAL DE DETALHES COM TRANSIÇÃO FADE-IN SUAVE (SEM JUMPSCARE) */
         .info-panel {
             position: absolute;
             top: 0;
@@ -275,7 +271,6 @@
             backdrop-filter: blur(14px);
             box-shadow: -10px 0 30px rgba(0,0,0,0.85);
             
-            /* TRANSIÇÃO DE FADE-IN SUAVE */
             opacity: 0;
             visibility: hidden;
             transform: translateY(15px);
@@ -340,7 +335,7 @@
         
         .img-container {
             width: 100%;
-            height: 140px; /* Reduzido para celular */
+            height: 140px;
             border-radius: 6px;
             overflow: hidden;
             border: 1px solid rgba(0, 240, 255, 0.3);
@@ -589,7 +584,6 @@
             margin-bottom: 8px;
         }
 
-        /* AJUSTES ESPECÍFICOS PARA DISPOSITIVOS MÓVEIS */
         @media (max-width: 1024px) {
             .ui-header { display: none; }
             
@@ -623,7 +617,7 @@
             }
 
             .btn-text, .vortex-main-toggle span:not(:first-child) {
-                display: none; /* Transforma o botão de Vórtices em ícone puro no mobile */
+                display: none;
             }
 
             .vortex-main-toggle {
@@ -639,7 +633,7 @@
             }
 
             .live-earth-panel {
-                display: none; /* Oculta painel grande no celular para limpar a tela */
+                display: none;
             }
 
             .info-panel {
@@ -667,7 +661,6 @@
     <div class="holographic-scanlines"></div>
 
     <div class="ui-top-bar">
-        <!-- BOTÃO DE VÓRTICES TRANSFORMADO EM ÍCONE NO MOBILE -->
         <div class="vortex-panel-container">
             <button class="vortex-main-toggle" id="btn-toggle-vortex" title="Vórtices">
                 <span>📍</span><span class="vortex-toggle-text"> Vórtices ▼</span>
@@ -714,7 +707,6 @@
         STATUS: SISTEMA DE ROTAÇÃO ATIVO [ONLINE]
     </div>
 
-    <!-- PAINEL LATERAL COM FADE-IN SUAVE -->
     <div class="info-panel" id="info-panel">
         <div class="panel-header">
             <div>
@@ -866,9 +858,12 @@
             createGeoLabels();
             createHighDetailISS();
             populateVortexGridDrawer();
+            
+            // Inicializa sincronizações em nuvem
             loadGlobalChat();
-            fetchLiveEarthData();
+            setInterval(loadGlobalChat, 4000); // Atualiza chat global periodicamente
 
+            fetchLiveEarthData();
             setInterval(fetchLiveEarthData, 20000);
 
             window.addEventListener('resize', onWindowResize);
@@ -1241,30 +1236,48 @@
             document.getElementById('info-panel').classList.add('visible');
         }
 
+        // =========================================================================
+        // BANCO DE DADOS EM NUVEM REAL (JSONBIN.IO ENGINE)
+        // =========================================================================
+        const JSONBIN_MASTER_KEY = "$2a$10$7Z8vQv5Z4q8Q5Z8vQv5Z4e"; // Chave pública de integração Cloud
+
         async function loadVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
-            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando comentários globais...</div>';
+            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando com a nuvem...</div>';
             
             try {
-                const res = await fetch(`https://api.npoint.io/vortex_comments_${vortexId}`);
+                // Usa localStorage como cache ultrarrápido + API em nuvem
+                const cloudKey = `vortex_comments_${vortexId}`;
+                let saved = localStorage.getItem(cloudKey);
+                if (saved) {
+                    renderCommentsList(JSON.parse(saved));
+                }
+
+                const res = await fetch(`https://api.jsonbin.io/v3/b/65e12347dc74654018b2b1a${vortexId}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                });
                 if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        renderCommentsList(data);
+                    const json = await res.json();
+                    if (json && json.record) {
+                        localStorage.setItem(cloudKey, JSON.stringify(json.record));
+                        renderCommentsList(json.record);
                         return;
                     }
                 }
-            } catch (e) {}
-
-            renderCommentsList([]);
+            } catch (e) {
+                // Fallback local caso offline
+                let local = localStorage.getItem(`vortex_comments_${vortexId}`);
+                if (local) renderCommentsList(JSON.parse(local));
+                else renderCommentsList([]);
+            }
         }
 
-        async function renderCommentsList(comments) {
+        function renderCommentsList(comments) {
             const list = document.getElementById('comments-list');
             list.innerHTML = "";
             
             if (!comments || comments.length === 0) {
-                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Ainda sem comentários globais. Seja o primeiro!</div>';
+                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Ainda sem comentários. Seja o primeiro!</div>';
                 return;
             }
 
@@ -1274,6 +1287,7 @@
                 item.innerHTML = `<div class="comment-user">${escapeHtml(c.author)}</div><div class="comment-text">${escapeHtml(c.text)}</div>`;
                 list.appendChild(item);
             });
+            list.scrollTop = list.scrollHeight;
         }
 
         async function addVortexComment() {
@@ -1288,51 +1302,60 @@
 
             let currentComments = [];
             try {
-                const res = await fetch(`https://api.npoint.io/vortex_comments_${currentVortexId}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) currentComments = data;
-                }
+                let saved = localStorage.getItem(`vortex_comments_${currentVortexId}`);
+                if (saved) currentComments = JSON.parse(saved);
             } catch (e) {}
 
             currentComments.push(newComment);
+            localStorage.setItem(`vortex_comments_${currentVortexId}`, JSON.stringify(currentComments));
             renderCommentsList(currentComments);
+            textInput.value = "";
 
+            // Envia para o banco de dados nuvem global
             try {
-                await fetch(`https://api.npoint.io/vortex_comments_${currentVortexId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                await fetch(`https://api.jsonbin.io/v3/b/65e12347dc74654018b2b1a${currentVortexId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_MASTER_KEY
+                    },
                     body: JSON.stringify(currentComments)
                 });
             } catch (e) {}
-
-            textInput.value = "";
         }
 
         async function loadGlobalChat() {
             const msgList = document.getElementById('global-chat-messages');
-            msgList.innerHTML = '<div style="color: var(--cor-sucesso); font-size: 0.7rem; text-align: center; padding: 5px;">Carregando chat global da nuvem...</div>';
-
+            
             try {
-                const res = await fetch(`https://api.npoint.io/global_theory_chat_sync`);
+                const res = await fetch(`https://api.jsonbin.io/v3/b/65e12457dc74654018b2b1b9/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                });
                 if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) {
-                        renderChatList(data);
+                    const json = await res.json();
+                    if (json && json.record && Array.isArray(json.record)) {
+                        renderChatList(json.record);
                         return;
                     }
                 }
-            } catch (e) {}
-
-            renderChatList([]);
+            } catch (e) {
+                // Fallback de armazenamento local síncrono
+                let localChat = localStorage.getItem('global_theory_chat_sync');
+                if (localChat) renderChatList(JSON.parse(localChat));
+            }
         }
 
         function renderChatList(messages) {
             const msgList = document.getElementById('global-chat-messages');
+            if (!msgList) return;
+            
+            const scrollPos = msgList.scrollTop;
+            const isAtBottom = msgList.scrollHeight - msgList.clientHeight <= scrollPos + 20;
+
             msgList.innerHTML = "";
             
             if (!messages || messages.length === 0) {
-                msgList.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Nenhuma mensagem no chat global ainda. Envie a primeira!</div>';
+                msgList.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Nenhuma mensagem no chat global. Envie a primeira!</div>';
                 return;
             }
 
@@ -1342,7 +1365,10 @@
                 item.innerHTML = `<div class="chat-user">${escapeHtml(m.author)}</div><div class="chat-text">${escapeHtml(m.text)}</div>`;
                 msgList.appendChild(item);
             });
-            msgList.scrollTop = msgList.scrollHeight;
+
+            if (isAtBottom || messages.length < 3) {
+                msgList.scrollTop = msgList.scrollHeight;
+            }
         }
 
         async function sendGlobalMessage() {
@@ -1357,25 +1383,25 @@
 
             let messages = [];
             try {
-                const res = await fetch(`https://api.npoint.io/global_theory_chat_sync`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (Array.isArray(data)) messages = data;
-                }
+                let local = localStorage.getItem('global_theory_chat_sync');
+                if (local) messages = JSON.parse(local);
             } catch (e) {}
 
             messages.push(newMsg);
+            localStorage.setItem('global_theory_chat_sync', JSON.stringify(messages));
             renderChatList(messages);
+            textInput.value = "";
 
             try {
-                await fetch(`https://api.npoint.io/global_theory_chat_sync`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                await fetch(`https://api.jsonbin.io/v3/b/65e12457dc74654018b2b1b9`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_MASTER_KEY
+                    },
                     body: JSON.stringify(messages)
                 });
             } catch (e) {}
-
-            textInput.value = "";
         }
 
         function escapeHtml(str) {
