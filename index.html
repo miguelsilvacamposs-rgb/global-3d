@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rede dos 12 Vórtices & Terra ao Vivo - Master Engine Cloud Sync</title>
+    <title>Rede dos 12 Vórtices & Terra ao Vivo - Firebase Live Sync</title>
     <style>
         * {
             margin: 0;
@@ -422,12 +422,12 @@
         }
 
         .btn-comment, .btn-send-chat {
-            background: rgba(0, 240, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--cor-primaria);
             color: var(--cor-primaria);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
             align-self: flex-end;
@@ -764,7 +764,25 @@
     <div id="canvas-container"></div>
     <div id="labels-container"></div>
 
+    <!-- SDKs OFICIAIS DO FIREBASE EM TEMPO REAL -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
+
     <script>
+        // CONFIGURAÇÃO OFICIAL DO TEU FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmCt5vC7rCy2KmdQNoNw4uU7VmfV2svac",
+            authDomain: "rededosvortices.firebaseapp.com",
+            projectId: "rededosvortices",
+            storageBucket: "rededosvortices.firebasestorage.app",
+            messagingSenderId: "459603066412",
+            appId: "1:459603066412:web:1ffd6c620ce0af56e69b89"
+        };
+
+        // INICIALIZAÇÃO DO BANCO DE DADOS EM NUVEM DO GOOGLE
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const VORTICES = [
             { id: 1, name: "1. Triângulo das Bermudas", region: "Oceano Atlântico Norte (EUA / Porto Rico / Bermudas)", lat: 25.0, lon: -71.0, img: "bermudas.jpg", desc: "Fenômenos: Desaparecimento de navios e aviões, bússolas desreguladas e luzes misteriosas.", theory: "É um dos pontos mais intrigantes do mundo. Dá sumiço em aviões e embarcações de forma muito suspeita, acompanhado de falhas de orientação. Na teoria, funciona como um dos portões ativos da malha enoquiana." },
             { id: 2, name: "2. Triângulo do Dragão", region: "Mar das Filipinas / Pacífico Norte (Japão)", lat: 25.0, lon: 137.0, img: "dragão.jpg", desc: "Fenômenos: Embarcações sumidas, luzes sobre a água e anomalias magnéticas.", theory: "O equivalente direto do Triângulo das Bermudas no Pacífico. A repetição exata de sumiços de barcos e aviões neste local reforça a ideia de um padrão global oculto ligando os dois oceanos." },
@@ -818,6 +836,7 @@
         let issElementLabel = null;
         let issOrbitPoints = [];
         let issOrbitLine = null;
+        let vortexCommentsUnsubscribe = null;
         
         const markerObjects = [];
         const labelElements = [];
@@ -859,9 +878,8 @@
             createHighDetailISS();
             populateVortexGridDrawer();
             
-            // Inicializa sincronizações em nuvem
-            loadGlobalChat();
-            setInterval(loadGlobalChat, 4000); // Atualiza chat global periodicamente
+            // Inicia o ouvinte em tempo real do Chat Global do Firebase
+            listenGlobalChat();
 
             fetchLiveEarthData();
             setInterval(fetchLiveEarthData, 20000);
@@ -1232,48 +1250,38 @@
                 noImgText.style.display = 'block';
             }
 
-            loadVortexComments(data.id);
+            listenVortexComments(data.id);
             document.getElementById('info-panel').classList.add('visible');
         }
 
         // =========================================================================
-        // BANCO DE DADOS EM NUVEM REAL (JSONBIN.IO ENGINE)
+        // BANCO DE DADOS EM TEMPO REAL COM FIREBASE FIRESTORE
         // =========================================================================
-        const JSONBIN_MASTER_KEY = "$2a$10$7Z8vQv5Z4q8Q5Z8vQv5Z4e"; // Chave pública de integração Cloud
 
-        async function loadVortexComments(vortexId) {
+        function listenVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
-            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando com a nuvem...</div>';
-            
-            try {
-                // Usa localStorage como cache ultrarrápido + API em nuvem
-                const cloudKey = `vortex_comments_${vortexId}`;
-                let saved = localStorage.getItem(cloudKey);
-                if (saved) {
-                    renderCommentsList(JSON.parse(saved));
-                }
+            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.7rem; text-align: center; padding: 5px;">Sincronizando com Firebase...</div>';
 
-                const res = await fetch(`https://api.jsonbin.io/v3/b/65e12347dc74654018b2b1a${vortexId}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
-                });
-                if (res.ok) {
-                    const json = await res.json();
-                    if (json && json.record) {
-                        localStorage.setItem(cloudKey, JSON.stringify(json.record));
-                        renderCommentsList(json.record);
-                        return;
-                    }
-                }
-            } catch (e) {
-                // Fallback local caso offline
-                let local = localStorage.getItem(`vortex_comments_${vortexId}`);
-                if (local) renderCommentsList(JSON.parse(local));
-                else renderCommentsList([]);
+            if (vortexCommentsUnsubscribe) {
+                vortexCommentsUnsubscribe();
             }
+
+            vortexCommentsUnsubscribe = db.collection('vortex_comments')
+                .doc(`vortex_${vortexId}`)
+                .collection('messages')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(snapshot => {
+                    const comments = [];
+                    snapshot.forEach(doc => comments.push(doc.data()));
+                    renderCommentsList(comments);
+                }, err => {
+                    renderCommentsList([]);
+                });
         }
 
         function renderCommentsList(comments) {
             const list = document.getElementById('comments-list');
+            if (!list) return;
             list.innerHTML = "";
             
             if (!comments || comments.length === 0) {
@@ -1296,53 +1304,33 @@
             const author = authorInput.value.trim() || "Explorador";
             const text = textInput.value.trim();
 
-            if (!text) return;
+            if (!text || !currentVortexId) return;
 
-            const newComment = { author, text, time: Date.now() };
-
-            let currentComments = [];
             try {
-                let saved = localStorage.getItem(`vortex_comments_${currentVortexId}`);
-                if (saved) currentComments = JSON.parse(saved);
-            } catch (e) {}
-
-            currentComments.push(newComment);
-            localStorage.setItem(`vortex_comments_${currentVortexId}`, JSON.stringify(currentComments));
-            renderCommentsList(currentComments);
-            textInput.value = "";
-
-            // Envia para o banco de dados nuvem global
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/65e12347dc74654018b2b1a${currentVortexId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_MASTER_KEY
-                    },
-                    body: JSON.stringify(currentComments)
-                });
-            } catch (e) {}
+                await db.collection('vortex_comments')
+                    .doc(`vortex_${currentVortexId}`)
+                    .collection('messages')
+                    .add({
+                        author: author,
+                        text: text,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                textInput.value = "";
+            } catch (e) {
+                console.error("Erro ao enviar comentário:", e);
+            }
         }
 
-        async function loadGlobalChat() {
-            const msgList = document.getElementById('global-chat-messages');
-            
-            try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/65e12457dc74654018b2b1b9/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+        function listenGlobalChat() {
+            db.collection('global_chat')
+                .orderBy('timestamp', 'asc')
+                .onSnapshot(snapshot => {
+                    const messages = [];
+                    snapshot.forEach(doc => messages.push(doc.data()));
+                    renderChatList(messages);
+                }, err => {
+                    console.error("Erro no chat global Firebase:", err);
                 });
-                if (res.ok) {
-                    const json = await res.json();
-                    if (json && json.record && Array.isArray(json.record)) {
-                        renderChatList(json.record);
-                        return;
-                    }
-                }
-            } catch (e) {
-                // Fallback de armazenamento local síncrono
-                let localChat = localStorage.getItem('global_theory_chat_sync');
-                if (localChat) renderChatList(JSON.parse(localChat));
-            }
         }
 
         function renderChatList(messages) {
@@ -1350,7 +1338,7 @@
             if (!msgList) return;
             
             const scrollPos = msgList.scrollTop;
-            const isAtBottom = msgList.scrollHeight - msgList.clientHeight <= scrollPos + 20;
+            const isAtBottom = msgList.scrollHeight - msgList.clientHeight <= scrollPos + 30;
 
             msgList.innerHTML = "";
             
@@ -1366,7 +1354,7 @@
                 msgList.appendChild(item);
             });
 
-            if (isAtBottom || messages.length < 3) {
+            if (isAtBottom || messages.length < 4) {
                 msgList.scrollTop = msgList.scrollHeight;
             }
         }
@@ -1379,29 +1367,16 @@
 
             if (!text) return;
 
-            const newMsg = { author, text, time: Date.now() };
-
-            let messages = [];
             try {
-                let local = localStorage.getItem('global_theory_chat_sync');
-                if (local) messages = JSON.parse(local);
-            } catch (e) {}
-
-            messages.push(newMsg);
-            localStorage.setItem('global_theory_chat_sync', JSON.stringify(messages));
-            renderChatList(messages);
-            textInput.value = "";
-
-            try {
-                await fetch(`https://api.jsonbin.io/v3/b/65e12457dc74654018b2b1b9`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_MASTER_KEY
-                    },
-                    body: JSON.stringify(messages)
+                await db.collection('global_chat').add({
+                    author: author,
+                    text: text,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
                 });
-            } catch (e) {}
+                textInput.value = "";
+            } catch (e) {
+                console.error("Erro ao enviar mensagem no Firebase:", e);
+            }
         }
 
         function escapeHtml(str) {
@@ -1503,7 +1478,6 @@
 
                 if (willOpen) {
                     chatModal.classList.add('visible');
-                    loadGlobalChat();
                 } else {
                     chatModal.classList.remove('visible');
                 }
