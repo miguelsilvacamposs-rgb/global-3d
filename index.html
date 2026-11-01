@@ -23,7 +23,7 @@
             --borda-neon: rgba(0, 240, 255, 0.6);
             --sombra-neon: 0 0 25px rgba(0, 240, 255, 0.35);
 
-            /* Cores do Chat Moderno */
+            /* Cores do Chat Moderno Estilo WhatsApp */
             --wa-bg: #0b141a;
             --wa-header: #1f2c34;
             --wa-incoming: #202c33;
@@ -491,7 +491,7 @@
             line-height: 1.25;
         }
 
-        /* --- CHAT GLOBAL MODERNO (SUBSTITUI O MODAL ANTIGO) --- */
+        /* --- CHAT GLOBAL MODERNO ESTILO WHATSAPP (OTIMIZADO MOBILE) --- */
         .chat-panel {
             position: absolute;
             top: 0;
@@ -578,7 +578,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
             -webkit-overflow-scrolling: touch;
         }
 
@@ -887,10 +887,14 @@
                 transform: translate(-50%, -50%) scale(1);
             }
 
+            /* Correção total do chat para ocupar a tela inteira com perfeição no mobile */
             .chat-panel {
                 width: 100vw;
                 height: 100vh;
                 border-left: none;
+                top: 0;
+                left: 0;
+                transform: none;
             }
         }
     </style>
@@ -979,7 +983,7 @@
         </div>
     </div>
 
-    <!-- CHAT GLOBAL MODERNO (ESTILO WHATSAPP) -->
+    <!-- CHAT GLOBAL MODERNO (ESTILO WHATSAPP OTIMIZADO PARA MOBILE) -->
     <div class="chat-panel" id="chat-panel">
         <div class="wa-panel-header">
             <div class="wa-group-info">
