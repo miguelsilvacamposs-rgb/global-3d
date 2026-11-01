@@ -29,7 +29,7 @@
             top: 0;
             left: 0;
             z-index: 1;
-            touch-action: pan-x pan-y;
+            touch-action: none; /* Corrigido para o touch rodar o mundo perfeitamente no celular */
         }
 
         /* Barra Superior Padrão (Computador) */
@@ -130,7 +130,7 @@
             pointer-events: auto;
         }
 
-        /* GAVETA DE VÓRTICES (DESKTOP E BASE) */
+        /* GAVETA DE VÓRTICES */
         .vortex-menu-drawer {
             position: absolute;
             top: calc(100% + 8px);
@@ -191,11 +191,13 @@
             flex-direction: column;
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            pointer-events: none;
         }
 
         .info-panel.visible {
             transform: translateX(0) scale(1);
             opacity: 1;
+            pointer-events: auto;
         }
         
         .panel-header {
@@ -564,16 +566,12 @@
             margin-bottom: 10px;
         }
 
-        /* ================================================= */
-        /* NOVO DESIGN MOBILE (DOCK COMPACTA & MODAL CENTRAL)*/
-        /* ================================================= */
+        /* DESIGN MOBILE OTIMIZADO (DOCK COMPACTA & MODAL CENTRAL) */
         @media (max-width: 1024px) {
-            /* Ocultar cabeçalho em texto no celular */
             .ui-header {
                 display: none;
             }
 
-            /* Barra de navegação vira DOCK compacta flutuante em ícones (ESTILO FOTO 3) */
             .ui-top-bar {
                 position: fixed;
                 top: auto;
@@ -608,7 +606,7 @@
             }
 
             .btn-text {
-                display: none; /* Esconde os textos nos botões pequenos da dock */
+                display: none;
             }
 
             .btn-icon {
@@ -616,7 +614,6 @@
                 display: inline-block;
             }
 
-            /* LISTA DE VÓRTICES CENTRALIZADA NA TELA (CIRCULADO EM VERMELHO CORRIGIDO) */
             .vortex-dropdown-container {
                 position: static;
             }
@@ -650,7 +647,6 @@
                 text-align: center;
             }
 
-            /* PERFIL DO VÓRTICE COMPACTO E SUAVE */
             .info-panel {
                 width: 90vw;
                 max-width: 360px;
@@ -687,7 +683,6 @@
         </div>
 
         <div class="controls-bar">
-            <!-- Botão de Vórtices com Ícone -->
             <div class="vortex-dropdown-container">
                 <button class="btn" id="btn-toggle-vortex" title="Vórtices">
                     <span class="btn-icon">📍</span>
@@ -778,7 +773,6 @@
     <div id="labels-container"></div>
 
     <script>
-        /* COORDENADAS REAIS EXATAS DOS 12 VÓRTICES (GOOGLE EARTH REAL) */
         const VORTICES = [
             { id: 1, name: "1. Triângulo das Bermudas", region: "Oceano Atlântico Norte (EUA / Porto Rico / Bermudas)", lat: 25.0, lon: -71.0, img: "bermudas.jpg", desc: "Fenômenos: Desaparecimento de navios e aviões, bússolas desreguladas e luzes misteriosas.", theory: "É um dos pontos mais intrigantes do mundo. Dá sumiço em aviões e embarcações de forma muito suspeita, acompanhado de falhas de orientação. Na teoria, funciona como um dos portões ativos da malha enoquiana." },
             { id: 2, name: "2. Triângulo do Dragão", region: "Mar das Filipinas / Pacífico Norte (Japão)", lat: 25.0, lon: 137.0, img: "dragão.jpg", desc: "Fenômenos: Embarcações sumidas, luzes sobre a água e anomalias magnéticas.", theory: "O equivalente direto do Triângulo das Bermudas no Pacífico. A repetição exata de sumiços de barcos e aviões neste local reforça a ideia de um padrão global oculto ligando os dois oceanos." },
@@ -1003,8 +997,9 @@
                 item.className = 'vortex-option-item';
                 item.innerText = v.name;
                 item.addEventListener('click', () => {
-                    focusOnVortex(v);
+                    // Fecha a gaveta e foca no vórtice (que abre o painel e fecha automaticamente o resto)
                     drawer.classList.remove('open');
+                    focusOnVortex(v);
                 });
                 drawer.appendChild(item);
             });
@@ -1089,6 +1084,12 @@
 
         function displayVortexInfo(data) {
             currentVortexId = data.id;
+
+            // EXCLUSIVIDADE: Fecha modais e gavetas ao abrir o painel de info do local
+            document.getElementById('vortex-menu-drawer').classList.remove('open');
+            document.getElementById('theory-modal').classList.remove('visible');
+            document.getElementById('chat-modal').classList.remove('visible');
+
             document.getElementById('panel-title').innerText = data.name;
             document.getElementById('panel-coords').innerText = `${data.lat}° N, ${data.lon}° E`;
             document.getElementById('panel-region').innerText = `🌍 ${data.region}`;
@@ -1259,15 +1260,24 @@
             const vortexDrawer = document.getElementById('vortex-menu-drawer');
             const btnToggleVortex = document.getElementById('btn-toggle-vortex');
 
-            // Abrir e fechar a gaveta customizada
+            // BOTÃO VÓRTICES: Abre a gaveta e FECHA o painel, chat e teoria
             btnToggleVortex.addEventListener('click', (e) => {
                 e.stopPropagation();
-                vortexDrawer.classList.toggle('open');
+                const willOpen = !vortexDrawer.classList.contains('open');
+                
+                // Fecha todos os outros elementos primeiro
+                infoPanel.classList.remove('visible');
                 theoryModal.classList.remove('visible');
                 chatModal.classList.remove('visible');
+
+                if (willOpen) {
+                    vortexDrawer.classList.add('open');
+                } else {
+                    vortexDrawer.classList.remove('open');
+                }
             });
 
-            // Fechar gaveta ao clicar em qualquer lugar fora dela
+            // Fechar gaveta ao clicar fora dela
             window.addEventListener('click', (e) => {
                 if (!e.target.closest('.vortex-dropdown-container')) {
                     vortexDrawer.classList.remove('open');
@@ -1298,17 +1308,35 @@
             document.getElementById('close-theory').addEventListener('click', () => theoryModal.classList.remove('visible'));
             document.getElementById('close-chat').addEventListener('click', () => chatModal.classList.remove('visible'));
             
+            // BOTÃO TEORIA: Abre teoria e FECHA painel, chat e gaveta de vórtices
             document.getElementById('btn-open-theory').addEventListener('click', () => {
-                theoryModal.classList.add('visible');
+                const willOpen = !theoryModal.classList.contains('visible');
+                
+                infoPanel.classList.remove('visible');
                 chatModal.classList.remove('visible');
                 vortexDrawer.classList.remove('open');
+
+                if (willOpen) {
+                    theoryModal.classList.add('visible');
+                } else {
+                    theoryModal.classList.remove('visible');
+                }
             });
 
+            // BOTÃO CHAT GLOBAL: Abre chat e FECHA painel, teoria e gaveta de vórtices
             document.getElementById('btn-open-chat').addEventListener('click', () => {
-                chatModal.classList.add('visible');
+                const willOpen = !chatModal.classList.contains('visible');
+
+                infoPanel.classList.remove('visible');
                 theoryModal.classList.remove('visible');
                 vortexDrawer.classList.remove('open');
-                loadGlobalChat();
+
+                if (willOpen) {
+                    chatModal.classList.add('visible');
+                    loadGlobalChat();
+                } else {
+                    chatModal.classList.remove('visible');
+                }
             });
 
             document.getElementById('btn-rotate').addEventListener('click', (e) => {
