@@ -261,7 +261,7 @@
             z-index: 5;
             backdrop-filter: blur(10px);
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
-            max-width: 300px;
+            max-width: 320px;
         }
 
         .live-earth-panel h4 {
@@ -750,6 +750,8 @@
             background: rgba(20, 4, 10, 0.9);
             border-color: #ff0055;
             box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
+            font-size: 9px;
+            line-height: 1.2;
         }
 
         .country-label {
@@ -1123,7 +1125,6 @@
         let issOrbitLine = null;
         let vortexCommentsUnsubscribe = null;
         
-        // SISTEMA DE ASTEROIDES REAIS EM TEMPO REAL
         let asteroidGroups = [];
         let asteroidLabels = [];
         let asteroidDataList = [];
@@ -1172,14 +1173,11 @@
             createHighDetailISS();
             populateVortexGridDrawer();
             
-            // Inicia o rastreio de asteroides reais da NASA
             fetchLiveAsteroids();
-
-            // Inicia o ouvinte em tempo real do Chat Global do Firebase
             listenGlobalChat();
 
             fetchLiveEarthData();
-            setInterval(fetchLiveEarthData, 2000);
+            setInterval(fetchLiveEarthData, 20000);
 
             window.addEventListener('resize', onWindowResize);
             setupUI();
@@ -1336,7 +1334,6 @@
             labelsContainer.appendChild(issElementLabel);
         }
 
-        // SISTEMA DE BUSCA DE ASTEROIDES REAIS (NASA NEOws API)
         async function fetchLiveAsteroids() {
             try {
                 const todayStr = new Date().toISOString().split('T')[0];
@@ -1344,7 +1341,7 @@
                 if (res.ok) {
                     const data = await res.json();
                     const nearObjects = data.near_earth_objects[todayStr] || [];
-                    asteroidDataList = nearObjects.slice(0, 6); // Pega até 6 asteroides reais do dia
+                    asteroidDataList = nearObjects.slice(0, 5); 
                     
                     document.getElementById('asteroid-status').innerText = `Asteroides NASA: ${asteroidDataList.length} detectados hoje`;
                     buildAsteroidObjects(asteroidDataList);
@@ -1352,11 +1349,10 @@
                     throw new Error("Erro na API da NASA");
                 }
             } catch (e) {
-                // Fallback simulado robusto caso a API pública atinja limite de requisições
                 asteroidDataList = [
-                    { name: "(2026 XA)", estimated_diameter: { kilometers: { estimated_diameter_max: 0.15 } }, close_approach_data: [{ miss_distance: { lunar: 3.2 } }] },
-                    { name: "(APOPHIS)", estimated_diameter: { kilometers: { estimated_diameter_max: 0.34 } }, close_approach_data: [{ miss_distance: { lunar: 8.5 } }] },
-                    { name: "(NEO-992)", estimated_diameter: { kilometers: { estimated_diameter_max: 0.08 } }, close_approach_data: [{ miss_distance: { lunar: 1.5 } }] }
+                    { name: "(2026 XA)", close_approach_data: [{ miss_distance: { lunar: 3.2, kilometers: "1234500" } }] },
+                    { name: "(APOPHIS)", close_approach_data: [{ miss_distance: { lunar: 8.5, kilometers: "3265000" } }] },
+                    { name: "(NEO-992)", close_approach_data: [{ miss_distance: { lunar: 1.5, kilometers: "576000" } }] }
                 ];
                 document.getElementById('asteroid-status').innerText = `Asteroides NASA: Modo Radar Ativo`;
                 buildAsteroidObjects(asteroidDataList);
@@ -1367,7 +1363,6 @@
             const labelsContainer = document.getElementById('labels-container');
             
             asteroids.forEach((ast, index) => {
-                // Cria geometria rochosa irregular (icosaedro com escala)
                 const astGeo = new THREE.DodecahedronGeometry(1.8 + (index * 0.3), 1);
                 const astMat = new THREE.MeshStandardMaterial({ 
                     color: 0x887766, 
@@ -1377,7 +1372,6 @@
                 });
                 const mesh = new THREE.Mesh(astGeo, astMat);
 
-                // Posicionamento orbital inicial ao redor da Terra em 3D
                 const angle = (index / asteroids.length) * Math.PI * 2;
                 const distance = 160 + (index * 25);
                 mesh.position.set(
@@ -1387,14 +1381,26 @@
                 );
 
                 scene.add(mesh);
-                asteroidGroups.push({ mesh: mesh, angle: angle, speed: 0.001 + (index * 0.0003), distance: distance });
+                
+                let distText = "Distância desconhecida";
+                if (ast.close_approach_data && ast.close_approach_data[0]) {
+                    const lunarDist = parseFloat(ast.close_approach_data[0].miss_distance.lunar).toFixed(1);
+                    distText = `${lunarDist} LD (~${Math.round(ast.close_approach_data[0].miss_distance.kilometers / 1000)} mil km)`;
+                }
 
-                // Rótulo na tela
+                asteroidGroups.push({ 
+                    mesh: mesh, 
+                    angle: angle, 
+                    speed: 0.0008 + (index * 0.0002), 
+                    distance: distance,
+                    name: ast.name,
+                    distText: distText
+                });
+
                 const label = document.createElement('div');
                 label.className = 'asteroid-label';
-                label.innerText = `☄️ ${ast.name}`;
                 labelsContainer.appendChild(label);
-                asteroidLabels.push({ element: label, mesh: mesh });
+                asteroidLabels.push({ element: label, groupData: asteroidGroups[asteroidGroups.length - 1] });
             });
         }
 
@@ -1511,9 +1517,17 @@
                 }
             }
 
-            // Atualiza posições dos rótulos dos asteroides em tempo real
             asteroidLabels.forEach(item => {
-                tempV.copy(item.mesh.position);
+                const mesh = item.groupData.mesh;
+                const pos = mesh.position;
+                
+                const r = Math.sqrt(pos.x*pos.x + pos.y*pos.y + pos.z*pos.z);
+                const lat = Math.asin(pos.y / r) * (180 / Math.PI);
+                const lon = Math.atan2(pos.z, -pos.x) * (180 / Math.PI);
+
+                item.element.innerHTML = `☄️ <b>${item.groupData.name}</b><br>Dist: ${item.groupData.distText}<br>Lat: ${lat.toFixed(1)}° | Lon: ${lon.toFixed(1)}°`;
+
+                tempV.copy(mesh.position);
                 tempV.project(camera);
                 const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
                 const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
@@ -1606,7 +1620,6 @@
             const btnRotate = document.getElementById('btn-rotate');
             if (btnRotate) btnRotate.classList.remove('active');
 
-            // Foca no primeiro asteroide orbitando
             const targetMesh = asteroidGroups[0].mesh;
             targetCameraPos = targetMesh.position.clone().normalize().multiplyScalar(220);
         }
@@ -1639,10 +1652,6 @@
             listenVortexComments(data.id);
             document.getElementById('info-panel').classList.add('visible');
         }
-
-        // =========================================================================
-        // BANCO DE DADOS EM TEMPO REAL COM FIREBASE FIRESTORE
-        // =========================================================================
 
         function listenVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
@@ -1909,7 +1918,12 @@
                 }
             });
 
-            document.getElementById('close-panel').addEventListener('click', () => infoPanel.classList.remove('visible'));
+            // CORREÇÃO: Ao fechar o painel, NÃO move a câmera nem dá zoom. Deixa o usuário livre onde está!
+            document.getElementById('close-panel').addEventListener('click', () => {
+                infoPanel.classList.remove('visible');
+                targetCameraPos = null; 
+            });
+
             document.getElementById('close-theory').addEventListener('click', () => theoryModal.classList.remove('visible'));
             document.getElementById('close-chat-panel').addEventListener('click', () => {
                 isChatOpen = false;
@@ -1934,7 +1948,7 @@
                 const willOpen = !chatPanel.classList.contains('visible');
 
                 infoPanel.classList.remove('visible');
-            theoryModal.classList.remove('visible');
+                theoryModal.classList.remove('visible');
                 vortexDrawer.classList.remove('open');
 
                 if (willOpen) {
@@ -1980,7 +1994,6 @@
                 }
             }
 
-            // Animação de órbita em tempo real para os asteroides
             asteroidGroups.forEach(ast => {
                 ast.angle += ast.speed;
                 ast.mesh.position.x = Math.cos(ast.angle) * ast.distance;
@@ -1989,8 +2002,10 @@
                 ast.mesh.rotation.y += 0.015;
             });
 
+            // Só move a câmera se houver um clique explícito em focar (targetCameraPos).
+            // Assim que o movimento chega ao destino (ou se o usuário mexer nos controles manuais), zera e liberta 100%.
             if (targetCameraPos) {
-                camera.position.lerp(targetCameraPos, 0.06);
+                camera.position.lerp(targetCameraPos, 0.08);
                 controls.update();
                 if (camera.position.distanceTo(targetCameraPos) < 1.0) {
                     targetCameraPos = null;
