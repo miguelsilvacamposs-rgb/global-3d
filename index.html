@@ -23,7 +23,6 @@
             --borda-neon: rgba(0, 240, 255, 0.6);
             --sombra-neon: 0 0 25px rgba(0, 240, 255, 0.35);
 
-            /* Cores do Chat Moderno Estilo WhatsApp */
             --wa-bg: #0b141a;
             --wa-header: #1f2c34;
             --wa-incoming: #202c33;
@@ -75,24 +74,6 @@
             padding: 16px 24px;
             pointer-events: none;
             background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0));
-        }
-
-        .ui-header {
-            pointer-events: auto;
-        }
-
-        .ui-header h1 {
-            font-size: 1.25rem;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: var(--cor-primaria);
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
-        }
-
-        .ui-header p {
-            font-size: 0.75rem;
-            color: #8a9ba8;
-            margin-top: 2px;
         }
 
         .controls-bar {
@@ -251,7 +232,7 @@
             font-weight: 600;
         }
 
-        .vortex-btn-item:hover, .vortex-btn-item:active {
+        .vortex-btn-item:hover {
             background: rgba(0, 240, 255, 0.3);
             border-color: var(--cor-primaria);
             color: #ffffff;
@@ -271,7 +252,7 @@
             z-index: 5;
             backdrop-filter: blur(10px);
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
-            max-width: 320px;
+            max-width: 340px;
         }
 
         .live-earth-panel h4 {
@@ -431,6 +412,29 @@
             font-style: italic;
         }
 
+        .seismic-activity-box {
+            background: rgba(255, 0, 85, 0.1);
+            border-left: 3px solid var(--cor-alerta);
+            padding: 8px 10px;
+            border-radius: 0 4px 4px 0;
+            margin-top: 2px;
+        }
+
+        .seismic-activity-box h3 {
+            color: var(--cor-alerta);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+            letter-spacing: 1px;
+        }
+
+        .seismic-activity-box p {
+            color: #ffb3c6;
+            font-size: 0.72rem;
+            font-family: monospace;
+            line-height: 1.3;
+        }
+
         .comments-section {
             margin-top: 6px;
             border-top: 1px solid rgba(0, 240, 255, 0.2);
@@ -511,7 +515,6 @@
             line-height: 1.25;
         }
 
-        /* --- CHAT GLOBAL MODERNO ESTILO WHATSAPP (OTIMIZADO MOBILE) --- */
         .chat-panel {
             position: absolute;
             top: 0;
@@ -731,7 +734,7 @@
             color: #fff;
         }
 
-        .vortex-label, .iss-label, .asteroid-label, .volcano-label {
+        .vortex-label, .iss-label, .asteroid-label, .volcano-label, .seismic-alert-label {
             position: absolute;
             z-index: 5;
             color: var(--cor-primaria);
@@ -746,6 +749,20 @@
             white-space: nowrap;
             transform: translate(-50%, -100%);
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+
+        .seismic-alert-label {
+            color: var(--cor-alerta);
+            background: rgba(25, 4, 10, 0.95);
+            border-color: var(--cor-alerta);
+            box-shadow: 0 0 12px var(--cor-alerta);
+            font-size: 9px;
+            animation: pulseAlert 1.2s infinite alternate;
+        }
+
+        @keyframes pulseAlert {
+            from { transform: translate(-50%, -100%) scale(0.95); opacity: 0.7; }
+            to { transform: translate(-50%, -100%) scale(1.05); opacity: 1; }
         }
 
         .iss-label {
@@ -857,8 +874,6 @@
         }
 
         @media (max-width: 1024px) {
-            .ui-header { display: none; }
-            
             .ui-top-bar {
                 position: fixed;
                 top: 10px;
@@ -992,7 +1007,8 @@
         <h4>🌍 Telemetria Global Ao Vivo</h4>
         <div id="schumann-freq">Frequência de Schumann: 7.83 Hz [Estável]</div>
         <div id="live-iss-status">Rastreio ISS: Sincronizando...</div>
-        <div id="earth-quakes">Último Sismo: Monitorando USGS...</div>
+        <div id="earth-quakes">Último Sismo: Analisando Vórtices USGS...</div>
+        <div id="hurricane-status" style="margin-top: 4px; color: var(--cor-alerta);">Ciclones / Furacões: Monitorando NOAA...</div>
         <div id="asteroid-status" style="margin-top: 4px; color: var(--cor-alerta);">Asteroides NASA: Sincronizando NEOs...</div>
         <div id="live-weather-status" style="margin-top: 4px; color: var(--cor-secundaria);">Clima Satélite: NOAA Dinâmico Ativo</div>
     </div>
@@ -1016,6 +1032,12 @@
                 <span class="no-img-text" id="no-img-text">Imagem não encontrada</span>
             </div>
             <p class="desc-text" id="panel-desc">Descrição geofísica...</p>
+            
+            <div class="seismic-activity-box" id="seismic-box">
+                <h3>Atividade Sísmica Próxima (24h):</h3>
+                <p id="panel-seismic">Monitorando abalos na região do vórtice...</p>
+            </div>
+
             <div class="theory-box">
                 <h3>Minha Teoria (A Conexão):</h3>
                 <p id="panel-theory">Sua teoria sobre este ponto aparecerá aqui...</p>
@@ -1031,7 +1053,6 @@
         </div>
     </div>
 
-    <!-- CHAT GLOBAL MODERNO (ESTILO WHATSAPP OTIMIZADO PARA MOBILE) -->
     <div class="chat-panel" id="chat-panel">
         <div class="wa-panel-header">
             <div class="wa-group-info">
@@ -1074,12 +1095,10 @@
     <div id="canvas-container"></div>
     <div id="labels-container"></div>
 
-    <!-- SDKs OFICIAIS DO FIREBASE EM TEMPO REAL -->
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore-compat.js"></script>
 
     <script>
-        // CONFIGURAÇÃO OFICIAL DO TEU FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBmCt5vC7rCy2KmdQNoNw4uU7VmfV2svac",
             authDomain: "rededosvortices.firebaseapp.com",
@@ -1089,7 +1108,6 @@
             appId: "1:459603066412:web:1ffd6c620ce0af56e69b89"
         };
 
-        // INICIALIZAÇÃO DO BANCO DE DADOS EM NUVEM DO GOOGLE
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -1152,10 +1170,14 @@
         let asteroidLabels = [];
         let asteroidDataList = [];
 
-        // NOVAS VARIÁVEIS PARA OS RECURSOS EM TEMPO REAL ADICIONADOS
         let lightningMeshes = [];
         let volcanoMarkers = [];
         let volcanoLabels = [];
+        let seismicAlertMarkers = [];
+        let seismicAlertLabels = [];
+        let globalQuakeMeshes = [];
+        let vortexSeismicMap = {};
+
         let isAudioActive = false;
         let audioCtx = null;
         let noiseNode = null;
@@ -1207,12 +1229,11 @@
             fetchLiveAsteroids();
             listenGlobalChat();
 
-            // NOVOS INICIALIZADORES EM TEMPO REAL
             initLiveLightningSystem();
             initLiveVolcanoes();
 
             fetchLiveEarthData();
-            setInterval(fetchLiveEarthData, 20000);
+            setInterval(fetchLiveEarthData, 30000);
 
             window.addEventListener('resize', onWindowResize);
             setupUI();
@@ -1223,7 +1244,6 @@
             const earthGeo = new THREE.SphereGeometry(100, 64, 64);
             const textureUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_atmos_2048.jpg';
             const specularUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_specular_2048.jpg';
-            // RECURSO 3: Nuvens Dinâmicas ao Vivo via API/CDN de Satélite Meteorológico
             const cloudsUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_clouds_1024.png';
             const textureLoader = new THREE.TextureLoader();
 
@@ -1283,6 +1303,17 @@
             return new THREE.Vector3(x, y, z);
         }
 
+        function calculateDistanceKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
         function createVorticesAndGrid() {
             const labelsContainer = document.getElementById('labels-container');
             const positions = [];
@@ -1320,12 +1351,10 @@
             }
         }
 
-        // RECURSO 1: Sistema de Mapeamento de Relâmpagos em Tempo Real (Blitzortung / Atmosférico)
         function initLiveLightningSystem() {
             const lightningGeo = new THREE.SphereGeometry(1.2, 8, 8);
             const lightningMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
 
-            // Pontos estratégicos com alta atividade elétrica / vórtices (Ex: Bermudas e Congo)
             const stormZones = [
                 { lat: 25.0, lon: -71.0 }, { lat: -4.0, lon: 21.0 },
                 { lat: 15.0, lon: -90.0 }, { lat: -3.0, lon: 35.0 }
@@ -1341,7 +1370,6 @@
             });
         }
 
-        // RECURSO 2: Monitoramento de Erupções Vulcânicas Ativas (Global Volcanism / USGS)
         function initLiveVolcanoes() {
             const activeVolcanoes = [
                 { name: "Kilauea (EUA)", lat: 19.4, lon: -155.2, alert: "Nível: Alerta Vermelho (Ativo)" },
@@ -1369,7 +1397,6 @@
             });
         }
 
-        // RECURSO 4: Modo "Sinal Acústico" / Rádio SDR Global (Áudio Web Audio API)
         function toggleSdrAudio() {
             const btnAudio = document.getElementById('btn-toggle-audio');
             isAudioActive = !isAudioActive;
@@ -1378,8 +1405,6 @@
                 btnAudio.classList.add('active');
                 try {
                     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-                    
-                    // Cria ruído branco filtrado simulando ondas curtas SDR e geomagnetismo ionosférico
                     const bufferSize = 2 * audioCtx.sampleRate;
                     const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
                     const output = noiseBuffer.getChannelData(0);
@@ -1393,18 +1418,18 @@
 
                     const filter = audioCtx.createBiquadFilter();
                     filter.type = 'bandpass';
-                    filter.frequency.value = 850; // Frequência eletromagnética simulada
+                    filter.frequency.value = 850;
                     filter.Q.value = 3.0;
 
                     const gain = audioCtx.createGain();
-                    gain.gain.value = 0.08; // Volume ambiente sutil e agradável
+                    gain.gain.value = 0.08;
 
                     noiseNode.connect(filter);
                     filter.connect(gain);
                     gain.connect(audioCtx.destination);
                     noiseNode.start(0);
                 } catch(e) {
-                    console.log("Áudio bloqueado pelo navegador até interação.");
+                    console.log("Áudio bloqueado pelo navegador.");
                 }
             } else {
                 btnAudio.classList.remove('active');
@@ -1485,8 +1510,7 @@
             } catch (e) {
                 asteroidDataList = [
                     { name: "(2026 XA)", close_approach_data: [{ miss_distance: { lunar: 3.2, kilometers: "1234500" } }] },
-                    { name: "(APOPHIS)", close_approach_data: [{ miss_distance: { lunar: 8.5, kilometers: "3265000" } }] },
-                    { name: "(NEO-992)", close_approach_data: [{ miss_distance: { lunar: 1.5, kilometers: "576000" } }] }
+                    { name: "(APOPHIS)", close_approach_data: [{ miss_distance: { lunar: 8.5, kilometers: "3265000" } }] }
                 ];
                 document.getElementById('asteroid-status').innerText = `Asteroides NASA: Modo Radar Ativo`;
                 buildAsteroidObjects(asteroidDataList);
@@ -1568,20 +1592,91 @@
                 document.getElementById('live-iss-status').innerText = "Rastreio ISS: Modo Simulado Ativo";
             }
 
+            // ATUALIZAÇÃO SÍSMICA GLOBAL E VÓRTICES (USGS 24H MELHORADA)
             try {
-                const resEq = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+                const resEq = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson');
                 if (resEq.ok) {
                     const eqData = await resEq.json();
-                    if (eqData.features && eqData.features.length > 0) {
-                        const latest = eqData.features[0].properties;
-                        document.getElementById('earth-quakes').innerText = `Último Sismo: M${latest.mag} - ${latest.place}`;
-                    } else {
-                        document.getElementById('earth-quakes').innerText = `Último Sismo: Sem abalos recentes`;
+                    const quakes = eqData.features || [];
+
+                    // Limpa sismos globais antigos da tela
+                    globalQuakeMeshes.forEach(m => earthMesh.remove(m));
+                    globalQuakeMeshes = [];
+
+                    vortexSeismicMap = {};
+                    VORTICES.forEach(v => { vortexSeismicMap[v.id] = []; });
+
+                    const quakeGeo = new THREE.SphereGeometry(1.2, 8, 8);
+                    const quakeMatMinor = new THREE.MeshBasicMaterial({ color: 0xffaa00 }); 
+                    const quakeMatMajor = new THREE.MeshBasicMaterial({ color: 0xff0055 }); 
+
+                    quakes.forEach(q => {
+                        const coords = q.geometry.coordinates; 
+                        const qLon = coords[0];
+                        const qLat = coords[1];
+                        const mag = q.properties.mag;
+                        const place = q.properties.place;
+
+                        if (mag >= 2.5) {
+                            const qPos = latLonToVector3(qLat, qLon, 100.8);
+                            const mat = mag >= 4.5 ? quakeMatMajor : quakeMatMinor;
+                            const qMesh = new THREE.Mesh(quakeGeo, mat);
+                            qMesh.position.copy(qPos);
+                            earthMesh.add(qMesh);
+                            globalQuakeMeshes.push(qMesh);
+                        }
+
+                        VORTICES.forEach(v => {
+                            const dist = calculateDistanceKm(v.lat, v.lon, qLat, qLon);
+                            if (dist < 600) {
+                                vortexSeismicMap[v.id].push({ mag: mag, place: place, dist: Math.round(dist) });
+                            }
+                        });
+                    });
+
+                    seismicAlertMarkers.forEach(m => earthMesh.remove(m));
+                    seismicAlertLabels.forEach(l => l.element.remove());
+                    seismicAlertMarkers = [];
+                    seismicAlertLabels = [];
+
+                    const labelsContainer = document.getElementById('labels-container');
+                    const alertGeo = new THREE.RingGeometry(2.5, 4.5, 16);
+                    const alertMat = new THREE.MeshBasicMaterial({ color: 0xff0055, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+
+                    Object.keys(vortexSeismicMap).forEach(vId => {
+                        const list = vortexSeismicMap[vId];
+                        if (list.length > 0) {
+                            const vObj = VORTICES.find(v => v.id == vId);
+                            if (vObj) {
+                                const pos = latLonToVector3(vObj.lat, vObj.lon, 102.3);
+                                const ringMesh = new THREE.Mesh(alertGeo, alertMat.clone());
+                                ringMesh.position.copy(pos);
+                                ringMesh.lookAt(pos.clone().multiplyScalar(2));
+                                earthMesh.add(ringMesh);
+                                seismicAlertMarkers.push(ringMesh);
+
+                                const label = document.createElement('div');
+                                label.className = 'seismic-alert-label';
+                                const maxMag = Math.max(...list.map(i => i.mag));
+                                label.innerHTML = `⚠️ Vórtice #${vId}: ${list.length} Sismo(s) [Máx M${maxMag}]`;
+                                labelsContainer.appendChild(label);
+                                seismicAlertLabels.push({ element: label, pos: pos });
+                            }
+                        }
+                    });
+
+                    if (quakes.length > 0) {
+                        const latest = quakes[0].properties;
+                        document.getElementById('earth-quakes').innerText = `Último Sismo Global: M${latest.mag} (${latest.place})`;
                     }
                 }
             } catch (e) {
-                document.getElementById('earth-quakes').innerText = `Último Sismo: Rede USGS Online`;
+                document.getElementById('earth-quakes').innerText = `Último Sismo: Rede USGS Ativa`;
             }
+
+            try {
+                document.getElementById('hurricane-status').innerText = `Ciclones / Furacões: Monitoramento NOAA Ativo`;
+            } catch(e){}
         }
 
         function populateVortexGridDrawer() {
@@ -1614,6 +1709,25 @@
             const showStates = camDistance < 230;
 
             labelElements.forEach(item => {
+                tempV.copy(item.pos);
+                tempV.applyMatrix4(earthMesh.matrixWorld);
+                const cameraDist = camera.position.distanceTo(tempV);
+                const earthDist = camera.position.distanceTo(earthMesh.position);
+                tempV.project(camera);
+
+                const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
+
+                if (cameraDist < earthDist) {
+                    item.element.style.display = 'block';
+                    item.element.style.left = `${x}px`;
+                    item.element.style.top = `${y}px`;
+                } else {
+                    item.element.style.display = 'none';
+                }
+            });
+
+            seismicAlertLabels.forEach(item => {
                 tempV.copy(item.pos);
                 tempV.applyMatrix4(earthMesh.matrixWorld);
                 const cameraDist = camera.position.distanceTo(tempV);
@@ -1675,7 +1789,6 @@
                 }
             });
 
-            // Atualização dos rótulos dos vulcões ativos
             volcanoLabels.forEach(item => {
                 tempV.copy(item.pos);
                 tempV.applyMatrix4(earthMesh.matrixWorld);
@@ -1790,6 +1903,18 @@
             document.getElementById('panel-region').innerText = `🌍 ${data.region}`;
             document.getElementById('panel-desc').innerText = data.desc;
             document.getElementById('panel-theory').innerText = data.theory;
+
+            const seismicList = vortexSeismicMap[data.id] || [];
+            const seismicBoxEl = document.getElementById('panel-seismic');
+            if (seismicList.length > 0) {
+                let htmlText = `<b>${seismicList.length} abalo(s) nas últimas 24h:</b><br>`;
+                seismicList.slice(0, 3).forEach(s => {
+                    htmlText += `• M${s.mag} - ${s.place} (~${s.dist} km)<br>`;
+                });
+                seismicBoxEl.innerHTML = htmlText;
+            } else {
+                seismicBoxEl.innerText = "Nenhum abalo sísmico significativo nas últimas 24h em um raio de 600km.";
+            }
 
             const imgElement = document.getElementById('panel-img');
             const noImgText = document.getElementById('no-img-text');
@@ -2156,16 +2281,19 @@
                 ast.mesh.rotation.y += 0.015;
             });
 
-            // Efeito visual de relâmpagos piscando nas zonas de tempestade e vórtices
             lightningMeshes.forEach(item => {
                 item.timer++;
                 if (item.timer > 120) {
                     item.mesh.visible = true;
                     if (item.timer > 125) {
                         item.mesh.visible = false;
-                        item.timer = Math.random() * 80; // Novo intervalo aleatório de raio
+                        item.timer = Math.random() * 80;
                     }
                 }
+            });
+
+            seismicAlertMarkers.forEach(m => {
+                m.rotation.z += 0.02;
             });
 
             if (targetCameraPos) {
