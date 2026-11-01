@@ -85,6 +85,10 @@
             font-weight: 600;
             outline: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
 
         .btn:hover {
@@ -120,13 +124,13 @@
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        /* GAVETA CUSTOMIZADA E BONITA DE VÓRTICES (Substitui o <select> feio nativo) */
         .vortex-dropdown-container {
             position: relative;
             display: inline-block;
             pointer-events: auto;
         }
 
+        /* GAVETA DE VÓRTICES (DESKTOP E BASE) */
         .vortex-menu-drawer {
             position: absolute;
             top: calc(100% + 8px);
@@ -166,7 +170,7 @@
             color: #fff;
         }
 
-        /* Painel Lateral com Transição Suave e Zoom Ajustado */
+        /* Painel Lateral com Transição Suave */
         .info-panel {
             position: absolute;
             top: 0;
@@ -560,62 +564,103 @@
             margin-bottom: 10px;
         }
 
-        /* LAYOUT MOBILE OTIMIZADO */
+        /* ================================================= */
+        /* NOVO DESIGN MOBILE (DOCK COMPACTA & MODAL CENTRAL)*/
+        /* ================================================= */
         @media (max-width: 1024px) {
-            .ui-top-bar {
-                position: absolute;
-                top: 10px;
-                left: 10px;
-                width: auto;
-                max-width: 220px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 10px;
-                padding: 12px;
-                background: rgba(5, 10, 18, 0.92);
-                border: 1px solid rgba(0, 240, 255, 0.3);
-                border-radius: 10px;
-                backdrop-filter: blur(10px);
-            }
-            .controls-bar {
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-                width: 100%;
-                gap: 6px;
-            }
-            .btn, .vortex-dropdown-container {
-                width: 100%;
-            }
-            .btn {
-                text-align: left;
-                padding: 8px 10px;
-                font-size: 0.75rem;
-            }
-            .vortex-menu-drawer {
-                top: 0;
-                left: calc(100% + 8px);
-                right: auto;
-                width: 240px;
-                max-height: 260px;
-            }
-            .ui-header h1 {
-                font-size: 0.9rem;
-            }
-            .ui-header p {
+            /* Ocultar cabeçalho em texto no celular */
+            .ui-header {
                 display: none;
             }
 
+            /* Barra de navegação vira DOCK compacta flutuante em ícones (ESTILO FOTO 3) */
+            .ui-top-bar {
+                position: fixed;
+                top: auto;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: auto;
+                max-width: 92vw;
+                padding: 8px 14px;
+                background: rgba(8, 14, 24, 0.92);
+                border: 1px solid rgba(0, 240, 255, 0.4);
+                border-radius: 30px;
+                backdrop-filter: blur(16px);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,240,255,0.2);
+                z-index: 100;
+            }
+
+            .controls-bar {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                width: 100%;
+            }
+
+            .btn {
+                padding: 10px 12px;
+                font-size: 0.7rem;
+                border-radius: 20px;
+                background: rgba(10, 25, 40, 0.8);
+            }
+
+            .btn-text {
+                display: none; /* Esconde os textos nos botões pequenos da dock */
+            }
+
+            .btn-icon {
+                font-size: 1.1rem;
+                display: inline-block;
+            }
+
+            /* LISTA DE VÓRTICES CENTRALIZADA NA TELA (CIRCULADO EM VERMELHO CORRIGIDO) */
+            .vortex-dropdown-container {
+                position: static;
+            }
+
+            .vortex-menu-drawer {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                right: auto;
+                transform: translate(-50%, -50%) scale(0.9);
+                width: 88vw;
+                max-width: 340px;
+                max-height: 60vh;
+                background: rgba(8, 14, 24, 0.98);
+                border: 1.5px solid #00f0ff;
+                border-radius: 16px;
+                box-shadow: 0 0 35px rgba(0, 240, 255, 0.4), 0 10px 40px rgba(0,0,0,0.9);
+                transition: transform 0.3s ease, opacity 0.3s ease;
+                opacity: 0;
+            }
+
+            .vortex-menu-drawer.open {
+                display: block;
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+
+            .vortex-option-item {
+                padding: 12px 16px;
+                font-size: 0.85rem;
+                text-align: center;
+            }
+
+            /* PERFIL DO VÓRTICE COMPACTO E SUAVE */
             .info-panel {
-                width: 92vw;
-                max-width: 380px;
+                width: 90vw;
+                max-width: 360px;
                 height: auto;
-                max-height: 80vh;
+                max-height: 75vh;
                 top: 50%;
                 left: 50%;
                 right: auto;
                 transform: translate(-50%, -50%) scale(0.85);
-                border-radius: 14px;
+                border-radius: 16px;
                 border: 1px solid rgba(0, 240, 255, 0.6);
                 box-shadow: 0 10px 40px rgba(0,0,0,0.9);
             }
@@ -626,7 +671,7 @@
             }
 
             .img-container {
-                height: 140px;
+                height: 130px;
             }
         }
     </style>
@@ -642,15 +687,34 @@
         </div>
 
         <div class="controls-bar">
-            <!-- Menu customizado substituindo o select antigo -->
+            <!-- Botão de Vórtices com Ícone -->
             <div class="vortex-dropdown-container">
-                <button class="btn" id="btn-toggle-vortex">Vórtices ▼</button>
+                <button class="btn" id="btn-toggle-vortex" title="Vórtices">
+                    <span class="btn-icon">📍</span>
+                    <span class="btn-text">Vórtices ▼</span>
+                </button>
                 <div class="vortex-menu-drawer" id="vortex-menu-drawer"></div>
             </div>
-            <button class="btn btn-chat" id="btn-open-chat">Chat Global</button>
-            <button class="btn btn-theory" id="btn-open-theory">Teoria</button>
-            <button class="btn" id="btn-reset">Reset</button>
-            <button class="btn active" id="btn-rotate">Girar</button>
+            
+            <button class="btn btn-chat" id="btn-open-chat" title="Chat Global">
+                <span class="btn-icon">💬</span>
+                <span class="btn-text">Chat Global</span>
+            </button>
+            
+            <button class="btn btn-theory" id="btn-open-theory" title="Teoria">
+                <span class="btn-icon">📜</span>
+                <span class="btn-text">Teoria</span>
+            </button>
+            
+            <button class="btn" id="btn-reset" title="Resetar Visão">
+                <span class="btn-icon">🔄</span>
+                <span class="btn-text">Reset</span>
+            </button>
+            
+            <button class="btn active" id="btn-rotate" title="Alternar Rotação">
+                <span class="btn-icon">🌐</span>
+                <span class="btn-text">Girar</span>
+            </button>
         </div>
     </div>
 
@@ -1214,7 +1278,7 @@
             const mouse = new THREE.Vector2();
 
             window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-menu-drawer')) return;
 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
