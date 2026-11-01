@@ -22,6 +22,13 @@
             --cor-fundo: rgba(4, 8, 16, 0.96);
             --borda-neon: rgba(0, 240, 255, 0.6);
             --sombra-neon: 0 0 25px rgba(0, 240, 255, 0.35);
+
+            /* Cores do Chat Moderno */
+            --wa-bg: #0b141a;
+            --wa-header: #1f2c34;
+            --wa-incoming: #202c33;
+            --wa-text: #e9edef;
+            --wa-subtext: #8696a0;
         }
 
         html, body {
@@ -113,6 +120,7 @@
             justify-content: center;
             gap: 6px;
             pointer-events: auto;
+            position: relative;
         }
 
         .btn:hover {
@@ -136,6 +144,21 @@
         .btn-live:hover {
             background: rgba(0, 255, 102, 0.25);
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: var(--cor-alerta);
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 1px solid #fff;
+            box-shadow: 0 0 10px var(--cor-alerta);
+            display: none;
         }
 
         .vortex-panel-container {
@@ -388,7 +411,7 @@
             font-style: italic;
         }
 
-        .comments-section, .chat-section {
+        .comments-section {
             margin-top: 6px;
             border-top: 1px solid rgba(0, 240, 255, 0.2);
             padding-top: 8px;
@@ -398,14 +421,14 @@
             pointer-events: auto;
         }
 
-        .comments-section h3, .chat-section h3 {
+        .comments-section h3 {
             color: var(--cor-primaria);
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .comment-input, .comment-textarea, .chat-input, .chat-textarea {
+        .comment-input, .comment-textarea {
             width: 100%;
             background: rgba(5, 10, 18, 0.8);
             border: 1px solid rgba(0, 240, 255, 0.3);
@@ -416,12 +439,12 @@
             outline: none;
         }
 
-        .comment-textarea, .chat-textarea {
+        .comment-textarea {
             resize: none;
             height: 50px;
         }
 
-        .btn-comment, .btn-send-chat {
+        .btn-comment {
             background: rgba(0, 0, 0, 0.4);
             border: 1px solid var(--cor-primaria);
             color: var(--cor-primaria);
@@ -434,12 +457,12 @@
             transition: 0.2s;
         }
 
-        .btn-comment:hover, .btn-send-chat:hover {
+        .btn-comment:hover {
             background: rgba(0, 240, 255, 0.3);
             box-shadow: var(--sombra-neon);
         }
         
-        .comments-list, .chat-messages {
+        .comments-list {
             display: flex;
             flex-direction: column;
             gap: 5px;
@@ -449,7 +472,7 @@
             padding-right: 4px;
         }
 
-        .comment-item, .chat-msg {
+        .comment-item {
             background: rgba(10, 18, 30, 0.6);
             border: 1px solid rgba(0, 240, 255, 0.15);
             border-radius: 6px;
@@ -457,15 +480,222 @@
             font-size: 0.7rem;
         }
 
-        .comment-user, .chat-user {
+        .comment-user {
             color: var(--cor-secundaria);
             font-weight: bold;
             margin-bottom: 2px;
         }
 
-        .comment-text, .chat-text {
+        .comment-text {
             color: #d1d5db;
             line-height: 1.25;
+        }
+
+        /* --- CHAT GLOBAL MODERNO (SUBSTITUI O MODAL ANTIGO) --- */
+        .chat-panel {
+            position: absolute;
+            top: 0;
+            right: 0;
+            height: 100vh;
+            width: 480px;
+            max-width: 100vw;
+            background: var(--wa-bg);
+            border-left: 1px solid rgba(0, 240, 255, 0.25);
+            z-index: 30;
+            box-shadow: -20px 0 50px rgba(0,0,0,0.95);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateX(50px);
+            transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            pointer-events: none;
+        }
+
+        .chat-panel.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        .wa-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--wa-header);
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+
+        .wa-group-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .wa-group-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #00a884, #005c4b);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .wa-group-text h2 {
+            color: var(--wa-text);
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .wa-group-text p {
+            color: var(--wa-subtext);
+            font-size: 0.7rem;
+        }
+
+        .wa-panel-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #0b141a 0%, #080f14 100%);
+        }
+
+        .chat-container-box {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages-scroll {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .chat-date-divider {
+            text-align: center;
+            margin: 14px 0 8px 0;
+        }
+
+        .chat-date-divider span {
+            background: #182229;
+            color: #8696a0;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 6px;
+            text-transform: uppercase;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .chat-bubble {
+            background: var(--wa-incoming);
+            color: var(--wa-text);
+            border-radius: 0 8px 8px 8px;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+            max-width: 85%;
+            align-self: flex-start;
+            position: relative;
+            box-shadow: 0 1px 0.5px rgba(0,0,0,0.3);
+            animation: fadeIn 0.15s ease-out;
+        }
+
+        .chat-bubble-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+            gap: 15px;
+        }
+
+        .chat-user-name {
+            color: #53bdeb;
+            font-weight: bold;
+            font-size: 0.75rem;
+        }
+
+        .chat-timestamp {
+            color: #8696a0;
+            font-size: 0.65rem;
+            font-family: monospace;
+            white-space: nowrap;
+        }
+
+        .chat-text-content {
+            color: var(--wa-text);
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        .chat-input-area {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--wa-header);
+            padding: 12px 16px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0;
+        }
+
+        .chat-input-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .chat-input-field {
+            background: #2a3942;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--wa-text);
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .chat-author-input {
+            width: 35%;
+        }
+
+        .chat-textarea-field {
+            flex: 1;
+            resize: none;
+            height: 42px;
+            font-family: inherit;
+            line-height: 1.2;
+        }
+
+        .btn-send-message {
+            background: #00a884;
+            border: none;
+            color: #ffffff;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .btn-send-message:hover {
+            background: #008f72;
+            transform: scale(1.05);
         }
 
         .close-btn {
@@ -584,6 +814,11 @@
             margin-bottom: 8px;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         @media (max-width: 1024px) {
             .ui-header { display: none; }
             
@@ -651,6 +886,12 @@
             .info-panel.visible {
                 transform: translate(-50%, -50%) scale(1);
             }
+
+            .chat-panel {
+                width: 100vw;
+                height: 100vh;
+                border-left: none;
+            }
         }
     </style>
 
@@ -677,6 +918,7 @@
             <button class="btn btn-chat" id="btn-open-chat" title="Chat Global">
                 <span class="btn-icon">💬</span>
                 <span class="btn-text">Chat</span>
+                <span class="unread-badge" id="unread-badge">0</span>
             </button>
             
             <button class="btn btn-theory" id="btn-open-theory" title="Teoria">
@@ -737,18 +979,34 @@
         </div>
     </div>
 
-    <div class="theory-modal" id="chat-modal" style="border-color: #00ff66; box-shadow: 0 0 30px rgba(0, 255, 102, 0.3);">
-        <h2>
-            <span style="color: #00ff66;">Chat Global da Teoria</span>
-            <button class="close-btn" id="close-chat">&times;</button>
-        </h2>
-        <p style="font-size: 0.75rem; color: #8a9ba8;">Espaço geral para conversarem e debaterem em tempo real no site.</p>
-        
-        <div class="chat-section">
-            <input type="text" id="chat-author" class="chat-input" placeholder="Seu apelido...">
-            <textarea id="chat-text-input" class="chat-textarea" placeholder="Digite sua mensagem..."></textarea>
-            <button class="btn-send-chat" id="btn-send-global-chat">Enviar Mensagem</button>
-            <div class="chat-messages" id="global-chat-messages"></div>
+    <!-- CHAT GLOBAL MODERNO (ESTILO WHATSAPP) -->
+    <div class="chat-panel" id="chat-panel">
+        <div class="wa-panel-header">
+            <div class="wa-group-info">
+                <div class="wa-group-avatar">🌍</div>
+                <div class="wa-group-text">
+                    <h2>Chat Global dos Vórtices</h2>
+                    <p>online • 3 dias de retenção automática</p>
+                </div>
+            </div>
+            <button class="close-btn" id="close-chat-panel">&times;</button>
+        </div>
+        <div class="wa-panel-body">
+            <div class="chat-container-box">
+                <div class="chat-messages-scroll" id="global-chat-messages">
+                    <div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Carregando mensagens da nuvem...</div>
+                </div>
+                
+                <div class="chat-input-area">
+                    <div class="chat-input-row">
+                        <input type="text" id="chat-author" class="chat-input-field chat-author-input" placeholder="Seu apelido...">
+                    </div>
+                    <div class="chat-input-row">
+                        <textarea id="chat-text-input" class="chat-input-field chat-textarea-field" placeholder="Digite sua mensagem..."></textarea>
+                        <button class="btn-send-message" id="btn-send-global-chat">➤</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -837,6 +1095,10 @@
         let issOrbitPoints = [];
         let issOrbitLine = null;
         let vortexCommentsUnsubscribe = null;
+        
+        let unreadCount = 0;
+        let isChatOpen = false;
+        let lastLoadedCount = 0;
         
         const markerObjects = [];
         const labelElements = [];
@@ -1230,7 +1492,7 @@
 
             document.getElementById('vortex-grid-drawer').classList.remove('open');
             document.getElementById('theory-modal').classList.remove('visible');
-            document.getElementById('chat-modal').classList.remove('visible');
+            document.getElementById('chat-panel').classList.remove('visible');
 
             document.getElementById('panel-title').innerText = data.name;
             document.getElementById('panel-coords').innerText = `${data.lat}° N, ${data.lon}° E`;
@@ -1322,41 +1584,95 @@
         }
 
         function listenGlobalChat() {
+            const threeDaysAgo = Date.now() - (3 * 24 * 60 * 60 * 1000);
+
             db.collection('global_chat')
                 .orderBy('timestamp', 'asc')
                 .onSnapshot(snapshot => {
                     const messages = [];
-                    snapshot.forEach(doc => messages.push(doc.data()));
+                    const batch = db.batch();
+                    let hasOldMessages = false;
+
+                    snapshot.forEach(doc => {
+                        const data = doc.data();
+                        const msgTime = data.timestamp ? data.timestamp.toMillis() : Date.now();
+
+                        if (msgTime < threeDaysAgo) {
+                            batch.delete(doc.ref);
+                            hasOldMessages = true;
+                        } else {
+                            messages.push(data);
+                        }
+                    });
+
+                    if (hasOldMessages) {
+                        batch.commit().catch(err => {});
+                    }
+
                     renderChatList(messages);
                 }, err => {
                     console.error("Erro no chat global Firebase:", err);
                 });
         }
 
+        function getWhatsAppDateLabel(timestampMillis) {
+            const msgDate = new Date(timestampMillis);
+            const today = new Date();
+            if (msgDate.toDateString() === today.toDateString()) return "Hoje";
+            
+            const yesterday = new Date();
+            yesterday.setDate(today.getDate() - 1);
+            if (msgDate.toDateString() === yesterday.toDateString()) return "Ontem";
+            
+            return msgDate.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
         function renderChatList(messages) {
             const msgList = document.getElementById('global-chat-messages');
             if (!msgList) return;
-            
-            const scrollPos = msgList.scrollTop;
-            const isAtBottom = msgList.scrollHeight - msgList.clientHeight <= scrollPos + 30;
 
             msgList.innerHTML = "";
-            
+
             if (!messages || messages.length === 0) {
-                msgList.innerHTML = '<div style="color: #4a6b82; font-size: 0.7rem; text-align: center; padding: 8px;">Nenhuma mensagem no chat global. Envie a primeira!</div>';
+                msgList.innerHTML = '<div style="color: #8696a0; font-size: 0.8rem; text-align: center; padding: 20px;">Nenhuma mensagem no grupo. Seja o primeiro a enviar!</div>';
+                lastLoadedCount = 0;
                 return;
             }
 
+            if (!isChatOpen && messages.length > lastLoadedCount && lastLoadedCount > 0) {
+                unreadCount += (messages.length - lastLoadedCount);
+                updateBadge();
+            }
+            lastLoadedCount = messages.length;
+
+            let lastDateLabel = "";
+
             messages.forEach(m => {
-                const item = document.createElement('div');
-                item.className = 'chat-msg';
-                item.innerHTML = `<div class="chat-user">${escapeHtml(m.author)}</div><div class="chat-text">${escapeHtml(m.text)}</div>`;
-                msgList.appendChild(item);
+                const millis = m.timestamp ? m.timestamp.toMillis() : Date.now();
+                const dateLabel = getWhatsAppDateLabel(millis);
+                const timeString = new Date(millis).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                if (dateLabel !== lastDateLabel) {
+                    lastDateLabel = dateLabel;
+                    const divider = document.createElement('div');
+                    divider.className = 'chat-date-divider';
+                    divider.innerHTML = `<span>${dateLabel}</span>`;
+                    msgList.appendChild(divider);
+                }
+
+                const bubble = document.createElement('div');
+                bubble.className = 'chat-bubble';
+                bubble.innerHTML = `
+                    <div class="chat-bubble-header">
+                        <span class="chat-user-name">${escapeHtml(m.author)}</span>
+                        <span class="chat-timestamp">${timeString}</span>
+                    </div>
+                    <div class="chat-text-content">${escapeHtml(m.text)}</div>
+                `;
+                msgList.appendChild(bubble);
             });
 
-            if (isAtBottom || messages.length < 4) {
-                msgList.scrollTop = msgList.scrollHeight;
-            }
+            msgList.scrollTop = msgList.scrollHeight;
         }
 
         async function sendGlobalMessage() {
@@ -1379,6 +1695,16 @@
             }
         }
 
+        function updateBadge() {
+            const badge = document.getElementById('unread-badge');
+            if (unreadCount > 0) {
+                badge.innerText = unreadCount;
+                badge.style.display = 'inline-block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
         function escapeHtml(str) {
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
@@ -1386,7 +1712,7 @@
         function setupUI() {
             const infoPanel = document.getElementById('info-panel');
             const theoryModal = document.getElementById('theory-modal');
-            const chatModal = document.getElementById('chat-modal');
+            const chatPanel = document.getElementById('chat-panel');
             const vortexDrawer = document.getElementById('vortex-grid-drawer');
             const btnToggleVortex = document.getElementById('btn-toggle-vortex');
             const telemetryHud = document.getElementById('telemetry-hud');
@@ -1397,7 +1723,7 @@
                 
                 infoPanel.classList.remove('visible');
                 theoryModal.classList.remove('visible');
-                chatModal.classList.remove('visible');
+                chatPanel.classList.remove('visible');
 
                 if (willOpen) {
                     vortexDrawer.classList.add('open');
@@ -1416,7 +1742,7 @@
             const mouse = new THREE.Vector2();
 
             window.addEventListener('pointermove', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-panel-container')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.chat-panel') || e.target.closest('.vortex-panel-container')) return;
                 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1434,7 +1760,7 @@
             });
 
             window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-panel-container')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.chat-panel') || e.target.closest('.vortex-panel-container')) return;
 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1451,15 +1777,25 @@
             document.getElementById('btn-send-comment').addEventListener('click', addVortexComment);
             document.getElementById('btn-send-global-chat').addEventListener('click', sendGlobalMessage);
 
+            document.getElementById('chat-text-input').addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendGlobalMessage();
+                }
+            });
+
             document.getElementById('close-panel').addEventListener('click', () => infoPanel.classList.remove('visible'));
             document.getElementById('close-theory').addEventListener('click', () => theoryModal.classList.remove('visible'));
-            document.getElementById('close-chat').addEventListener('click', () => chatModal.classList.remove('visible'));
+            document.getElementById('close-chat-panel').addEventListener('click', () => {
+                isChatOpen = false;
+                chatPanel.classList.remove('visible');
+            });
             
             document.getElementById('btn-open-theory').addEventListener('click', () => {
                 const willOpen = !theoryModal.classList.contains('visible');
                 
                 infoPanel.classList.remove('visible');
-                chatModal.classList.remove('visible');
+                chatPanel.classList.remove('visible');
                 vortexDrawer.classList.remove('open');
 
                 if (willOpen) {
@@ -1470,16 +1806,20 @@
             });
 
             document.getElementById('btn-open-chat').addEventListener('click', () => {
-                const willOpen = !chatModal.classList.contains('visible');
+                const willOpen = !chatPanel.classList.contains('visible');
 
                 infoPanel.classList.remove('visible');
                 theoryModal.classList.remove('visible');
                 vortexDrawer.classList.remove('open');
 
                 if (willOpen) {
-                    chatModal.classList.add('visible');
+                    isChatOpen = true;
+                    unreadCount = 0;
+                    updateBadge();
+                    chatPanel.classList.add('visible');
                 } else {
-                    chatModal.classList.remove('visible');
+                    isChatOpen = false;
+                    chatPanel.classList.remove('visible');
                 }
             });
 
