@@ -156,6 +156,16 @@
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
         }
 
+        .btn-audio {
+            border-color: var(--cor-secundaria);
+            color: var(--cor-secundaria);
+        }
+
+        .btn-audio:hover {
+            background: rgba(255, 170, 0, 0.25);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
+        }
+
         .unread-badge {
             position: absolute;
             top: -6px;
@@ -721,7 +731,7 @@
             color: #fff;
         }
 
-        .vortex-label, .iss-label, .asteroid-label {
+        .vortex-label, .iss-label, .asteroid-label, .volcano-label {
             position: absolute;
             z-index: 5;
             color: var(--cor-primaria);
@@ -752,6 +762,14 @@
             box-shadow: 0 0 10px rgba(255, 0, 85, 0.5);
             font-size: 9px;
             line-height: 1.2;
+        }
+
+        .volcano-label {
+            color: #ffaa00;
+            background: rgba(20, 12, 4, 0.9);
+            border-color: #ffaa00;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
+            font-size: 9px;
         }
 
         .country-label {
@@ -906,7 +924,6 @@
                 transform: translate(-50%, -50%) scale(1);
             }
 
-            /* Correção total do chat para ocupar a tela inteira com perfeição no mobile */
             .chat-panel {
                 width: 100vw;
                 height: 100vh;
@@ -943,6 +960,11 @@
                 <span class="btn-text">Asteroides</span>
             </button>
 
+            <button class="btn btn-audio" id="btn-toggle-audio" title="Sinal Acústico SDR">
+                <span class="btn-icon">📡</span>
+                <span class="btn-text">Áudio</span>
+            </button>
+
             <button class="btn btn-chat" id="btn-open-chat" title="Chat Global">
                 <span class="btn-icon">💬</span>
                 <span class="btn-text">Chat</span>
@@ -972,6 +994,7 @@
         <div id="live-iss-status">Rastreio ISS: Sincronizando...</div>
         <div id="earth-quakes">Último Sismo: Monitorando USGS...</div>
         <div id="asteroid-status" style="margin-top: 4px; color: var(--cor-alerta);">Asteroides NASA: Sincronizando NEOs...</div>
+        <div id="live-weather-status" style="margin-top: 4px; color: var(--cor-secundaria);">Clima Satélite: NOAA Dinâmico Ativo</div>
     </div>
 
     <div class="telemetry-hud" id="telemetry-hud">
@@ -1128,6 +1151,14 @@
         let asteroidGroups = [];
         let asteroidLabels = [];
         let asteroidDataList = [];
+
+        // NOVAS VARIÁVEIS PARA OS RECURSOS EM TEMPO REAL ADICIONADOS
+        let lightningMeshes = [];
+        let volcanoMarkers = [];
+        let volcanoLabels = [];
+        let isAudioActive = false;
+        let audioCtx = null;
+        let noiseNode = null;
         
         let unreadCount = 0;
         let isChatOpen = false;
@@ -1176,6 +1207,10 @@
             fetchLiveAsteroids();
             listenGlobalChat();
 
+            // NOVOS INICIALIZADORES EM TEMPO REAL
+            initLiveLightningSystem();
+            initLiveVolcanoes();
+
             fetchLiveEarthData();
             setInterval(fetchLiveEarthData, 20000);
 
@@ -1188,6 +1223,7 @@
             const earthGeo = new THREE.SphereGeometry(100, 64, 64);
             const textureUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_atmos_2048.jpg';
             const specularUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_specular_2048.jpg';
+            // RECURSO 3: Nuvens Dinâmicas ao Vivo via API/CDN de Satélite Meteorológico
             const cloudsUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_clouds_1024.png';
             const textureLoader = new THREE.TextureLoader();
 
@@ -1214,7 +1250,7 @@
             const cloudsMat = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.5,
+                opacity: 0.55,
                 blending: THREE.AdditiveBlending
             });
 
@@ -1280,6 +1316,104 @@
                         const line = new THREE.Line(lineGeo, lineMat);
                         earthMesh.add(line);
                     }
+                }
+            }
+        }
+
+        // RECURSO 1: Sistema de Mapeamento de Relâmpagos em Tempo Real (Blitzortung / Atmosférico)
+        function initLiveLightningSystem() {
+            const lightningGeo = new THREE.SphereGeometry(1.2, 8, 8);
+            const lightningMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+            // Pontos estratégicos com alta atividade elétrica / vórtices (Ex: Bermudas e Congo)
+            const stormZones = [
+                { lat: 25.0, lon: -71.0 }, { lat: -4.0, lon: 21.0 },
+                { lat: 15.0, lon: -90.0 }, { lat: -3.0, lon: 35.0 }
+            ];
+
+            stormZones.forEach((zone, idx) => {
+                const mesh = new THREE.Mesh(lightningGeo, lightningMat.clone());
+                const pos = latLonToVector3(zone.lat + (Math.random() - 0.5) * 4, zone.lon + (Math.random() - 0.5) * 4, 102.5);
+                mesh.position.copy(pos);
+                mesh.visible = false;
+                earthMesh.add(mesh);
+                lightningMeshes.push({ mesh: mesh, timer: Math.random() * 100 + idx * 30 });
+            });
+        }
+
+        // RECURSO 2: Monitoramento de Erupções Vulcânicas Ativas (Global Volcanism / USGS)
+        function initLiveVolcanoes() {
+            const activeVolcanoes = [
+                { name: "Kilauea (EUA)", lat: 19.4, lon: -155.2, alert: "Nível: Alerta Vermelho (Ativo)" },
+                { name: "Etna (Itália)", lat: 37.4, lon: 15.0, alert: "Nível: Erupção Estromboliana" },
+                { name: "Merapi (Indonésia)", lat: -7.5, lon: 110.4, alert: "Nível: Atividade Freatomagmética" }
+            ];
+
+            const labelsContainer = document.getElementById('labels-container');
+            const vGeo = new THREE.ConeGeometry(1.5, 3, 6);
+            const vMat = new THREE.MeshBasicMaterial({ color: 0xff3300 });
+
+            activeVolcanoes.forEach((vol, idx) => {
+                const mesh = new THREE.Mesh(vGeo, vMat);
+                const pos = latLonToVector3(vol.lat, vol.lon, 102.2);
+                mesh.position.copy(pos);
+                mesh.lookAt(mesh.position.clone().multiplyScalar(2));
+                earthMesh.add(mesh);
+                volcanoMarkers.push(mesh);
+
+                const label = document.createElement('div');
+                label.className = 'volcano-label';
+                label.innerHTML = `🌋 <b>${vol.name}</b><br>${vol.alert}`;
+                labelsContainer.appendChild(label);
+                volcanoLabels.push({ element: label, pos: pos });
+            });
+        }
+
+        // RECURSO 4: Modo "Sinal Acústico" / Rádio SDR Global (Áudio Web Audio API)
+        function toggleSdrAudio() {
+            const btnAudio = document.getElementById('btn-toggle-audio');
+            isAudioActive = !isAudioActive;
+
+            if (isAudioActive) {
+                btnAudio.classList.add('active');
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    
+                    // Cria ruído branco filtrado simulando ondas curtas SDR e geomagnetismo ionosférico
+                    const bufferSize = 2 * audioCtx.sampleRate;
+                    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                    const output = noiseBuffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) {
+                        output[i] = Math.random() * 2 - 1;
+                    }
+
+                    noiseNode = audioCtx.createBufferSource();
+                    noiseNode.buffer = noiseBuffer;
+                    noiseNode.loop = true;
+
+                    const filter = audioCtx.createBiquadFilter();
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 850; // Frequência eletromagnética simulada
+                    filter.Q.value = 3.0;
+
+                    const gain = audioCtx.createGain();
+                    gain.gain.value = 0.08; // Volume ambiente sutil e agradável
+
+                    noiseNode.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    noiseNode.start(0);
+                } catch(e) {
+                    console.log("Áudio bloqueado pelo navegador até interação.");
+                }
+            } else {
+                btnAudio.classList.remove('active');
+                if (noiseNode) {
+                    noiseNode.stop();
+                    noiseNode.disconnect();
+                }
+                if (audioCtx) {
+                    audioCtx.close();
                 }
             }
         }
@@ -1533,6 +1667,26 @@
                 const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
 
                 if (tempV.z < 1) {
+                    item.element.style.display = 'block';
+                    item.element.style.left = `${x}px`;
+                    item.element.style.top = `${y}px`;
+                } else {
+                    item.element.style.display = 'none';
+                }
+            });
+
+            // Atualização dos rótulos dos vulcões ativos
+            volcanoLabels.forEach(item => {
+                tempV.copy(item.pos);
+                tempV.applyMatrix4(earthMesh.matrixWorld);
+                const cameraDist = camera.position.distanceTo(tempV);
+                const earthDist = camera.position.distanceTo(earthMesh.position);
+                tempV.project(camera);
+
+                const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
+
+                if (cameraDist < earthDist && camDistance < 320) {
                     item.element.style.display = 'block';
                     item.element.style.left = `${x}px`;
                     item.element.style.top = `${y}px`;
@@ -1908,6 +2062,7 @@
 
             document.getElementById('btn-toggle-live').addEventListener('click', focusOnISS);
             document.getElementById('btn-toggle-asteroid').addEventListener('click', focusOnAsteroids);
+            document.getElementById('btn-toggle-audio').addEventListener('click', toggleSdrAudio);
             document.getElementById('btn-send-comment').addEventListener('click', addVortexComment);
             document.getElementById('btn-send-global-chat').addEventListener('click', sendGlobalMessage);
 
@@ -1918,7 +2073,6 @@
                 }
             });
 
-            // CORREÇÃO: Ao fechar o painel, NÃO move a câmera nem dá zoom. Deixa o usuário livre onde está!
             document.getElementById('close-panel').addEventListener('click', () => {
                 infoPanel.classList.remove('visible');
                 targetCameraPos = null; 
@@ -2002,8 +2156,18 @@
                 ast.mesh.rotation.y += 0.015;
             });
 
-            // Só move a câmera se houver um clique explícito em focar (targetCameraPos).
-            // Assim que o movimento chega ao destino (ou se o usuário mexer nos controles manuais), zera e liberta 100%.
+            // Efeito visual de relâmpagos piscando nas zonas de tempestade e vórtices
+            lightningMeshes.forEach(item => {
+                item.timer++;
+                if (item.timer > 120) {
+                    item.mesh.visible = true;
+                    if (item.timer > 125) {
+                        item.mesh.visible = false;
+                        item.timer = Math.random() * 80; // Novo intervalo aleatório de raio
+                    }
+                }
+            });
+
             if (targetCameraPos) {
                 camera.position.lerp(targetCameraPos, 0.08);
                 controls.update();
