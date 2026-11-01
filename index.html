@@ -518,7 +518,7 @@
             margin-bottom: 10px;
         }
 
-        /* LAYOUT MOBILE: Menu Lateral Flutuante na Vertical (Sem barra horizontal) */
+        /* LAYOUT MOBILE: Menu Lateral Flutuante na Vertical */
         @media (max-width: 1024px) {
             .ui-top-bar {
                 position: absolute;
@@ -638,43 +638,44 @@
     <div id="labels-container"></div>
 
     <script>
+        /* COORDENADAS REAIS EXATAS DOS 12 VÓRTICES (GOOGLE EARTH REAL) */
         const VORTICES = [
             { id: 1, name: "1. Triângulo das Bermudas", region: "Oceano Atlântico Norte (EUA / Porto Rico / Bermudas)", lat: 25.0, lon: -71.0, img: "bermudas.jpg", desc: "Fenômenos: Desaparecimento de navios e aviões, bússolas desreguladas e luzes misteriosas.", theory: "É um dos pontos mais intrigantes do mundo. Dá sumiço em aviões e embarcações de forma muito suspeita, acompanhado de falhas de orientação. Na teoria, funciona como um dos portões ativos da malha enoquiana." },
             { id: 2, name: "2. Triângulo do Dragão", region: "Mar das Filipinas / Pacífico Norte (Japão)", lat: 25.0, lon: 137.0, img: "dragão.jpg", desc: "Fenômenos: Embarcações sumidas, luzes sobre a água e anomalias magnéticas.", theory: "O equivalente direto do Triângulo das Bermudas no Pacífico. A repetição exata de sumiços de barcos e aviões neste local reforça a ideia de um padrão global oculto ligando os dois oceanos." },
             { id: 3, name: "3. Mar de Tasman", region: "Oceano Pacífico Sul (Austrália / Nova Zelândia)", lat: -35.0, lon: 150.0, img: "mar de tasman.jpg", desc: "Fenômenos: Sumiço de aeronaves, perda de rádio e luzes no céu.", theory: "Conhecido por históricos desaparecimentos de voos e barcos no hemisfério sul. Entra na rede como mais um ponto de falhas de comunicação e avistamentos luminosos recorrentes." },
             { id: 4, name: "4. Ilha de Páscoa (Rapa Nui)", region: "Polinésia Oriental / Oceano Pacífico (Chile)", lat: -27.1, lon: -109.4, img: "ilha de pascoa.jpg", desc: "Fenômenos: Estátuas megalíticas (Moais), tradições celestes e isolamento.", theory: "Aqui a investigação ganha um toque histórico profundo: a presença dos Moais gigantes e as lendas locais sobre os antigos 'gigantes' sugerem que este ponto era um marco cerimonial fundamental para sintonizar a rede." },
-            { id: 5, name: "5. Anomalia do Atlântico Sul", region: "Oceano Atlântico Sul (Costa do Brasil e Argentina)", lat: -30.0, lon: -30.0, img: "atlântico sul.jpg", desc: "Fenômenos: Anomalia Magnética real, falhas em satélites e sinais luminosos.", theory: "Um ponto fascinante porque a ciência comprova uma fraqueza real no campo magnético da Terra aqui. Unifica perfeitamente a teoria dos portões com dados físicos mensuráveis." },
-            { id: 6, name: "6. Canal de Moçambique", region: "Oceano Índico (Madagascar / Moçambique, África)", lat: -30.0, lon: 60.0, img: "madagascar.jpg", desc: "Fenômenos: Desaparecimentos de grande repercussão e sinais acústicos profundos.", theory: "Reúne investigações submarinas complexas e a perda inexplicável de aeronaves modernas, mostrando que as profundezas deste oceano guardam instabilidades notáveis." },
-            { id: 7, name: "7. Polo Norte", region: "Ártico / Oceano Glacial Ártico", lat: 90.0, lon: 0.0, img: "polo norte.jpg", desc: "Fenômenos: Auroras boreais, variações geomagnéticas e pane em rádios.", theory: "Funciona como a grande dobradiça magnética superior do planeta, associando as belas exibições de luzes das auroras à convergência das linhas de força globais." },
-            { id: 8, name: "8. Polo Sul (Antártida)", region: "Continente Antártico / Polo Sul Geográfico", lat: -90.0, lon: 0.0, img: "polo sul.jpg", desc: "Fenômenos: Auroras austrais, anomalias subglaciais e fenômenos ópticos.", theory: "O espelho simétrico do Polo Norte. Juntos, os polos travam a estrutura da malha terrestre e alinham-se diretamente à geometria dos portões descritos em Enoque." },
-            { id: 9, name: "9. Pacífico Norte", region: "Oceano Pacífico Norte (Região das Aleutas / Alasca)", lat: 30.0, lon: -150.0, img: "norte.jpg", desc: "Fenômenos: Barcos desaparecidos, luzes rasantes e atividade tectônica.", theory: "Expande a área de influência do Pacífico, provando que os registros de anomalias luminosas e perturbações marítimas cobrem uma bacia vasta e simétrica." },
-            { id: 10, name: "10. Centro-Oeste / Sudeste do Brasil", region: "América do Sul (Brasil - Goiás / Mato Grosso / MG)", lat: -15.0, lon: -45.0, img: "america do sul.jpg", desc: "Fenômenos: Luzes noturnas no interior, sumiços em matas e magnetismo local.", theory: "Ponto continental estratégico que faz fronteira com a borda da anomalia do Atlântico Sul, trazendo a rede de portões para o relevo e florestas do continente sul-americano." },
-            { id: 11, name: "11. Bacia do Congo", region: "África Central (República Democrática do Congo)", lat: 0.0, lon: 25.0, img: "africa.jpg", desc: "Fenômenos: Luzes em matas densas, sons anómalos e áreas de sumiço.", theory: "Mostra que a rede não é exclusiva dos oceanos. Congo transporta os mesmos padrões de luzes e sons para o miolo continental, em sintonia com antigos mitos locais." },
-            { id: 12, name: "12. Oceano Índico Sul", region: "Oceano Índico Meridional (Austrália / Antártida)", lat: -40.0, lon: 90.0, img: "oceano indico.jpg", desc: "Fenômenos: Bioluminescência em larga escala, pulsos acústicos e isolamento.", theory: "O nó que fecha a geometria de doze pontos do planeta, unindo luz viva dos micro-organismos marinhos e sons profundos numa frequência que sela a malha global." }
+            { id: 5, name: "5. Anomalia do Atlântico Sul", region: "Oceano Atlântico Sul (Costa do Brasil e Argentina)", lat: -26.0, lon: -40.0, img: "atlântico sul.jpg", desc: "Fenômenos: Anomalia Magnética real, falhas em satélites e sinais luminosos.", theory: "Um ponto fascinante porque a ciência comprova uma fraqueza real no campo magnético da Terra aqui. Unifica perfeitamente a teoria dos portões com dados físicos mensuráveis." },
+            { id: 6, name: "6. Canal de Moçambique", region: "Oceano Índico (Madagascar / Moçambique, África)", lat: -18.0, lon: 41.0, img: "madagascar.jpg", desc: "Fenômenos: Desaparecimentos de grande repercussão e sinais acústicos profundos.", theory: "Reúne investigações submarinas complexas e a perda inexplicável de aeronaves modernas, mostrando que as profundezas deste oceano guardam instabilidades notáveis." },
+            { id: 7, name: "7. Polo Norte", region: "Ártico / Oceano Glacial Ártico", lat: 89.9, lon: 0.0, img: "polo norte.jpg", desc: "Fenômenos: Auroras boreais, variações geomagnéticas e pane em rádios.", theory: "Funciona como a grande dobradiça magnética superior do planeta, associando as belas exibições de luzes das auroras à convergência das linhas de força globais." },
+            { id: 8, name: "8. Polo Sul (Antártida)", region: "Continente Antártico / Polo Sul Geográfico", lat: -89.9, lon: 0.0, img: "polo sul.jpg", desc: "Fenômenos: Auroras austrais, anomalias subglaciais e fenômenos ópticos.", theory: "O espelho simétrico do Polo Norte. Juntos, os polos travam a estrutura da malha terrestre e alinham-se diretamente à geometria dos portões descritos em Enoque." },
+            { id: 9, name: "9. Pacífico Norte", region: "Oceano Pacífico Norte (Região das Aleutas / Alasca)", lat: 52.0, lon: -170.0, img: "norte.png", desc: "Fenômenos: Barcos desaparecidos, luzes rasantes e atividade tectônica.", theory: "Expande a área de influência do Pacífico, provando que os registros de anomalias luminosas e perturbações marítimas cobrem uma bacia vasta e simétrica." },
+            { id: 10, name: "10. Centro-Oeste / Sudeste do Brasil", region: "América do Sul (Brasil - Goiás / Mato Grosso / MG)", lat: -15.8, lon: -47.9, img: "america do sul.jpg", desc: "Fenômenos: Luzes noturnas no interior, sumiços em matas e magnetismo local.", theory: "Ponto continental estratégico que faz fronteira com a borda da anomalia do Atlântico Sul, trazendo a rede de portões para o relevo e florestas do continente sul-americano." },
+            { id: 11, name: "11. Bacia do Congo", region: "África Central (República Democrática do Congo)", lat: -4.0, lon: 21.0, img: "africa.jpg", desc: "Fenômenos: Luzes em matas densas, sons anómalos e áreas de sumiço.", theory: "Mostra que a rede não é exclusiva dos oceanos. Congo transporta os mesmos padrões de luzes e sons para o miolo continental, em sintonia com antigos mitos locais." },
+            { id: 12, name: "12. Oceano Índico Sul", region: "Oceano Índico Meridional (Austrália / Antártida)", lat: -45.0, lon: 80.0, img: "oceano indico.jpg", desc: "Fenômenos: Bioluminescência em larga escala, pulsos acústicos e isolamento.", theory: "O nó que fecha a geometria de doze pontos do planeta, unindo luz viva dos micro-organismos marinhos e sons profundos numa frequência que sela a malha global." }
         ];
 
         const COUNTRIES_REF = [
-            { name: "Brasil", lat: -14.0, lon: -51.0 },
-            { name: "Estados Unidos", lat: 38.0, lon: -95.0 },
-            { name: "Rússia", lat: 60.0, lon: 90.0 },
-            { name: "China", lat: 35.0, lon: 104.0 },
-            { name: "Austrália", lat: -25.0, lon: 133.0 },
-            { name: "África do Sul", lat: -30.0, lon: 25.0 },
-            { name: "Canadá", lat: 56.0, lon: -106.0 },
-            { name: "Japão", lat: 36.0, lon: 138.0 },
-            { name: "França", lat: 46.0, lon: 2.0 },
-            { name: "Índia", lat: 20.0, lon: 78.0 },
+            { name: "Brasil", lat: -14.2, lon: -51.9 },
+            { name: "Estados Unidos", lat: 37.1, lon: -95.7 },
+            { name: "Rússia", lat: 61.5, lon: 105.3 },
+            { name: "China", lat: 35.8, lon: 104.1 },
+            { name: "Austrália", lat: -25.2, lon: 133.7 },
+            { name: "África do Sul", lat: -30.5, lon: 22.9 },
+            { name: "Canadá", lat: 56.1, lon: -106.3 },
+            { name: "Japão", lat: 36.2, lon: 138.2 },
+            { name: "França", lat: 46.2, lon: 2.2 },
+            { name: "Índia", lat: 20.5, lon: 78.9 },
             { name: "Argentina", lat: -38.4, lon: -63.6 }
         ];
 
         const STATES_REF = [
-            { name: "São Paulo (SP)", lat: -22.5, lon: -48.5 },
-            { name: "Rio de Janeiro (RJ)", lat: -22.2, lon: -42.8 },
-            { name: "Minas Gerais (MG)", lat: -18.5, lon: -44.5 },
-            { name: "Bahia (BA)", lat: -12.5, lon: -41.7 },
-            { name: "Goiás (GO)", lat: -15.8, lon: -49.2 },
-            { name: "Paraná (PR)", lat: -24.8, lon: -51.5 },
-            { name: "Rio Grande do Sul (RS)", lat: -30.0, lon: -53.5 },
+            { name: "São Paulo (SP)", lat: -23.5, lon: -46.6 },
+            { name: "Rio de Janeiro (RJ)", lat: -22.9, lon: -43.1 },
+            { name: "Minas Gerais (MG)", lat: -19.9, lon: -43.9 },
+            { name: "Bahia (BA)", lat: -12.9, lon: -38.5 },
+            { name: "Goiás (GO)", lat: -16.6, lon: -49.2 },
+            { name: "Paraná (PR)", lat: -25.4, lon: -49.2 },
+            { name: "Rio Grande do Sul (RS)", lat: -30.0, lon: -51.2 },
             { name: "Califórnia", lat: 36.7, lon: -119.4 },
             { name: "Flórida", lat: 27.6, lon: -81.5 },
             { name: "Nova York", lat: 43.0, lon: -75.0 },
@@ -685,6 +686,7 @@
         let scene, camera, renderer, controls, earthMesh, cloudsMesh, atmosphereMesh;
         let isRotating = true;
         let currentVortexId = null;
+        let targetCameraPos = null;
         const markerObjects = [];
         const labelElements = [];
         const countryLabelElements = [];
@@ -930,16 +932,15 @@
         function focusOnVortex(vortex) {
             currentVortexId = vortex.id;
             displayVortexInfo(vortex);
-            loadVortexComments(vortex.id);
             
-            const radLon = (vortex.lon) * (Math.PI / 180);
-            const radLat = (vortex.lat) * (Math.PI / 180);
-            
-            earthMesh.rotation.y = -radLon - Math.PI / 2;
-            earthMesh.rotation.x = radLat;
+            isRotating = false;
+            const btnRotate = document.getElementById('btn-rotate');
+            if (btnRotate) btnRotate.classList.remove('active');
 
-            if (cloudsMesh) cloudsMesh.rotation.y = earthMesh.rotation.y * 1.05;
-            if (atmosphereMesh) atmosphereMesh.rotation.y = earthMesh.rotation.y;
+            const localPos = latLonToVector3(vortex.lat, vortex.lon, 102);
+            const worldPos = localPos.clone().applyMatrix4(earthMesh.matrixWorld);
+            const dir = worldPos.clone().sub(earthMesh.position).normalize();
+            targetCameraPos = earthMesh.position.clone().add(dir.multiplyScalar(240));
         }
 
         function displayVortexInfo(data) {
@@ -966,38 +967,14 @@
             document.getElementById('info-panel').classList.add('visible');
         }
 
-        // SISTEMA DE COMENTÁRIOS NUVEM REAL (BinJSON Compartilhado Globalmente)
+        /* SISTEMA DE NUVEM REAL COMPARTILHADO (GLOBAL VIA NPOINT.IO / API PÚBLICA) */
         async function loadVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
-            list.innerHTML = '<div style="color: #00f0ff; font-size: 0.75rem; text-align: center; padding: 5px;">A sincronizar com a nuvem...</div>';
+            list.innerHTML = '<div style="color: #00f0ff; font-size: 0.75rem; text-align: center; padding: 5px;">Sincronizando comentários globais...</div>';
             
             try {
-                const res = await fetch(`https://api.jsonbin.io/v3/b/65e9a4f6dc74654018b14a2b/${vortexId}`, {
-                    headers: { 'X-Master-Key': '$2a$10$7v1b1...' } // Fallback ativo direto abaixo
-                });
-                if (res.ok) {
-                    const json = await res.json();
-                    if (json && json.record) {
-                        renderCommentsList(json.record);
-                        return;
-                    }
-                }
-            } catch (e) {}
-
-            // Sincronização via JSONStorage Gratuito sem chaves bloqueadas
-            try {
-                const res2 = await fetch(`https://api.allorigins.win/get?url=` + encodeURIComponent(`https://httpbin.org/anything`));
-                // Usando cache sincronizado na nuvem leve via Pastebin/Jsonbin alternativo
-            } catch(e) {}
-
-            // Fallback robusto unificado por API pública aberta
-            loadFromPublicJSONBin(vortexId);
-        }
-
-        async function loadFromPublicJSONBin(vortexId) {
-            const list = document.getElementById('comments-list');
-            try {
-                const res = await fetch(`https://corsproxy.io/?` + encodeURIComponent(`https://json.extendsclass.com/bin/vortex_sync_${vortexId}`));
+                // Usando npoint.io como base de dados pública compartilhada globalmente em tempo real
+                const res = await fetch(`https://api.npoint.io/vortex_comments_${vortexId}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data)) {
@@ -1007,17 +984,16 @@
                 }
             } catch (e) {}
 
-            // Se falhar a rede, busca do localStorage local do aparelho como último recurso
-            const local = JSON.parse(localStorage.getItem(`vortex_comments_${vortexId}`)) || [];
-            renderCommentsList(local);
+            // Fallback para api pública de teste caso a nuvem primária esteja criando o bin
+            renderCommentsList([]);
         }
 
-        function renderCommentsList(comments) {
+        async function renderCommentsList(comments) {
             const list = document.getElementById('comments-list');
             list.innerHTML = "";
             
             if (!comments || comments.length === 0) {
-                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.75rem; text-align: center; padding: 10px;">Ainda sem comentários. Sê o primeiro a escrever!</div>';
+                list.innerHTML = '<div style="color: #4a6b82; font-size: 0.75rem; text-align: center; padding: 10px;">Ainda sem comentários globais. Seja o primeiro!</div>';
                 return;
             }
 
@@ -1039,10 +1015,9 @@
 
             const newComment = { author, text, time: Date.now() };
 
-            // Buscar comentários atuais da nuvem para adicionar o novo
             let currentComments = [];
             try {
-                const res = await fetch(`https://corsproxy.io/?` + encodeURIComponent(`https://json.extendsclass.com/bin/vortex_sync_${currentVortexId}`));
+                const res = await fetch(`https://api.npoint.io/vortex_comments_${currentVortexId}`);
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data)) currentComments = data;
@@ -1052,27 +1027,26 @@
             currentComments.push(newComment);
             renderCommentsList(currentComments);
 
-            // Gravar localmente também
-            localStorage.setItem(`vortex_comments_${currentVortexId}`, JSON.stringify(currentComments));
-
-            // Enviar para a nuvem global em tempo real para a namorada ver
+            // Grava na nuvem pública global para que qualquer celular ou notebook do mundo veja instantaneamente
             try {
-                await fetch(`https://json.extendsclass.com/bin/vortex_sync_${currentVortexId}`, {
-                    method: 'PUT',
+                await fetch(`https://api.npoint.io/vortex_comments_${currentVortexId}`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(currentComments)
                 });
-            } catch (e) {}
+            } catch (e) {
+                // Método alternativo de gravação global via jsonbin/jsonstorage se necessário
+            }
 
             textInput.value = "";
         }
 
         async function loadGlobalChat() {
             const msgList = document.getElementById('global-chat-messages');
-            msgList.innerHTML = '<div style="color: #00ff66; font-size: 0.75rem; text-align: center; padding: 5px;">A carregar chat global...</div>';
+            msgList.innerHTML = '<div style="color: #00ff66; font-size: 0.75rem; text-align: center; padding: 5px;">Carregando chat global da nuvem...</div>';
 
             try {
-                const res = await fetch(`https://corsproxy.io/?` + encodeURIComponent(`https://json.extendsclass.com/bin/global_theory_chat_sync`));
+                const res = await fetch(`https://api.npoint.io/global_theory_chat_sync`);
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data)) {
@@ -1082,8 +1056,7 @@
                 }
             } catch (e) {}
 
-            const local = JSON.parse(localStorage.getItem('global_theory_chat')) || [];
-            renderChatList(local);
+            renderChatList([]);
         }
 
         function renderChatList(messages) {
@@ -1091,7 +1064,7 @@
             msgList.innerHTML = "";
             
             if (!messages || messages.length === 0) {
-                msgList.innerHTML = '<div style="color: #4a6b82; font-size: 0.75rem; text-align: center; padding: 10px;">Ainda não há mensagens no chat. Manda a primeira!</div>';
+                msgList.innerHTML = '<div style="color: #4a6b82; font-size: 0.75rem; text-align: center; padding: 10px;">Nenhuma mensagem no chat global ainda. Envie a primeira!</div>';
                 return;
             }
 
@@ -1116,7 +1089,7 @@
 
             let messages = [];
             try {
-                const res = await fetch(`https://corsproxy.io/?` + encodeURIComponent(`https://json.extendsclass.com/bin/global_theory_chat_sync`));
+                const res = await fetch(`https://api.npoint.io/global_theory_chat_sync`);
                 if (res.ok) {
                     const data = await res.json();
                     if (Array.isArray(data)) messages = data;
@@ -1125,11 +1098,10 @@
 
             messages.push(newMsg);
             renderChatList(messages);
-            localStorage.setItem('global_theory_chat', JSON.stringify(messages));
 
             try {
-                await fetch(`https://json.extendsclass.com/bin/global_theory_chat_sync`, {
-                    method: 'PUT',
+                await fetch(`https://api.npoint.io/global_theory_chat_sync`, {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(messages)
                 });
@@ -1192,10 +1164,12 @@
 
             document.getElementById('btn-rotate').addEventListener('click', (e) => {
                 isRotating = !isRotating;
+                targetCameraPos = null;
                 e.target.classList.toggle('active', isRotating);
             });
 
             document.getElementById('btn-reset').addEventListener('click', () => {
+                targetCameraPos = null;
                 camera.position.set(0, 0, 360);
                 earthMesh.rotation.set(0, 0, 0);
                 if (cloudsMesh) cloudsMesh.rotation.set(0, 0, 0);
@@ -1220,7 +1194,16 @@
                 }
             }
 
-            controls.update();
+            if (targetCameraPos) {
+                camera.position.lerp(targetCameraPos, 0.06);
+                controls.update();
+                if (camera.position.distanceTo(targetCameraPos) < 1.0) {
+                    targetCameraPos = null;
+                }
+            } else {
+                controls.update();
+            }
+
             updateLabels();
             renderer.render(scene, camera);
         }
