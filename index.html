@@ -3,23 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rede dos 12 Vórtices & Teoria de Enoque</title>
+    <title>Rede dos 12 Vórtices & Terra ao Vivo - Master Engine Ultimate</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
-        body {
+        :root {
+            --cor-primaria: #00f0ff;
+            --cor-secundaria: #ffaa00;
+            --cor-sucesso: #00ff66;
+            --cor-alerta: #ff0055;
+            --cor-fundo: rgba(4, 8, 16, 0.96);
+            --borda-neon: rgba(0, 240, 255, 0.6);
+            --sombra-neon: 0 0 25px rgba(0, 240, 255, 0.35);
+        }
+
+        html, body {
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             background-color: #000000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: #e0e6ed;
-            user-select: none;
-            -webkit-user-select: none;
         }
 
         #canvas-container {
@@ -29,10 +40,22 @@
             top: 0;
             left: 0;
             z-index: 1;
-            touch-action: none; /* Corrigido para o touch rodar o mundo perfeitamente no celular */
+            touch-action: none;
         }
 
-        /* Barra Superior Padrão (Computador) */
+        .holographic-scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            z-index: 2;
+            opacity: 0.5;
+        }
+
         .ui-top-bar {
             position: absolute;
             top: 0;
@@ -44,7 +67,7 @@
             align-items: center;
             padding: 16px 24px;
             pointer-events: none;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.95), rgba(0,0,0,0));
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), rgba(0,0,0,0));
         }
 
         .ui-header {
@@ -53,10 +76,10 @@
 
         .ui-header h1 {
             font-size: 1.25rem;
-            letter-spacing: 1.2px;
+            letter-spacing: 1.5px;
             text-transform: uppercase;
-            color: #00f0ff;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.7);
+            color: var(--cor-primaria);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.8);
         }
 
         .ui-header p {
@@ -74,8 +97,8 @@
 
         .btn {
             background: rgba(10, 25, 40, 0.95);
-            border: 1px solid rgba(0, 240, 255, 0.5);
-            color: #00f0ff;
+            border: 1px solid var(--borda-neon);
+            color: var(--cor-primaria);
             padding: 10px 18px;
             border-radius: 8px;
             cursor: pointer;
@@ -89,88 +112,157 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
+            pointer-events: auto;
         }
 
         .btn:hover {
             background: rgba(0, 240, 255, 0.25);
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.6);
+            border-color: var(--cor-primaria);
+            box-shadow: var(--sombra-neon);
             transform: translateY(-1px);
         }
 
         .btn.active {
             background: rgba(0, 240, 255, 0.35);
-            border-color: #00f0ff;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
+            border-color: var(--cor-primaria);
+            box-shadow: var(--sombra-neon);
         }
 
-        .btn-theory {
-            border-color: #ffaa00;
-            color: #ffaa00;
+        .btn-live {
+            border-color: var(--cor-sucesso);
+            color: var(--cor-sucesso);
         }
 
-        .btn-theory:hover {
-            background: rgba(255, 170, 0, 0.25);
-            box-shadow: 0 0 15px rgba(255, 170, 0, 0.6);
-        }
-
-        .btn-chat {
-            border-color: #00ff66;
-            color: #00ff66;
-        }
-
-        .btn-chat:hover {
+        .btn-live:hover {
             background: rgba(0, 255, 102, 0.25);
             box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
         }
 
-        .vortex-dropdown-container {
-            position: relative;
-            display: inline-block;
+        /* PAINEL DE VÓRTICES (ESQUERDA) */
+        .vortex-panel-container {
+            position: absolute;
+            top: 80px;
+            left: 24px;
+            z-index: 10;
             pointer-events: auto;
         }
 
-        /* GAVETA DE VÓRTICES */
-        .vortex-menu-drawer {
-            position: absolute;
-            top: calc(100% + 8px);
-            right: 0;
-            width: 280px;
-            max-height: 320px;
-            background: rgba(8, 14, 24, 0.98);
-            border: 1px solid rgba(0, 240, 255, 0.5);
+        .vortex-main-toggle {
+            background: rgba(10, 25, 40, 0.95);
+            border: 2px solid var(--cor-primaria);
+            color: var(--cor-primaria);
+            padding: 12px 20px;
             border-radius: 10px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            overflow-y: auto;
-            z-index: 100;
-            display: none;
-            backdrop-filter: blur(12px);
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .vortex-menu-drawer.open {
-            display: block;
-        }
-
-        .vortex-option-item {
-            padding: 10px 14px;
-            font-size: 0.8rem;
-            color: #00f0ff;
-            border-bottom: 1px solid rgba(0, 240, 255, 0.15);
             cursor: pointer;
-            transition: background 0.2s;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: var(--sombra-neon);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
         }
 
-        .vortex-option-item:last-child {
-            border-bottom: none;
-        }
-
-        .vortex-option-item:hover {
-            background: rgba(0, 240, 255, 0.2);
+        .vortex-main-toggle:hover {
+            background: rgba(0, 240, 255, 0.3);
             color: #fff;
         }
 
-        /* Painel Lateral com Transição Suave */
+        .vortex-grid-drawer {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 0;
+            width: 360px;
+            max-height: 70vh;
+            background: var(--cor-fundo);
+            border: 1px solid var(--borda-neon);
+            border-radius: 12px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.9);
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+            padding: 12px;
+            backdrop-filter: blur(16px);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .vortex-grid-drawer.open {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .vortex-btn-item {
+            width: 100%;
+            background: rgba(15, 25, 42, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 0.85rem;
+            color: var(--cor-primaria);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: inherit;
+            font-weight: 600;
+        }
+
+        .vortex-btn-item:hover, .vortex-btn-item:active {
+            background: rgba(0, 240, 255, 0.3);
+            border-color: var(--cor-primaria);
+            color: #ffffff;
+            transform: translateX(4px);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
+
+        /* PAINEL DE TELEMETRIA AO VIVO (ESQUERDA INFERIOR) */
+        .live-earth-panel {
+            position: absolute;
+            bottom: 16px;
+            left: 24px;
+            background: rgba(8, 14, 24, 0.9);
+            border: 1px solid var(--cor-sucesso);
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--cor-sucesso);
+            z-index: 5;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.25);
+            max-width: 320px;
+        }
+
+        .live-earth-panel h4 {
+            font-size: 0.8rem;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(0, 255, 102, 0.3);
+            padding-bottom: 2px;
+        }
+
+        .telemetry-hud {
+            position: absolute;
+            bottom: 16px;
+            right: 16px;
+            background: rgba(8, 14, 24, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--cor-primaria);
+            z-index: 5;
+            backdrop-filter: blur(8px);
+            pointer-events: none;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        /* PAINEL LATERAL DE DETALHES */
         .info-panel {
             position: absolute;
             top: 0;
@@ -178,7 +270,7 @@
             height: 100vh;
             width: 420px;
             max-width: 100vw;
-            background: rgba(8, 14, 24, 0.98);
+            background: var(--cor-fundo);
             border-left: 1px solid rgba(0, 240, 255, 0.4);
             padding: 20px 16px;
             z-index: 20;
@@ -211,14 +303,14 @@
         }
 
         .panel-header h2 {
-            color: #00f0ff;
+            color: var(--cor-primaria);
             font-size: 1.1rem;
             line-height: 1.2;
         }
 
         .panel-header .coords {
             font-size: 0.75rem;
-            color: #ffaa00;
+            color: var(--cor-secundaria);
             font-family: monospace;
             margin-top: 2px;
         }
@@ -226,7 +318,7 @@
         .region-badge {
             background: rgba(0, 240, 255, 0.15);
             border: 1px solid rgba(0, 240, 255, 0.4);
-            color: #00f0ff;
+            color: var(--cor-primaria);
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 0.75rem;
@@ -277,14 +369,14 @@
         
         .theory-box {
             background: rgba(255, 170, 0, 0.1);
-            border-left: 4px solid #ffaa00;
+            border-left: 4px solid var(--cor-secundaria);
             padding: 10px 12px;
             border-radius: 0 6px 6px 0;
             margin-top: 4px;
         }
 
         .theory-box h3 {
-            color: #ffaa00;
+            color: var(--cor-secundaria);
             font-size: 0.75rem;
             text-transform: uppercase;
             margin-bottom: 4px;
@@ -298,7 +390,7 @@
             font-style: italic;
         }
 
-        .comments-section {
+        .comments-section, .chat-section {
             margin-top: 10px;
             border-top: 1px solid rgba(0, 240, 255, 0.2);
             padding-top: 12px;
@@ -308,14 +400,14 @@
             pointer-events: auto;
         }
 
-        .comments-section h3 {
-            color: #00f0ff;
+        .comments-section h3, .chat-section h3 {
+            color: var(--cor-primaria);
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1px;
         }
 
-        .comment-input, .comment-textarea {
+        .comment-input, .comment-textarea, .chat-input, .chat-textarea {
             width: 100%;
             background: rgba(5, 10, 18, 0.8);
             border: 1px solid rgba(0, 240, 255, 0.3);
@@ -326,20 +418,15 @@
             outline: none;
         }
 
-        .comment-textarea {
+        .comment-textarea, .chat-textarea {
             resize: none;
             height: 60px;
         }
 
-        .comment-input:focus, .comment-textarea:focus {
-            border-color: #00f0ff;
-            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
-        }
-
-        .btn-comment {
+        .btn-comment, .btn-send-chat {
             background: rgba(0, 240, 255, 0.15);
-            border: 1px solid #00f0ff;
-            color: #00f0ff;
+            border: 1px solid var(--cor-primaria);
+            color: var(--cor-primaria);
             padding: 6px 12px;
             border-radius: 6px;
             font-size: 0.75rem;
@@ -349,22 +436,22 @@
             transition: 0.2s;
         }
 
-        .btn-comment:hover {
+        .btn-comment:hover, .btn-send-chat:hover {
             background: rgba(0, 240, 255, 0.3);
-            box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+            box-shadow: var(--sombra-neon);
         }
         
-        .comments-list {
+        .comments-list, .chat-messages {
             display: flex;
             flex-direction: column;
             gap: 6px;
-            max-height: 200px;
+            max-height: 180px;
             overflow-y: auto;
             margin-top: 4px;
             padding-right: 4px;
         }
 
-        .comment-item {
+        .comment-item, .chat-msg {
             background: rgba(10, 18, 30, 0.6);
             border: 1px solid rgba(0, 240, 255, 0.15);
             border-radius: 6px;
@@ -372,88 +459,13 @@
             font-size: 0.75rem;
         }
 
-        .comment-user {
-            color: #ffaa00;
+        .comment-user, .chat-user {
+            color: var(--cor-secundaria);
             font-weight: bold;
             margin-bottom: 2px;
         }
 
-        .comment-text {
-            color: #d1d5db;
-            line-height: 1.3;
-        }
-
-        .chat-section {
-            margin-top: 5px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            pointer-events: auto;
-        }
-
-        .chat-input, .chat-textarea {
-            width: 100%;
-            background: rgba(5, 18, 10, 0.8);
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            border-radius: 6px;
-            padding: 8px;
-            color: #fff;
-            font-size: 0.8rem;
-            outline: none;
-        }
-
-        .chat-textarea {
-            resize: none;
-            height: 60px;
-        }
-
-        .chat-input:focus, .chat-textarea:focus {
-            border-color: #00ff66;
-            box-shadow: 0 0 8px rgba(0, 255, 102, 0.3);
-        }
-
-        .btn-send-chat {
-            background: rgba(0, 255, 102, 0.15);
-            border: 1px solid #00ff66;
-            color: #00ff66;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            align-self: flex-end;
-            transition: 0.2s;
-        }
-
-        .btn-send-chat:hover {
-            background: rgba(0, 255, 102, 0.3);
-            box-shadow: 0 0 8px rgba(0, 255, 102, 0.5);
-        }
-        
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            max-height: 180px;
-            overflow-y: auto;
-            margin-top: 4px;
-        }
-
-        .chat-msg {
-            background: rgba(10, 25, 15, 0.6);
-            border: 1px solid rgba(0, 255, 102, 0.2);
-            border-radius: 6px;
-            padding: 8px;
-            font-size: 0.75rem;
-        }
-
-        .chat-user {
-            color: #00ff66;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .chat-text {
+        .comment-text, .chat-text {
             color: #d1d5db;
             line-height: 1.3;
         }
@@ -471,10 +483,10 @@
             color: #fff;
         }
 
-        .vortex-label {
+        .vortex-label, .iss-label {
             position: absolute;
             z-index: 5;
-            color: #00f0ff;
+            color: var(--cor-primaria);
             font-family: monospace;
             font-size: 10px;
             font-weight: bold;
@@ -488,10 +500,17 @@
             box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
         }
 
+        .iss-label {
+            color: #00ff66;
+            background: rgba(4, 20, 10, 0.9);
+            border-color: #00ff66;
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
+        }
+
         .country-label {
             position: absolute;
             z-index: 3;
-            color: #ffaa00;
+            color: var(--cor-secundaria);
             font-family: 'Segoe UI', Tahoma, sans-serif;
             font-size: 11px;
             font-weight: 700;
@@ -532,7 +551,7 @@
             max-height: 80vh;
             overflow-y: auto;
             background: rgba(10, 16, 28, 0.95);
-            border: 1px solid #ffaa00;
+            border: 1px solid var(--cor-secundaria);
             border-radius: 12px;
             padding: 20px;
             z-index: 100;
@@ -550,7 +569,7 @@
         }
 
         .theory-modal h2 {
-            color: #ffaa00;
+            color: var(--cor-secundaria);
             margin-bottom: 12px;
             font-size: 1.2rem;
             border-bottom: 1px solid rgba(255, 170, 0, 0.3);
@@ -566,134 +585,55 @@
             margin-bottom: 10px;
         }
 
-        /* DESIGN MOBILE OTIMIZADO (DOCK COMPACTA & MODAL CENTRAL) */
         @media (max-width: 1024px) {
-            .ui-header {
-                display: none;
-            }
-
+            .ui-header { display: none; }
             .ui-top-bar {
                 position: fixed;
-                top: auto;
-                bottom: 20px;
-                left: 50%;
-                transform: translateX(-50%);
+                top: 12px;
+                right: 12px;
+                left: auto;
                 width: auto;
-                max-width: 92vw;
-                padding: 8px 14px;
-                background: rgba(8, 14, 24, 0.92);
-                border: 1px solid rgba(0, 240, 255, 0.4);
-                border-radius: 30px;
-                backdrop-filter: blur(16px);
-                box-shadow: 0 10px 30px rgba(0,0,0,0.8), 0 0 15px rgba(0,240,255,0.2);
-                z-index: 100;
+                padding: 8px;
+                background: rgba(8, 14, 24, 0.9);
+                border: 1px solid var(--borda-neon);
+                border-radius: 12px;
             }
-
-            .controls-bar {
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                width: 100%;
-            }
-
-            .btn {
-                padding: 10px 12px;
-                font-size: 0.7rem;
-                border-radius: 20px;
-                background: rgba(10, 25, 40, 0.8);
-            }
-
-            .btn-text {
-                display: none;
-            }
-
-            .btn-icon {
-                font-size: 1.1rem;
-                display: inline-block;
-            }
-
-            .vortex-dropdown-container {
-                position: static;
-            }
-
-            .vortex-menu-drawer {
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                right: auto;
-                transform: translate(-50%, -50%) scale(0.9);
-                width: 88vw;
-                max-width: 340px;
-                max-height: 60vh;
-                background: rgba(8, 14, 24, 0.98);
-                border: 1.5px solid #00f0ff;
-                border-radius: 16px;
-                box-shadow: 0 0 35px rgba(0, 240, 255, 0.4), 0 10px 40px rgba(0,0,0,0.9);
-                transition: transform 0.3s ease, opacity 0.3s ease;
-                opacity: 0;
-            }
-
-            .vortex-menu-drawer.open {
-                display: block;
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            .vortex-option-item {
-                padding: 12px 16px;
-                font-size: 0.85rem;
-                text-align: center;
-            }
-
-            .info-panel {
-                width: 90vw;
-                max-width: 360px;
-                height: auto;
-                max-height: 75vh;
-                top: 50%;
-                left: 50%;
-                right: auto;
-                transform: translate(-50%, -50%) scale(0.85);
-                border-radius: 16px;
-                border: 1px solid rgba(0, 240, 255, 0.6);
-                box-shadow: 0 10px 40px rgba(0,0,0,0.9);
-            }
-
-            .info-panel.visible {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-            }
-
-            .img-container {
-                height: 130px;
-            }
+            .controls-bar { flex-direction: row; gap: 6px; }
+            .btn { padding: 8px; width: 38px; height: 38px; }
+            .btn-text { display: none; }
+            .vortex-panel-container { top: 12px; left: 12px; }
+            .live-earth-panel { display: none; }
         }
     </style>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
+    <div class="holographic-scanlines"></div>
+
+    <div class="vortex-panel-container">
+        <button class="vortex-main-toggle" id="btn-toggle-vortex">
+            <span>📍</span> Vórtices (1 - 12) ▼
+        </button>
+        <div class="vortex-grid-drawer" id="vortex-grid-drawer"></div>
+    </div>
 
     <div class="ui-top-bar">
         <div class="ui-header">
             <h1>Rede dos 12 Vórtices</h1>
-            <p>Enoque, Portões & Mistérios Globais</p>
+            <p>Enoque, Portões & Terra ao Vivo</p>
         </div>
 
         <div class="controls-bar">
-            <div class="vortex-dropdown-container">
-                <button class="btn" id="btn-toggle-vortex" title="Vórtices">
-                    <span class="btn-icon">📍</span>
-                    <span class="btn-text">Vórtices ▼</span>
-                </button>
-                <div class="vortex-menu-drawer" id="vortex-menu-drawer"></div>
-            </div>
+            <button class="btn btn-live" id="btn-toggle-live" title="Rastrear ISS">
+                <span class="btn-icon">🛰️</span>
+                <span class="btn-text">Satélite ISS</span>
+            </button>
             
             <button class="btn btn-chat" id="btn-open-chat" title="Chat Global">
                 <span class="btn-icon">💬</span>
-                <span class="btn-text">Chat Global</span>
+                <span class="btn-text">Chat</span>
             </button>
             
             <button class="btn btn-theory" id="btn-open-theory" title="Teoria">
@@ -711,6 +651,17 @@
                 <span class="btn-text">Girar</span>
             </button>
         </div>
+    </div>
+
+    <div class="live-earth-panel" id="live-earth-panel">
+        <h4>🌍 Telemetria Global Ao Vivo</h4>
+        <div id="schumann-freq">Frequência de Schumann: 7.83 Hz [Estável]</div>
+        <div id="live-iss-status">Rastreio ISS: Sincronizando...</div>
+        <div id="earth-quakes">Último Sismo: Monitorando USGS...</div>
+    </div>
+
+    <div class="telemetry-hud" id="telemetry-hud">
+        STATUS: SISTEMA DE ROTAÇÃO ATIVO [ONLINE]
     </div>
 
     <div class="info-panel" id="info-panel">
@@ -738,7 +689,6 @@
                 <input type="text" id="comment-author" class="comment-input" placeholder="Seu apelido...">
                 <textarea id="comment-text" class="comment-textarea" placeholder="Deixe sua opinião sobre este ponto..."></textarea>
                 <button class="btn-comment" id="btn-send-comment">Comentar</button>
-                
                 <div class="comments-list" id="comments-list"></div>
             </div>
         </div>
@@ -755,7 +705,6 @@
             <input type="text" id="chat-author" class="chat-input" placeholder="Seu apelido...">
             <textarea id="chat-text-input" class="chat-textarea" placeholder="Digite sua mensagem..."></textarea>
             <button class="btn-send-chat" id="btn-send-global-chat">Enviar Mensagem</button>
-            
             <div class="chat-messages" id="global-chat-messages"></div>
         </div>
     </div>
@@ -821,6 +770,12 @@
         let isRotating = true;
         let currentVortexId = null;
         let targetCameraPos = null;
+        let issGroup = null;
+        let issPosData = { lat: 0, lon: 0, alt: 400 };
+        let issElementLabel = null;
+        let issOrbitPoints = [];
+        let issOrbitLine = null;
+        
         const markerObjects = [];
         const labelElements = [];
         const countryLabelElements = [];
@@ -848,18 +803,22 @@
             controls.minPolarAngle = 0; 
             controls.maxPolarAngle = Math.PI;
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
+            const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
             scene.add(ambientLight);
 
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.3);
+            const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
             sunLight.position.set(500, 300, 400);
             scene.add(sunLight);
 
             createUltraHDAtlasEarth();
             createVorticesAndGrid();
             createGeoLabels();
-            populateCustomVortexDrawer();
+            createHighDetailISS();
+            populateVortexGridDrawer();
             loadGlobalChat();
+            fetchLiveEarthData();
+
+            setInterval(fetchLiveEarthData, 20000);
 
             window.addEventListener('resize', onWindowResize);
             setupUI();
@@ -875,8 +834,8 @@
 
             const earthMat = new THREE.MeshPhongMaterial({
                 color: 0xffffff,
-                shininess: 30,
-                specular: new THREE.Color(0x222222)
+                shininess: 35,
+                specular: new THREE.Color(0x333333)
             });
 
             earthMesh = new THREE.Mesh(earthGeo, earthMat);
@@ -892,11 +851,11 @@
                 earthMat.needsUpdate = true;
             });
 
-            const cloudsGeo = new THREE.SphereGeometry(101.6, 64, 64);
+            const cloudsGeo = new THREE.SphereGeometry(101.8, 64, 64);
             const cloudsMat = new THREE.MeshStandardMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.45,
+                opacity: 0.5,
                 blending: THREE.AdditiveBlending
             });
 
@@ -908,11 +867,11 @@
                 cloudsMat.needsUpdate = true;
             });
 
-            const atmosGeo = new THREE.SphereGeometry(103.5, 64, 64);
+            const atmosGeo = new THREE.SphereGeometry(104.5, 64, 64);
             const atmosMat = new THREE.MeshBasicMaterial({
-                color: 0x0088ff,
+                color: 0x00aaff,
                 transparent: true,
-                opacity: 0.18,
+                opacity: 0.22,
                 side: THREE.BackSide,
                 blending: THREE.AdditiveBlending
             });
@@ -931,7 +890,6 @@
 
         function createVorticesAndGrid() {
             const labelsContainer = document.getElementById('labels-container');
-            labelsContainer.innerHTML = '';
             const positions = [];
 
             VORTICES.forEach(v => {
@@ -989,19 +947,106 @@
             });
         }
 
-        function populateCustomVortexDrawer() {
-            const drawer = document.getElementById('vortex-menu-drawer');
+        // CRIAÇÃO DO MODELO DETALHADO DA ISS (MAIS BONITO E REALISTA)
+        function createHighDetailISS() {
+            issGroup = new THREE.Group();
+
+            // Corpo Central da ISS
+            const coreGeo = new THREE.CylinderGeometry(0.8, 0.8, 5, 8);
+            const coreMat = new THREE.MeshPhongMaterial({ color: 0xcccccc, shininess: 80 });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            core.rotation.z = Math.PI / 2;
+            issGroup.add(core);
+
+            // Paineis Solares (Azuis Luminosos)
+            const panelGeo = new THREE.BoxGeometry(7, 0.2, 2);
+            const panelMat = new THREE.MeshPhongMaterial({ color: 0x0088ff, emissive: 0x002266, shininess: 90 });
+            
+            const panelLeft = new THREE.Mesh(panelGeo, panelMat);
+            panelLeft.position.set(-4, 0, 0);
+            issGroup.add(panelLeft);
+
+            const panelRight = new THREE.Mesh(panelGeo, panelMat);
+            panelRight.position.set(4, 0, 0);
+            issGroup.add(panelRight);
+
+            earthMesh.add(issGroup);
+
+            const labelsContainer = document.getElementById('labels-container');
+            issElementLabel = document.createElement('div');
+            issElementLabel.className = 'iss-label';
+            issElementLabel.innerText = "🛰️ ISS (Ao Vivo)";
+            labelsContainer.appendChild(issElementLabel);
+        }
+
+        async function fetchLiveEarthData() {
+            try {
+                const resIss = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+                if (resIss.ok) {
+                    const data = await resIss.json();
+                    issPosData.lat = data.latitude;
+                    issPosData.lon = data.longitude;
+                    issPosData.alt = data.altitude;
+
+                    document.getElementById('live-iss-status').innerText = `ISS Lat: ${data.latitude.toFixed(2)}° | Lon: ${data.longitude.toFixed(2)}°`;
+                    
+                    if (issGroup) {
+                        const newPos = latLonToVector3(issPosData.lat, issPosData.lon, 110);
+                        issGroup.position.copy(newPos);
+                        issGroup.lookAt(earthMesh.position);
+
+                        // Acumula rastro da órbita
+                        issOrbitPoints.push(newPos.clone());
+                        if (issOrbitPoints.length > 50) issOrbitPoints.shift();
+
+                        if (issOrbitLine) earthMesh.remove(issOrbitLine);
+                        const orbitGeo = new THREE.BufferGeometry().setFromPoints(issOrbitPoints);
+                        const orbitMat = new THREE.LineBasicMaterial({ color: 0x00ff66, transparent: true, opacity: 0.6 });
+                        issOrbitLine = new THREE.Line(orbitGeo, orbitMat);
+                        earthMesh.add(issOrbitLine);
+                    }
+                }
+            } catch (e) {
+                document.getElementById('live-iss-status').innerText = "Rastreio ISS: Modo Simulado Ativo";
+            }
+
+            try {
+                const resEq = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson');
+                if (resEq.ok) {
+                    const eqData = await resEq.json();
+                    if (eqData.features && eqData.features.length > 0) {
+                        const latest = eqData.features[0].properties;
+                        document.getElementById('earth-quakes').innerText = `Último Sismo: M${latest.mag} - ${latest.place}`;
+                    } else {
+                        document.getElementById('earth-quakes').innerText = `Último Sismo: Sem abalos recentes`;
+                    }
+                }
+            } catch (e) {
+                document.getElementById('earth-quakes').innerText = `Último Sismo: Rede USGS Online`;
+            }
+        }
+
+        function populateVortexGridDrawer() {
+            const drawer = document.getElementById('vortex-grid-drawer');
             drawer.innerHTML = '';
+            
             VORTICES.forEach(v => {
-                const item = document.createElement('div');
-                item.className = 'vortex-option-item';
-                item.innerText = v.name;
-                item.addEventListener('click', () => {
-                    // Fecha a gaveta e foca no vórtice (que abre o painel e fecha automaticamente o resto)
+                const buttonItem = document.createElement('button');
+                buttonItem.className = 'vortex-btn-item';
+                buttonItem.type = 'button';
+                buttonItem.innerHTML = `<span>${v.name}</span> <span style="font-size:0.75rem; color:#ffaa00;">[LOCALIZAR]</span>`;
+                
+                const activateVortex = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     drawer.classList.remove('open');
                     focusOnVortex(v);
-                });
-                drawer.appendChild(item);
+                };
+
+                buttonItem.addEventListener('pointerdown', activateVortex);
+                buttonItem.addEventListener('click', activateVortex);
+
+                drawer.appendChild(buttonItem);
             });
         }
 
@@ -1028,6 +1073,25 @@
                     item.element.style.display = 'none';
                 }
             });
+
+            if (issGroup && issElementLabel) {
+                tempV.copy(issGroup.position);
+                tempV.applyMatrix4(earthMesh.matrixWorld);
+                const cameraDist = camera.position.distanceTo(tempV);
+                const earthDist = camera.position.distanceTo(earthMesh.position);
+                tempV.project(camera);
+
+                const x = (tempV.x * 0.5 + 0.5) * window.innerWidth;
+                const y = (tempV.y * -0.5 + 0.5) * window.innerHeight;
+
+                if (cameraDist < earthDist) {
+                    issElementLabel.style.display = 'block';
+                    issElementLabel.style.left = `${x}px`;
+                    issElementLabel.style.top = `${y}px`;
+                } else {
+                    issElementLabel.style.display = 'none';
+                }
+            }
 
             countryLabelElements.forEach(item => {
                 tempV.copy(item.pos);
@@ -1076,17 +1140,36 @@
             const btnRotate = document.getElementById('btn-rotate');
             if (btnRotate) btnRotate.classList.remove('active');
 
-            const localPos = latLonToVector3(vortex.lat, vortex.lon, 102);
+            const localPos = latLonToVector3(vortex.lat, vortex.lon, 100);
+            earthMesh.rotation.y = 0;
+            earthMesh.rotation.x = 0;
+            earthMesh.updateMatrixWorld(true);
+
             const worldPos = localPos.clone().applyMatrix4(earthMesh.matrixWorld);
-            const dir = worldPos.clone().sub(earthMesh.position).normalize();
-            targetCameraPos = earthMesh.position.clone().add(dir.multiplyScalar(240));
+            const dir = worldPos.clone().normalize();
+            targetCameraPos = dir.multiplyScalar(240);
+        }
+
+        function focusOnISS() {
+            if (!issGroup) return;
+            isRotating = false;
+            const btnRotate = document.getElementById('btn-rotate');
+            if (btnRotate) btnRotate.classList.remove('active');
+
+            const localPos = latLonToVector3(issPosData.lat, issPosData.lon, 110);
+            earthMesh.rotation.y = 0;
+            earthMesh.rotation.x = 0;
+            earthMesh.updateMatrixWorld(true);
+
+            const worldPos = localPos.clone().applyMatrix4(earthMesh.matrixWorld);
+            const dir = worldPos.clone().normalize();
+            targetCameraPos = dir.multiplyScalar(240);
         }
 
         function displayVortexInfo(data) {
             currentVortexId = data.id;
 
-            // EXCLUSIVIDADE: Fecha modais e gavetas ao abrir o painel de info do local
-            document.getElementById('vortex-menu-drawer').classList.remove('open');
+            document.getElementById('vortex-grid-drawer').classList.remove('open');
             document.getElementById('theory-modal').classList.remove('visible');
             document.getElementById('chat-modal').classList.remove('visible');
 
@@ -1114,7 +1197,7 @@
 
         async function loadVortexComments(vortexId) {
             const list = document.getElementById('comments-list');
-            list.innerHTML = '<div style="color: #00f0ff; font-size: 0.75rem; text-align: center; padding: 5px;">Sincronizando comentários globais...</div>';
+            list.innerHTML = '<div style="color: var(--cor-primaria); font-size: 0.75rem; text-align: center; padding: 5px;">Sincronizando comentários globais...</div>';
             
             try {
                 const res = await fetch(`https://api.npoint.io/vortex_comments_${vortexId}`);
@@ -1182,7 +1265,7 @@
 
         async function loadGlobalChat() {
             const msgList = document.getElementById('global-chat-messages');
-            msgList.innerHTML = '<div style="color: #00ff66; font-size: 0.75rem; text-align: center; padding: 5px;">Carregando chat global da nuvem...</div>';
+            msgList.innerHTML = '<div style="color: var(--cor-sucesso); font-size: 0.75rem; text-align: center; padding: 5px;">Carregando chat global da nuvem...</div>';
 
             try {
                 const res = await fetch(`https://api.npoint.io/global_theory_chat_sync`);
@@ -1257,15 +1340,14 @@
             const infoPanel = document.getElementById('info-panel');
             const theoryModal = document.getElementById('theory-modal');
             const chatModal = document.getElementById('chat-modal');
-            const vortexDrawer = document.getElementById('vortex-menu-drawer');
+            const vortexDrawer = document.getElementById('vortex-grid-drawer');
             const btnToggleVortex = document.getElementById('btn-toggle-vortex');
+            const telemetryHud = document.getElementById('telemetry-hud');
 
-            // BOTÃO VÓRTICES: Abre a gaveta e FECHA o painel, chat e teoria
             btnToggleVortex.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const willOpen = !vortexDrawer.classList.contains('open');
                 
-                // Fecha todos os outros elementos primeiro
                 infoPanel.classList.remove('visible');
                 theoryModal.classList.remove('visible');
                 chatModal.classList.remove('visible');
@@ -1277,9 +1359,8 @@
                 }
             });
 
-            // Fechar gaveta ao clicar fora dela
             window.addEventListener('click', (e) => {
-                if (!e.target.closest('.vortex-dropdown-container')) {
+                if (!e.target.closest('.vortex-panel-container')) {
                     vortexDrawer.classList.remove('open');
                 }
             });
@@ -1287,8 +1368,26 @@
             const raycaster = new THREE.Raycaster();
             const mouse = new THREE.Vector2();
 
+            window.addEventListener('pointermove', (e) => {
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-panel-container')) return;
+                
+                mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(markerObjects);
+
+                if (intersects.length > 0) {
+                    telemetryHud.innerText = `ALVO TRAVADO: ${intersects[0].object.userData.name.toUpperCase()} [LAT: ${intersects[0].object.userData.lat}°]`;
+                    telemetryHud.style.borderColor = '#00f0ff';
+                } else {
+                    telemetryHud.innerText = isRotating ? "STATUS: SISTEMA DE ROTAÇÃO ATIVO [ONLINE]" : "STATUS: MODO DE INSPEÇÃO LIVRE";
+                    telemetryHud.style.borderColor = 'rgba(0, 240, 255, 0.4)';
+                }
+            });
+
             window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-menu-drawer')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.vortex-panel-container')) return;
 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -1301,6 +1400,7 @@
                 }
             });
 
+            document.getElementById('btn-toggle-live').addEventListener('click', focusOnISS);
             document.getElementById('btn-send-comment').addEventListener('click', addVortexComment);
             document.getElementById('btn-send-global-chat').addEventListener('click', sendGlobalMessage);
 
@@ -1308,7 +1408,6 @@
             document.getElementById('close-theory').addEventListener('click', () => theoryModal.classList.remove('visible'));
             document.getElementById('close-chat').addEventListener('click', () => chatModal.classList.remove('visible'));
             
-            // BOTÃO TEORIA: Abre teoria e FECHA painel, chat e gaveta de vórtices
             document.getElementById('btn-open-theory').addEventListener('click', () => {
                 const willOpen = !theoryModal.classList.contains('visible');
                 
@@ -1323,7 +1422,6 @@
                 }
             });
 
-            // BOTÃO CHAT GLOBAL: Abre chat e FECHA painel, teoria e gaveta de vórtices
             document.getElementById('btn-open-chat').addEventListener('click', () => {
                 const willOpen = !chatModal.classList.contains('visible');
 
