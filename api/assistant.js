@@ -78,62 +78,84 @@ ${context}`
     }
   ];
 
-  const model = 'gemini-3.8-flash';
+  // Modelo principal + alternativas automáticas.
+  const models = [
+    'gemini-3.8-flash',
+    'gemini-3.6-flash',
+    'gemini-3.5-flash-lite'
+  ];
 
-  try {
-    const upstream = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: 'POST',
-        headers: {
-          'x-goog-api-key': apiKey,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: instructions }]
+  let lastError = null;
+  let lastStatus = 503;
+
+  for (const model of models) {
+    try {
+      const upstream = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: 'POST',
+          headers: {
+            'x-goog-api-key': apiKey,
+            'Content-Type': 'application/json'
           },
-          contents,
-          generationConfig: {
-            maxOutputTokens: 900,
-            temperature: 0.7
-          }
-        }),
-        signal: AbortSignal.timeout(30000)
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [{ text: instructions }]
+            },
+            contents,
+            generationConfig: {
+              maxOutputTokens: 900,
+              temperature: 0.7
+            }
+          }),
+          signal: AbortSignal.timeout(18000)
+        }
+      );
+
+      const data = await upstream.json().catch(() => ({}));
+
+      if (!upstream.ok) {
+        lastStatus = upstream.status;
+        lastError = data.error?.message || `Erro HTTP ${upstream.status}`;
+
+        // Se for sobrecarga, limite ou modelo indisponível,
+        // tenta automaticamente o próximo modelo.
+        if ([429, 503, 404].includes(upstream.status)) {
+          continue;
+        }
+
+        return res.status(502).json({
+          error: 'O Gemini recusou a solicitação: ' + lastError
+        });
       }
-    );
 
-    const data = await upstream.json().catch(() => ({}));
+      const answer = (data.candidates || [])
+        .flatMap(c => c.content?.parts || [])
+        .map(p => p.text || '')
+        .join('\n')
+        .trim();
 
-    if (!upstream.ok) {
-      return res.status(upstream.status === 429 ? 429 : 502).json({
-        error: data.error?.message ||
-          `Gemini respondeu HTTP ${upstream.status}.`
+      if (!answer) {
+        lastError = 'O modelo não retornou texto.';
+        continue;
+      }
+
+      return res.status(200).json({
+        ok: true,
+        answer: answer.slice(0, 12000),
+        model
       });
+
+    } catch (error) {
+      lastError = String(error.message || error);
+      lastStatus = 503;
+      continue;
     }
-
-    const answer = (data.candidates || [])
-      .flatMap(c => c.content?.parts || [])
-      .map(p => p.text || '')
-      .join('\n')
-      .trim();
-
-    if (!answer) {
-      return res.status(502).json({
-        error: 'O Gemini não retornou uma resposta em texto.'
-      });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      answer: answer.slice(0, 12000),
-      model
-    });
-
-  } catch (error) {
-    return res.status(502).json({
-      error: 'Não foi possível conectar ao assistente agora. ' +
-        String(error.message || error).slice(0, 160)
-    });
   }
+
+  return res.status(lastStatus === 429 ? 429 : 503).json({
+    error: 'O assistente está temporariamente indisponível. ' +
+      'Os modelos principais estão ocupados. Aguarde um pouco e tente novamente.',
+    details: String(lastError || '').slice(0, 180)
+  });
 };
