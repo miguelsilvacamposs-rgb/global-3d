@@ -134,8 +134,10 @@ ${context}`
             },
             contents,
             generationConfig: {
-              maxOutputTokens: 1000,
-              temperature: 0.8
+              maxOutputTokens: 700,
+  temperature: 0.8,
+  thinkingConfig: {
+    thinkingLevel: "LOW"
             }
           }),
           signal: AbortSignal.timeout(18000)
