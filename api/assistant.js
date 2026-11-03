@@ -137,7 +137,7 @@ ${context}`
               maxOutputTokens: 700,
   temperature: 0.8,
   thinkingConfig: {
-    thinkingLevel: "LOW"
+    thinkingLevel: "MINIMAL"
             }
           }),
           signal: AbortSignal.timeout(18000)
