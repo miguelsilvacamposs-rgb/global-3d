@@ -3466,8 +3466,14 @@
             input.value='';send.disabled=true;send.textContent='Analisando...';if(status)status.textContent=`Analisando ${v.name}`;
             try{
                 const response=await fetch('/api/assistant',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({question,context,history:investigationAiHistory.slice(0,-1)})});
-                const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||`Assistente indisponível (HTTP ${response.status})`);
-                const answer=String(data.answer||'A IA não retornou texto.');investigationAiHistory.push({role:'assistant',content:answer});investigationAiHistory=investigationAiHistory.slice(-8);
+                const data=await response.json().catch(()=>({}));console.log('RESPOSTA DA API:', data);if(!response.ok)throw new Error(data.error||`Assistente indisponível (HTTP ${response.status})`);
+                const rawAnswer = data.answer;
+
+const answer = typeof rawAnswer === 'string'
+    ? rawAnswer
+    : rawAnswer && typeof rawAnswer === 'object'
+        ? (rawAnswer.text || rawAnswer.answer || JSON.stringify(rawAnswer))
+        : 'A IA não retornou texto.';investigationAiHistory.push({role:'assistant',content:answer});investigationAiHistory=investigationAiHistory.slice(-8);
                 log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${answer}`);if(status)status.textContent='Resposta concluída';
             }catch(error){log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${error.message||'Erro de conexão.'}`);if(status)status.textContent='Falha na consulta';}
             finally{send.disabled=false;send.textContent='Enviar pergunta';log.scrollTop=log.scrollHeight;}
