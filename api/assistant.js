@@ -1,6 +1,32 @@
-
 // Vercel Function: /api/assistant
-// GEMINI_API_KEY deve ficar nas Environment Variables da Vercel.
+// Variáveis de ambiente necessárias na Vercel:
+// - GEMINI_API_KEY
+// - FIREBASE_PROJECT_ID
+// - FIREBASE_CLIENT_EMAIL
+// - FIREBASE_PRIVATE_KEY (ou GOOGLE_APPLICATION_CREDENTIALS / firebase-adminsdk json configurado)
+
+let admin = null;
+try {
+  admin = require('firebase-admin');
+  if (!admin.apps.length) {
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY 
+      ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') 
+      : undefined;
+
+    if (process.env.FIREBASE_PROJECT_ID && privateKey && process.env.FIREBASE_CLIENT_EMAIL) {
+      admin.initializeApp({
+        credential: admin.credential.cert({
+          projectId: process.env.FIREBASE_PROJECT_ID,
+          clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+          privateKey: privateKey
+        })
+      });
+    }
+  }
+} catch (e) {
+  // Firebase Admin opcional/não configurado inicialmente para não quebrar o chat caso o frontend ainda não envie token
+  console.warn('Firebase Admin não inicializado:', e.message);
+}
 
 function extractText(value) {
   if (typeof value === 'string') return value;
@@ -56,6 +82,66 @@ module.exports = async function handler(req, res) {
 
   const context = JSON.stringify(body.context || {}).slice(0, 14000);
 
+  // Validação opcional de Autenticação Firebase via Bearer Token no Header Authorization
+  let authenticatedUser = null;
+  const authHeader = req.headers.authorization || '';
+  if (authHeader.startsWith('Bearer ') && admin && admin.apps.length) {
+    const idToken = authHeader.split('Bearer ')[1];
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      authenticatedUser = {
+        uid: decodedToken.uid,
+        email: decodedToken.email || ''
+      };
+    } catch (err) {
+      console.warn('Falha ao verificar token do Firebase:', err.message);
+    }
+  }
+
+  let privateMemoriesText = '';
+  let sharedMemoriesText = '';
+
+  // Consulta ao Firestore se o Firebase Admin estiver ativo
+  if (admin && admin.apps.length) {
+    const db = admin.firestore();
+
+    // 1. Recuperação de Memória Privada (se o usuário estiver autenticado)
+    if (authenticatedUser) {
+      try {
+        const memSnapshot = await db
+          .collection('users')
+          .doc(authenticatedUser.uid)
+          .collection('memories')
+          .orderBy('updatedAt', 'desc')
+          .limit(5)
+          .get();
+
+        if (!memSnapshot.empty) {
+          const memoriesList = memSnapshot.docs.map(doc => `- [${doc.data().type || 'preferência'}]: ${doc.data().content}`);
+          privateMemoriesText = `\nMEMÓRIAS PRIVADAS DO USUÁRIO:\n${memoriesList.join('\n')}`;
+        }
+      } catch (err) {
+        console.error('Erro ao buscar memórias privadas:', err.message);
+      }
+    }
+
+    // 2. Recuperação de Memória Coletiva da Malha Oculta (Pública / Projetos)
+    try {
+      const sharedSnapshot = await db
+        .collection('assistant_shared_memory')
+        .orderBy('updatedAt', 'desc')
+        .limit(6)
+        .get();
+
+      if (!sharedSnapshot.empty) {
+        const sharedList = sharedSnapshot.docs.map(doc => `- [${doc.data().type || 'fato'}] (${doc.data().category || 'Geral'}): ${doc.data().content}`);
+        sharedMemoriesText = `\nMEMÓRIA COLETIVA DA MALHA OCULTA:\n${sharedList.join('\n')}`;
+      }
+    } catch (err) {
+      console.error('Erro ao buscar memória coletiva:', err.message);
+    }
+  }
+
   const history = Array.isArray(body.history)
     ? body.history.slice(-8).map(m => {
         const role = m?.role === 'assistant' || m?.role === 'model'
@@ -108,12 +194,17 @@ ESTILO:
 ${question}
 
 CONTEXTO ATUAL DO DOSSIÊ:
-${context}`
+${context}
+${privateMemoriesText}
+${sharedMemoriesText}`
       }]
     }
   ];
 
   const models = [
+    'gemini-2.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
     'gemini-3.8-flash',
     'gemini-3.6-flash',
     'gemini-3.5-flash'
@@ -122,8 +213,30 @@ ${context}`
   let lastError = 'Nenhum modelo conseguiu responder.';
   let lastStatus = 503;
 
+  // Ativação inteligente do Google Search Grounding se a pergunta parecer exigir dados externos recentes
+  const needsSearch = /(notícia|últimas|pesquise|busca|quanto foi|quem ganhou|site|link|recente|hoje|atual)/i.test(question);
+
   for (const model of models) {
     try {
+      const payload = {
+        systemInstruction: {
+          parts: [{ text: instructions }]
+        },
+        contents,
+        generationConfig: {
+          maxOutputTokens: 900,
+          temperature: 0.8,
+          thinkingConfig: {
+            thinkingLevel: 'LOW'
+          }
+        }
+      };
+
+      // Adiciona tools de Google Search Grounding se aplicável e compatível
+      if (needsSearch) {
+        payload.tools = [{ googleSearch: {} }];
+      }
+
       const upstream = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
@@ -132,19 +245,7 @@ ${context}`
             'x-goog-api-key': apiKey,
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [{ text: instructions }]
-            },
-            contents,
-            generationConfig: {
-              maxOutputTokens: 900,
-              temperature: 0.8,
-              thinkingConfig: {
-                thinkingLevel: 'LOW'
-              }
-            }
-          }),
+          body: JSON.stringify(payload),
           signal: AbortSignal.timeout(18000)
         }
       );
@@ -182,7 +283,23 @@ ${context}`
         continue;
       }
 
-      // Garante que answer seja SEMPRE uma string.
+      // Salva o histórico da conversa no Firestore de forma assíncrona (se autenticado)
+      if (admin && admin.apps.length && authenticatedUser) {
+        try {
+          const db = admin.firestore();
+          db.collection('users')
+            .doc(authenticatedUser.uid)
+            .collection('assistant_history')
+            .add({
+              question,
+              answer,
+              createdAt: admin.firestore.FieldValue.serverTimestamp()
+            })
+            .catch(() => {});
+        } catch {}
+      }
+
+      // Garante que answer seja SEMPRE uma string e preserva o contrato original de resposta
       return res.status(200).json({
         ok: true,
         answer: String(answer).slice(0, 12000),
