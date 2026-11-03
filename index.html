@@ -3471,9 +3471,27 @@
 
 const answer = typeof rawAnswer === 'string'
     ? rawAnswer
-    : rawAnswer && typeof rawAnswer === 'object'
-        ? (rawAnswer.text || rawAnswer.answer || JSON.stringify(rawAnswer))
-        : 'A IA não retornou texto.';investigationAiHistory.push({role:'assistant',content:answer});investigationAiHistory=investigationAiHistory.slice(-8);
+    : Array.isArray(rawAnswer)
+        ? rawAnswer.map(item =>
+            typeof item === 'string' ? item : item?.text || item?.answer || ''
+          ).filter(Boolean).join('\n')
+        : rawAnswer && typeof rawAnswer === 'object'
+            ? (typeof rawAnswer.text === 'string'
+                ? rawAnswer.text
+                : typeof rawAnswer.answer === 'string'
+                    ? rawAnswer.answer
+                    : '')
+            : '';
+
+if (!answer.trim()) {
+    throw new Error('A IA não retornou uma resposta válida em texto.');
+}
+
+investigationAiHistory.push({
+    role: 'assistant',
+    content: answer
+});
+investigationAiHistory = investigationAiHistory.slice(-8);
                 log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${answer}`);if(status)status.textContent='Resposta concluída';
             }catch(error){log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${error.message||'Erro de conexão.'}`);if(status)status.textContent='Falha na consulta';}
             finally{send.disabled=false;send.textContent='Enviar pergunta';log.scrollTop=log.scrollHeight;}
