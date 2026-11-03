@@ -31,8 +31,9 @@
         }
 
         html, body {
-            width: 100vw;
+            width: 100%;
             height: 100vh;
+            height: 100dvh;
             overflow: hidden;
             background-color: #000000;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -212,6 +213,13 @@
         .btn-risk-toggle:hover {
             background: rgba(255, 0, 85, 0.25);
             box-shadow: 0 0 15px rgba(255, 0, 85, 0.6);
+        }
+
+        .btn.tracking-active {
+            outline: 2px solid rgba(0, 240, 255, .9);
+            outline-offset: 2px;
+            box-shadow: 0 0 18px rgba(0, 240, 255, .45);
+            background: rgba(0, 100, 125, .35);
         }
 
         /* PROBLEMA 1 CORRIGIDO: GAVETA COM SCROLL TÁTIL NATIVO E FLUIDEZ */
@@ -1067,20 +1075,77 @@
             }
 
             .info-panel {
-                width: 92vw;
-                max-width: 340px;
-                height: auto;
-                max-height: 80vh;
+                position: fixed;
+                z-index: 60;
+                width: min(92vw, 420px);
+                max-width: calc(100vw - 20px);
+                height: min(82dvh, 760px);
+                max-height: calc(100dvh - 24px);
                 top: 50%;
                 left: 50%;
                 right: auto;
-                transform: translate(-50%, -50%) scale(0.9);
+                padding: 12px 12px 8px;
+                overflow: hidden;
+                transform: translate(-50%, -50%) scale(0.96);
                 border-radius: 14px;
+                box-sizing: border-box;
             }
 
             .info-panel.visible {
                 transform: translate(-50%, -50%) scale(1);
             }
+
+            .info-panel .panel-header {
+                position: relative;
+                z-index: 2;
+                flex: 0 0 auto;
+                align-items: center;
+                gap: 10px;
+                margin: 0;
+                padding: 4px 0 9px;
+                background: rgba(4, 8, 16, 0.98);
+            }
+
+            .info-panel .panel-header > div {
+                min-width: 0;
+                overflow-wrap: anywhere;
+            }
+
+            .info-panel .panel-header h2 {
+                overflow-wrap: anywhere;
+            }
+
+            .info-panel .panel-body {
+                min-height: 0;
+                flex: 1 1 auto;
+                overflow-x: hidden;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                touch-action: pan-y;
+                -webkit-overflow-scrolling: touch;
+                padding: 8px 2px 18px 0;
+            }
+
+            .info-panel .close-btn {
+                position: relative;
+                z-index: 5;
+                flex: 0 0 44px;
+                width: 44px;
+                height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(0, 240, 255, 0.28);
+                border-radius: 10px;
+                background: rgba(0, 240, 255, 0.08);
+                color: #ffffff;
+                font-size: 1.8rem;
+                line-height: 1;
+                touch-action: manipulation;
+            }
+
+            .info-panel .img-container { height: 112px; }
+            .info-panel .comments-list { max-height: 110px; }
 
             .chat-panel {
                 width: 100vw;
@@ -1110,12 +1175,447 @@
                 font-size: 0.7rem;
             }
         }
-    </style>
+
+        /* ARQUIVO DA TEORIA — componente isolado, sem reutilizar classes/IDs existentes */
+        .archive-launcher {
+            background: rgba(10, 25, 40, 0.96);
+            border: 1px solid rgba(190, 145, 255, 0.7);
+            color: #d8baff;
+            padding: 6px 10px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            font: 600 0.75rem inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 15px rgba(0,0,0,.45);
+            backdrop-filter: blur(10px);
+            white-space: nowrap;
+        }
+        .archive-launcher:hover {
+            background: rgba(150, 90, 220, .22);
+            box-shadow: 0 0 18px rgba(190,145,255,.3);
+        }
+        .archive-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(0, 3, 10, .78);
+            backdrop-filter: blur(12px);
+        }
+        .archive-overlay.open { display: flex; }
+        .archive-window {
+            width: min(100%, 1050px);
+            height: min(88vh, 850px);
+            max-height: 88vh;
+            display: grid;
+            grid-template-columns: 290px minmax(0, 1fr);
+            grid-template-rows: minmax(0, 1fr);
+            min-height: 0;
+            overflow: hidden;
+            border: 1px solid rgba(190,145,255,.45);
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(13,18,34,.98), rgba(5,10,20,.98));
+            box-shadow: 0 25px 80px rgba(0,0,0,.75), 0 0 35px rgba(155,100,230,.12);
+        }
+        .archive-sidebar {
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(190,145,255,.2);
+            background: rgba(8,13,27,.8);
+        }
+        .archive-brand {
+            padding: 20px 18px 14px;
+            border-bottom: 1px solid rgba(190,145,255,.18);
+        }
+        .archive-brand small {
+            color: #aa91ce;
+            letter-spacing: 2px;
+            font: 700 .62rem monospace;
+            text-transform: uppercase;
+        }
+        .archive-brand h2 {
+            margin-top: 7px;
+            color: #e5d5ff;
+            font-size: 1.15rem;
+        }
+        .archive-nav {
+            flex: 1 1 0%;
+            min-height: 0;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(185,145,235,.75) rgba(255,255,255,.06);
+            overscroll-behavior: contain;
+            touch-action: pan-y;
+            padding: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .archive-nav button {
+            display: block;
+            width: 100%;
+            margin: 3px 0;
+            padding: 10px 11px;
+            border: 1px solid transparent;
+            border-radius: 9px;
+            background: transparent;
+            color: #aebbd0;
+            text-align: left;
+            font: 500 .78rem/1.3 'Segoe UI', sans-serif;
+            cursor: pointer;
+        }
+        .archive-nav button:hover,
+        .archive-nav button.active {
+            color: #eadcff;
+            border-color: rgba(190,145,255,.35);
+            background: rgba(150,100,220,.14);
+        }
+        .archive-nav button span {
+            display: inline-block;
+            min-width: 25px;
+            color: #b994f0;
+            font: 700 .68rem monospace;
+        }
+        .archive-main {
+            min-width: 0;
+            min-height: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .archive-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 16px 22px;
+            border-bottom: 1px solid rgba(190,145,255,.18);
+        }
+        .archive-topline small {
+            color: #9e8ab8;
+            font: .65rem monospace;
+            letter-spacing: 1.5px;
+        }
+        .archive-close {
+            border: 0;
+            background: transparent;
+            color: #b9a9cc;
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        .archive-content {
+            flex: 1 1 0%;
+            height: 0;
+            min-width: 0;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: scroll;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(185,145,235,.8) rgba(255,255,255,.07);
+            overscroll-behavior: contain;
+            touch-action: pan-y;
+            padding: 22px 28px 30px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-gutter: stable;
+        }
+        .archive-content::-webkit-scrollbar,
+        .archive-nav::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+        .archive-content::-webkit-scrollbar-track,
+        .archive-nav::-webkit-scrollbar-track {
+            background: rgba(255,255,255,.06);
+            border-radius: 10px;
+        }
+        .archive-content::-webkit-scrollbar-thumb,
+        .archive-nav::-webkit-scrollbar-thumb {
+            background: rgba(185,145,235,.72);
+            border: 2px solid rgba(8,13,27,.85);
+            border-radius: 10px;
+        }
+        .archive-content::-webkit-scrollbar-thumb:hover,
+        .archive-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(210,180,255,.95);
+        }
+        .archive-disclaimer {
+            display: inline-block;
+            margin-bottom: 18px;
+            padding: 6px 10px;
+            border: 1px solid rgba(190,190,210,.12);
+            border-radius: 20px;
+            background: rgba(180,190,210,.045);
+            color: rgba(195,202,218,.48);
+            font-size: .68rem;
+            letter-spacing: .2px;
+        }
+        .archive-content h1 {
+            margin: 0 0 14px;
+            color: #e5d5ff;
+            font-size: clamp(1.35rem, 3vw, 2rem);
+            line-height: 1.2;
+        }
+        .archive-content h3 {
+            margin: 20px 0 8px;
+            color: #c9a7ff;
+            font-size: .9rem;
+        }
+        .archive-content p, .archive-content li {
+            color: #c2ccdc;
+            font-size: .88rem;
+            line-height: 1.72;
+        }
+        .archive-content p { margin: 0 0 12px; }
+        .archive-content ul { padding-left: 20px; margin: 0 0 14px; }
+        .archive-lead {
+            color: #e0d5f1 !important;
+            font-size: .96rem !important;
+        }
+        .archive-note {
+            margin-top: 18px;
+            padding: 12px 14px;
+            border-left: 2px solid #aa82e8;
+            border-radius: 0 8px 8px 0;
+            background: rgba(150,100,220,.09);
+            color: #c9b8e5;
+            font-size: .8rem;
+            line-height: 1.55;
+        }
+        @media (max-width: 1024px) {
+            .top-left-group {
+                flex-wrap: wrap;
+                align-items: flex-start;
+                row-gap: 6px;
+            }
+            .archive-launcher { flex: 0 0 auto; }
+            .archive-overlay { padding: 8px; }
+            .archive-window {
+                width: 100%;
+                height: min(90dvh, 760px);
+                max-height: 90dvh;
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: auto minmax(0, 1fr);
+                border-radius: 14px;
+            }
+            .archive-sidebar {
+                min-height: 0;
+                border-right: 0;
+                border-bottom: 1px solid rgba(190,145,255,.2);
+            }
+            .archive-main { min-height: 0; }
+            .archive-content { min-height: 0; height: 0; flex: 1 1 0%; overflow-y: scroll; }
+            .archive-brand { padding: 11px 14px 8px; }
+            .archive-brand h2 { font-size: .98rem; margin-top: 4px; }
+            .archive-nav {
+                display: flex;
+                gap: 6px;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 7px 10px 9px;
+                white-space: nowrap;
+            }
+            .archive-nav button {
+                flex: 0 0 auto;
+                width: auto;
+                margin: 0;
+                padding: 8px 10px;
+                font-size: .72rem;
+            }
+            .archive-nav button span { min-width: 20px; }
+            .archive-topline { padding: 9px 14px; }
+            .archive-content { padding: 14px 16px 24px; }
+            .archive-content p, .archive-content li { font-size: .84rem; }
+            .risk-drawer {
+                position: fixed;
+                top: max(142px, calc(env(safe-area-inset-top) + 132px));
+                left: max(8px, env(safe-area-inset-left));
+                right: max(8px, env(safe-area-inset-right));
+                width: auto;
+                max-width: none;
+                max-height: calc(100vh - 158px);
+                max-height: calc(100dvh - max(158px, calc(env(safe-area-inset-top) + 148px)) - env(safe-area-inset-bottom));
+                overflow-x: hidden;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                box-sizing: border-box;
+                padding: 10px;
+                border-radius: 12px;
+            }
+            .risk-drawer > div:first-child { position: sticky; top: -10px; z-index: 2; background: rgba(12,16,26,.98); padding: 4px 0 8px; }
+            .risk-drawer > div:nth-child(3) { width: 100%; max-height: none; overflow-x: auto; overflow-y: visible; }
+            .risk-drawer .risk-table { min-width: 460px; font-size: .68rem; }
+            .risk-drawer .risk-table th, .risk-drawer .risk-table td { padding: 7px 6px; }
+            .risk-drawer > div:first-child {
+                min-width: 0;
+                gap: 8px;
+                align-items: flex-start !important;
+                line-height: 1.35;
+                overflow-wrap: anywhere;
+            }
+            .risk-drawer > p {
+                line-height: 1.4;
+            }
+            .risk-drawer > div:nth-child(3) {
+                width: 100%;
+                max-width: 100%;
+                min-height: 0;
+                overflow-x: auto;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+            }
+            .risk-table { min-width: 390px; }
+        }
+        @media (max-width: 380px) {
+            .top-left-group { gap: 5px; }
+            .vortex-main-toggle, .btn-risk-toggle, .archive-launcher {
+                padding: 6px 8px;
+                font-size: .69rem;
+                height: 34px;
+            }
+            .archive-window { height: 91dvh; max-height: 91dvh; }
+            .archive-content { padding: 12px 13px 22px; }
+            .archive-disclaimer { font-size: .62rem; }
+        }
+
+
+
+        /* Laboratório: painel lateral consistente com os demais módulos e layout adaptável */
+        .lab-panel{left:16px;right:auto;top:88px;bottom:14px;width:min(650px,48vw);max-height:none;overflow:auto;display:none;flex-direction:column;gap:9px;background:#091522;border:1px solid #29465a;border-radius:13px;padding:13px;box-shadow:0 8px 22px rgba(0,0,0,.28);backdrop-filter:none;contain:layout paint;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#287e83 #071321}
+        .lab-panel.open{display:flex;animation:labPanelIn .14s ease-out both}@keyframes labPanelIn{from{opacity:.85;transform:translateX(-5px)}to{opacity:1;transform:translateX(0)}}.lab-header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:2px 38px 10px 2px;border-bottom:1px solid #36c8c444}.lab-header h3{color:#91e8dc;margin:0;font:800 .9rem system-ui,sans-serif;letter-spacing:.04em}.lab-header p{margin:5px 0 0;color:#a8b8c8;font-size:.7rem;line-height:1.5;max-width:48ch}.lab-panel *{animation:none!important;transition:none!important}.lab-live{white-space:nowrap;color:#8dffbd;border:1px solid #49d99b66;border-radius:20px;padding:6px 8px;font:800 .57rem monospace}.lab-actions{display:flex;align-items:end;flex-wrap:wrap;gap:8px}.lab-actions select,.lab-actions button,.lab-geometry-controls select,.lab-geometry-controls input{min-height:34px;border:1px solid #28566a;border-radius:7px;background:#091a27;color:#d8f4f1;padding:6px 9px;font:600 .67rem monospace}.lab-actions button{cursor:pointer;color:#75f5d6;border-color:#28a88e}.lab-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.lab-kpi{min-width:0;border:1px solid #263e50;border-radius:8px;background:#0e1d2b;padding:8px}.lab-kpi span,.lab-kpi small{display:block;color:#8baabd;font:700 .55rem monospace}.lab-kpi b{display:block;color:#73f2d7;font:900 1.2rem monospace;margin:5px 0;overflow-wrap:anywhere}.lab-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.lab-section{min-width:0;border:1px solid #263d50;border-radius:9px;background:#0b1926;padding:9px}.lab-section h4{color:#8cebdc;font:750 .66rem system-ui,sans-serif;letter-spacing:.04em;margin:0 0 8px}.lab-chart-wrap{width:100%;min-width:0;overflow:hidden}.lab-chart{display:block;width:100%;max-width:100%}.lab-table-wrap{overflow:auto;max-width:100%}.lab-table{border-collapse:collapse;width:100%;font-size:.61rem}.lab-table th,.lab-table td{padding:6px;border:1px solid #28465a;text-align:left;white-space:nowrap}.lab-table th{color:#8edfd2;background:#0e2636}.lab-table td{color:#c5d7e5}.lab-geometry-controls{display:flex;flex-wrap:wrap;gap:7px;margin:5px 0 9px}.lab-geometry-controls label{display:grid;gap:4px;color:#8eacbd;font:700 .55rem monospace}.lab-geometry-controls input{min-width:130px}.lab-geometry-controls button{min-height:34px;border:1px solid #287c70;border-radius:7px;background:#12352f;color:#9cf3d9;padding:6px 10px;font:700 .65rem system-ui;cursor:pointer}.lab-findings{display:grid;gap:6px}.lab-finding{border:1px solid #28536a;border-left:3px solid #4bd9c0;border-radius:7px;background:#0b1b2a;padding:8px;color:#c9dce9;font-size:.66rem;line-height:1.45}.lab-finding strong{color:#8ff4df}.lab-muted,.lab-note{color:#819bb0;font-size:.59rem;line-height:1.45}.lab-health{display:grid;gap:5px}.lab-health-item{display:grid;grid-template-columns:1fr auto;gap:4px 8px;border:1px solid #29465a;border-radius:6px;padding:7px;font-size:.6rem;color:#9fb6c9}.lab-health-item.ok{border-left:3px solid #48d89a}.lab-health-item.warn{border-left:3px solid #f4b34f}.lab-health-item.bad{border-left:3px solid #e36b6b}.lab-health-item b{color:#e1eff8}.lab-health-item span:nth-child(2){text-align:right}.lab-note{border-top:1px solid #ffffff18;padding-top:8px}.investigation-firms-config{display:flex;align-items:end;flex-wrap:wrap;gap:7px;padding:8px;border:1px solid #654528;border-radius:7px;background:#20160f}.investigation-firms-config label{display:grid;gap:4px;color:#e6b987;font:700 .58rem monospace;flex:1;min-width:180px}.investigation-firms-config input{min-width:0;width:100%;background:#100e0c;border:1px solid #81562f;border-radius:6px;padding:7px;color:#fff}.investigation-firms-config button{background:#402613;border:1px solid #b77737;border-radius:6px;color:#ffe0b8;padding:8px;font-size:.62rem;cursor:pointer}.investigation-firms-config a{color:#ffd18a;font-size:.62rem}.investigation-firms-config small{width:100%;color:#bd9c7d;font-size:.55rem}
+        @media(max-width:1024px){.lab-panel{left:10px;right:auto;top:72px;bottom:12px;width:min(620px,calc(100vw - 20px));max-height:none}.lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+        @media(max-width:640px){.lab-panel{left:6px;right:6px;top:58px;bottom:calc(6px + env(safe-area-inset-bottom));width:auto;max-height:none;padding:10px;border-radius:11px}.lab-columns{grid-template-columns:1fr}.lab-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.lab-header{display:block}.lab-live{display:inline-block;margin-top:7px}.lab-actions{align-items:stretch}.lab-actions label,.lab-actions button{width:100%}.lab-geometry-controls{display:grid;grid-template-columns:1fr 1fr}.lab-geometry-controls input{grid-column:1/-1;width:100%}.investigation-firms-config{align-items:stretch}.investigation-firms-config button{width:100%}}
+
+        /* CENTRAL DE INVESTIGAÇÃO / MÓDULOS */
+        .feature-hub { position:fixed; right:16px; top:76px; z-index:35; }
+        .feature-hub-trigger { border:1px solid var(--borda-neon); background:rgba(5,15,28,.94); color:var(--cor-primaria); border-radius:11px; padding:10px 13px; font-weight:800; cursor:pointer; box-shadow:0 0 18px rgba(0,240,255,.18); backdrop-filter:blur(12px); }
+        .feature-hub-drawer { display:none; position:absolute; right:0; top:calc(100% + 8px); width:min(310px, calc(100vw - 24px)); max-height:min(72dvh,560px); overflow:auto; padding:12px; border:1px solid rgba(0,240,255,.45); border-radius:14px; background:rgba(5,10,22,.97); box-shadow:0 18px 48px #000c; backdrop-filter:blur(18px); }
+        .feature-hub-drawer.open { display:grid; gap:8px; }
+        .feature-hub-title { color:#b9a0ed; font-size:.72rem; letter-spacing:.16em; font-weight:800; padding:2px 3px 7px; border-bottom:1px solid #a77bdf44; }
+        .performance-control{display:grid;gap:7px;padding:9px;border:1px solid #34445a;border-radius:9px;background:#0b1524;color:#9fb2c9;font:700 .61rem monospace}
+        .performance-control>div{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+        .quality-choice{min-height:34px;border:1px solid #34445a;border-radius:7px;background:#111e30;color:#c8d5e5;font:700 .68rem system-ui;cursor:pointer}
+        .quality-choice.active{border-color:#48d6bd;background:#12352f;color:#9effe7}
+        .performance-control small{font:500 .62rem/1.4 system-ui;color:#8499b1}
+        .feature-toggle { display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%; padding:10px 11px; border:1px solid #31425a; border-radius:9px; background:#101a2b; color:#dce8f7; font:600 .78rem inherit; text-align:left; cursor:pointer; }
+        .feature-toggle .state { color:#8593a8; font-size:.65rem; letter-spacing:.08em; }
+        .feature-toggle.active { border-color:var(--cor-sucesso); background:rgba(0,255,102,.10); box-shadow:inset 3px 0 var(--cor-sucesso); }
+        .feature-toggle.active .state { color:var(--cor-sucesso); }
+        .feature-panel { display:none; position:fixed; z-index:34; right:16px; top:132px; width:min(390px,calc(100vw - 24px)); max-height:min(65dvh,520px); overflow:auto; padding:14px; border:1px solid rgba(0,240,255,.45); border-radius:14px; background:rgba(5,10,22,.96); box-shadow:0 18px 48px #000c; backdrop-filter:blur(18px); color:#dce8f7; }
+        .feature-panel.open { display:block; }
+        .feature-panel h3 { color:var(--cor-primaria); font-size:.95rem; margin:0 34px 10px 0; }
+        .feature-panel p,.feature-panel li { font-size:.76rem; line-height:1.5; color:#bdc9d9; }
+        .feature-panel ul { padding-left:18px; }
+        .feature-panel-close { position:absolute; right:9px; top:8px; width:32px; height:32px; border:1px solid #789; border-radius:8px; background:#172236; color:#fff; font-size:1.2rem; cursor:pointer; }
+        .feature-stat { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-bottom:1px solid #ffffff16; font-size:.75rem; }
+        .feature-stat b { color:#5cecff; }
+        .radar-panel { width:min(760px,calc(100vw - 32px)); max-height:min(78dvh,720px); padding:16px; border-color:rgba(0,240,255,.62); background:linear-gradient(145deg,rgba(4,13,25,.98),rgba(3,7,17,.98)); }
+        .radar-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:2px 38px 12px 2px; border-bottom:1px solid #00eaff38; }
+        .radar-kicker { color:#8c9eb8; font:700 .58rem monospace; letter-spacing:.18em; margin-bottom:5px; }
+        .radar-head h3 { margin:0; color:#65f7dc; font:900 1.05rem monospace; letter-spacing:.12em; }
+        .radar-live-pill { color:#7dffc0; font:800 .62rem monospace; letter-spacing:.1em; border:1px solid #00ff8866; border-radius:30px; padding:6px 9px; white-space:nowrap; }
+        .radar-live-pill i { display:inline-block; width:7px; height:7px; border-radius:50%; background:#00ff88; box-shadow:0 0 10px #00ff88; margin-right:5px; animation:radarPulse 1.3s infinite; }
+        @keyframes radarPulse { 50% { opacity:.25; } }
+        .radar-layout { display:grid; grid-template-columns:minmax(220px,1.05fr) minmax(220px,.95fr); gap:14px; padding-top:12px; }
+        .radar-scope-wrap { min-width:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+        #radar-scope { display:block; width:min(100%,390px); height:auto; aspect-ratio:1; filter:drop-shadow(0 0 12px #00eaff20); }
+        .radar-scope-caption { color:#68849b; font:700 .55rem monospace; letter-spacing:.12em; text-align:center; margin-top:4px; }
+        .radar-side { min-width:0; max-height:480px; overflow:auto; scrollbar-width:thin; scrollbar-color:#1c9b9b #081321; }
+        .radar-feed-title { color:#63e9d2; font:800 .64rem monospace; letter-spacing:.12em; margin:12px 0 6px; padding-bottom:5px; border-bottom:1px solid #00eaff25; }
+        .radar-feed-list,.radar-neo-list { display:grid; gap:6px; }
+        .radar-feed-item,.radar-neo-item { border:1px solid #25465a; border-left:3px solid #ffb43b; background:#091625; border-radius:7px; padding:7px 8px; color:#c8d9e8; font-size:.68rem; line-height:1.4; }
+        .radar-feed-item strong,.radar-neo-item strong { color:#fff; }
+        .radar-feed-item small,.radar-neo-item small { color:#829bb0; display:block; margin-top:2px; }
+        .radar-empty { color:#8194a8; font-size:.7rem; padding:8px; }
+        .track-card{border:1px solid #24566a;border-left:3px solid #55baff;background:linear-gradient(120deg,#071725,#091321);border-radius:8px;padding:8px 9px;color:#cfe5f5;font:600 .66rem/1.5 monospace;margin-bottom:6px;overflow-wrap:anywhere}
+        .track-card strong{color:#78f5df;font-size:.72rem}.track-card small{display:block;color:#8ca8bc;font-size:.59rem;margin-top:3px}.track-card .track-coord{color:#f0d28b}
+        .track-card.asteroid{border-left-color:#ffb44c}.track-card.asteroid strong{color:#ffd18a}
+
+        .radar-foot { display:flex; flex-wrap:wrap; gap:8px 16px; padding-top:10px; margin-top:10px; border-top:1px solid #00eaff25; color:#7e9aaf; font:600 .58rem monospace; }
+        .radar-foot span::before { content:'●'; color:#00eaff; margin-right:5px; }
+        @media(max-width:640px) {
+          .radar-panel { left:8px; right:8px; bottom:calc(12px + env(safe-area-inset-bottom)); top:auto; width:auto; max-height:calc(100dvh - 24px - env(safe-area-inset-top)); padding:12px; overflow:auto; }
+          .radar-layout { grid-template-columns:1fr; gap:8px; }
+          #radar-scope { width:min(72vw,260px); }
+          .radar-side { max-height:30dvh; }
+          .radar-head h3 { font-size:.88rem; }
+          .radar-kicker { font-size:.5rem; }
+          .radar-foot { font-size:.52rem; }
+        }
+
+        .radar-controls{display:flex;flex-wrap:wrap;align-items:end;gap:8px;padding:11px 0 2px}.radar-controls label{display:grid;gap:4px;color:#8eacbd;font:700 .58rem monospace;letter-spacing:.08em}.radar-controls select,.radar-controls button{min-height:34px;border:1px solid #28566a;border-radius:7px;background:#091a27;color:#d8f4f1;padding:6px 9px;font:600 .68rem monospace}.radar-controls button{cursor:pointer;color:#75f5d6;border-color:#28a88e}.radar-controls button:hover{background:#12372f}.radar-panel{display:none;flex-direction:column}.radar-panel.open{display:flex}.radar-layout{min-height:0;flex:1}.radar-side{max-height:min(58dvh,560px)}
+        .timeline-panel{width:min(680px,calc(100vw - 28px));max-height:min(78dvh,760px);padding:17px;background:linear-gradient(150deg,rgba(7,20,32,.98),rgba(8,11,22,.98));border-color:#5b78a2;display:none;flex-direction:column;gap:10px}.timeline-panel.open{display:flex;animation:timelineReveal .38s ease-out both}@keyframes timelineReveal{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}.timeline-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;padding:2px 34px 10px 2px;border-bottom:1px solid #6c8ab044}.timeline-head h3{margin:0;color:#b9d7ff;font:900 1rem monospace;letter-spacing:.1em}.timeline-head p{margin:6px 0 0;color:#91a9c2;font-size:.7rem}.timeline-live{white-space:nowrap;color:#82ffc5;font:800 .6rem monospace;border:1px solid #45d99b55;border-radius:20px;padding:6px 8px}.timeline-toolbar{display:flex;gap:8px}.timeline-toolbar input,.timeline-toolbar select{min-width:0;flex:1;background:#0b1929;border:1px solid #344d6b;border-radius:7px;color:#e3efff;padding:9px;font:600 .7rem monospace}.timeline-summary{color:#8fa9c3;font:600 .62rem monospace}.timeline-list{overflow:auto;min-height:0;max-height:55dvh;padding:2px 6px 2px 2px;display:grid;gap:8px;scrollbar-width:thin;scrollbar-color:#52749a #0b1929}.timeline-entry{position:relative;border:1px solid #2c4664;border-left:3px solid #62c6ff;border-radius:8px;background:linear-gradient(110deg,#102137,#0a1423);padding:10px 12px 10px 14px;color:#d6e6f7}.timeline-entry.quake{border-left-color:#ffb85c}.timeline-entry .timeline-date{color:#86a6c8;font:700 .6rem monospace;letter-spacing:.04em}.timeline-entry strong{display:block;color:#f3f7ff;font-size:.76rem;margin:4px 0}.timeline-entry p{margin:0;color:#a9bdd2;font-size:.68rem;line-height:1.45}.timeline-entry .timeline-tag{display:inline-block;margin-top:6px;color:#8debd9;font:700 .56rem monospace;border:1px solid #347b7655;border-radius:20px;padding:3px 7px}.timeline-empty{padding:18px;text-align:center;color:#90a7be;border:1px dashed #38516c;border-radius:8px;font-size:.72rem}
+        @media(max-width:640px){.timeline-panel{left:8px;right:8px;bottom:calc(12px + env(safe-area-inset-bottom));top:auto;width:auto;max-height:calc(100dvh - 24px - env(safe-area-inset-top));}.timeline-list{max-height:42dvh}.timeline-head h3{font-size:.85rem}.timeline-toolbar{flex-direction:column}.radar-controls label{flex:1}.radar-controls select{width:100%}}
+
+                .investigation-panel{left:auto;right:18px;top:104px;bottom:18px;transform:none;width:min(510px,40vw);max-height:none;overflow:hidden;padding:16px;background:linear-gradient(155deg,rgba(39,23,13,.98),rgba(20,13,9,.98));border:1px solid rgba(255,145,54,.72);box-shadow:0 0 38px #ff8a2526,inset 0 0 28px #ff9b270d;display:none;flex-direction:column;z-index:120;}
+        .investigation-panel.open{display:flex;animation:investigationFadeIn .48s cubic-bezier(.2,.75,.25,1) both}.investigation-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:4px 34px 12px 2px;border-bottom:1px solid #ff9b3545;flex:0 0 auto}.investigation-head h3{color:#fff0dc;letter-spacing:.12em;margin:5px 0}.investigation-head p{color:#d2a77e;font-size:.72rem}.investigation-live{white-space:nowrap;color:#b9ff45;font:800 .65rem monospace;border:1px solid #b9ff4555;border-radius:20px;padding:7px 10px}.investigation-summary{display:flex;flex-wrap:wrap;gap:6px;padding:10px 0;flex:0 0 auto}.investigation-summary span{border:1px solid #754322;background:#24160f;padding:6px 8px;border-radius:7px;color:#f0c59a;font:600 .62rem monospace}.investigation-summary b{color:#b9ff45;margin-left:4px}.investigation-workspace{display:grid;grid-template-columns:132px minmax(0,1fr);gap:10px;min-height:0;flex:1}.investigation-place-list{overflow:auto;min-height:0;display:flex;flex-direction:column;gap:5px;padding-right:3px;scrollbar-width:thin;scrollbar-color:#a65d24 #24160f}.investigation-place{width:100%;text-align:left;border:1px solid #674025;border-radius:7px;background:#24160f;color:#f0c59a;padding:8px 7px;font:700 .63rem/1.35 monospace;cursor:pointer}.investigation-place.active{border-color:#ff9b35;background:#4a2814;color:#fff0dc;box-shadow:inset 3px 0 #ff9b35,0 0 12px #ff9b3520}.investigation-detail{overflow:auto;min-width:0;min-height:0;padding-right:4px;scrollbar-width:thin;scrollbar-color:#a65d24 #24160f}.investigation-detail h4{font:800 .82rem monospace;color:#fff0dc;margin:2px 0 4px}.investigation-detail .vortex-region{color:#c69b76;font-size:.64rem;margin-bottom:9px}.investigation-table{width:100%;border-collapse:collapse;font-size:.67rem;line-height:1.45}.investigation-table th,.investigation-table td{border:1px solid #674025;padding:7px 8px;text-align:left;vertical-align:top;overflow-wrap:anywhere}.investigation-table th{width:31%;background:#3a2112;color:#ffb66b;font:700 .61rem monospace;letter-spacing:.04em}.investigation-table td{color:#f1d9c2;background:#24160f}.investigation-table a{color:#ffd18a}.investigation-events{margin-top:10px}.investigation-events h5{font:800 .65rem monospace;color:#ffad57;letter-spacing:.08em;margin:10px 0 5px}.vortex-event{border:1px solid #59351f;border-left:2px solid #ff9b35;border-radius:6px;padding:7px;margin:5px 0;color:#f1d9c2;font-size:.66rem;line-height:1.4;overflow-wrap:anywhere}.vortex-event small{display:block;color:#c49b78;margin-top:3px}.vortex-event.news{border-left-color:#ffc34d}.vortex-no-event{color:#d0b092;font-size:.66rem;padding:7px;border:1px dashed #29485b;border-radius:6px}.investigation-source-note{color:#718da1;font-size:.58rem;line-height:1.45;margin-top:9px;border-top:1px solid #ff9b3535;padding-top:8px;flex:0 0 auto}
+        .investigation-mode{background:radial-gradient(ellipse at 50% 48%,#202124 0%,#090a0b 66%,#000 100%)}.investigation-mode .holographic-scanlines{opacity:.18;background-size:100% 3px,4px 100%;}.investigation-mode #canvas-container{filter:contrast(1.14) brightness(.78);}.investigation-mode .ui-top-bar{background:linear-gradient(to bottom,rgba(8,8,9,.97),rgba(8,8,9,.25));border-bottom:1px solid #ff9b3530}.investigation-mode .live-earth-panel,.investigation-mode .telemetry-hud{opacity:.22;filter:saturate(.25)}.investigation-mode .feature-hub-trigger{border-color:#ff9b35;background:rgba(28,17,10,.98);box-shadow:0 0 24px #ff9b3540}.investigation-mode #canvas-container:after{content:"MALHA OCULTA // VARREDURA GLOBAL DE AMEAÇAS";position:absolute;left:18px;bottom:18px;color:#ffad5788;font:700 10px monospace;letter-spacing:.2em;pointer-events:none}.investigation-mode .investigation-panel{background:linear-gradient(155deg,rgba(39,23,13,.98),rgba(20,13,9,.98));}
+        @keyframes investigationFadeIn{from{opacity:0;transform:translateX(-22px);filter:blur(3px)}to{opacity:1;transform:translateX(0);filter:blur(0)}}
+        @media(min-width:1025px){.investigation-panel.open{left:18px;right:auto;top:104px;bottom:18px;width:min(510px,39vw);max-height:none}.investigation-mode #canvas-container{width:100%;}}
+        @media(max-width:1024px){.investigation-panel{left:10px;right:10px;top:auto;bottom:140px;width:auto;max-height:55dvh;padding:12px}.investigation-workspace{grid-template-columns:105px minmax(0,1fr);gap:7px}.investigation-place{font-size:.58rem;padding:7px 5px}.investigation-table th,.investigation-table td{padding:6px;font-size:.61rem}}
+        @media(max-width:640px){.investigation-panel{left:8px;right:8px;top:62px;bottom:calc(8px + env(safe-area-inset-bottom));width:auto;max-height:none;padding:13px}.investigation-head{display:block}.investigation-live{display:inline-block;margin-top:8px}.investigation-head h3{font-size:.9rem}.investigation-summary span{font-size:.57rem;padding:6px}.investigation-workspace{grid-template-columns:92px minmax(0,1fr)}.investigation-source-note{font-size:.54rem}}
+
+
+        .investigation-hazard-legend{display:flex;flex-wrap:wrap;gap:6px;margin:5px 0 8px;font:600 .57rem monospace;color:#f3c59b}.investigation-hazard-legend span{padding:4px 6px;border:1px solid #754322;border-radius:5px;background:#24160f}.investigation-hazard-legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:4px}.investigation-hazard-marker{cursor:pointer}
+        .mobile-more-trigger,.mobile-more-drawer { display:none; }
+        .connection-line { pointer-events:none; }
+        @media(max-width:1024px) {
+          .feature-hub { top:auto; right:10px; bottom:86px; }
+          .feature-hub-trigger { width:44px; height:44px; padding:0; border-radius:50%; font-size:1.05rem; }
+          .feature-hub-drawer { bottom:52px; top:auto; right:0; max-height:62dvh; }
+          .feature-panel { top:auto; bottom:140px; left:10px; right:10px; width:auto; max-height:55dvh; padding:12px; }
+          .mobile-more-trigger { display:inline-flex; }
+          .mobile-more-drawer { display:none; position:absolute; right:0; top:calc(100% + 7px); width:190px; padding:9px; gap:7px; border:1px solid var(--borda-neon); border-radius:12px; background:rgba(5,12,24,.97); box-shadow:0 12px 30px #000c; }
+          .mobile-more-drawer.open { display:flex; flex-direction:column; }
+          .mobile-more-drawer .btn { width:100%; height:38px; justify-content:flex-start; }
+          .controls-bar { position:relative; }
+          .controls-bar .btn.mobile-overflow-item { display:none; }
+          .mobile-more-drawer .btn.mobile-overflow-item { display:inline-flex; }
+          .top-left-group { max-width:calc(100vw - 16px); }
+        }
+        @media(max-width:420px) {
+          .ui-top-bar { padding:8px; }
+          .controls-bar { gap:5px; justify-content:flex-start; }
+          .btn { width:35px; height:35px; }
+          .top-left-group { top:52px; }
+          .feature-hub { bottom:78px; }
+        }
+
+    
+        /* Ajustes finais do painel de investigação após as regras gerais dos módulos */
+        @media(min-width:1025px){.feature-panel.investigation-panel.open{left:18px;right:auto;top:104px;bottom:18px;width:min(510px,39vw);max-height:none}}
+        @media(max-width:1024px){.feature-panel.investigation-panel.open{display:flex;top:auto;bottom:140px;left:10px;right:10px;width:auto;max-height:55dvh;overflow:hidden}}
+        @media(max-width:640px){.feature-panel.investigation-panel.open{top:62px;bottom:calc(8px + env(safe-area-inset-bottom));left:8px;right:8px;max-height:none;padding:13px}.investigation-workspace{grid-template-columns:92px minmax(0,1fr)}}
+
+        /* Assistente interno da investigação: leve, sem bibliotecas adicionais */
+        .firms-server-status{display:grid;gap:4px;flex:1;min-width:180px}.firms-server-status b{color:#ffd18a;font:800 .62rem monospace}.firms-server-status small{color:#bd9c7d;font-size:.57rem;line-height:1.4}
+        .investigation-ai{margin-top:10px;border:1px solid #3b5b50;border-radius:9px;background:#101b19;padding:10px;display:grid;gap:8px;}
+        .investigation-ai-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+        .investigation-ai-head strong{color:#b8f3d0;font:800 .68rem system-ui;letter-spacing:.06em}
+        .investigation-ai-head small{color:#94ad9e;font-size:.57rem}
+        .investigation-ai-log{min-height:76px;max-height:220px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;background:#09120f;border:1px solid #294338;border-radius:7px;padding:9px;color:#d9e8df;font: .68rem/1.5 system-ui;}
+        .investigation-ai-compose{display:flex;gap:7px;align-items:stretch}
+        .investigation-ai-compose textarea{flex:1;min-width:0;min-height:42px;max-height:100px;resize:vertical;background:#0a1511;border:1px solid #3b6553;border-radius:7px;color:#eef8f0;padding:8px;font: .68rem/1.4 system-ui}
+        .investigation-ai-compose button,.investigation-ai-clear{border:1px solid #4b9c72;border-radius:7px;background:#173b2b;color:#c9f8d9;padding:8px 11px;font:700 .64rem system-ui;cursor:pointer}
+        .investigation-ai-compose button:disabled{opacity:.5;cursor:wait}
+        .investigation-ai-foot{color:#80988b;font-size:.55rem;line-height:1.4}
+        @media(max-width:640px){.investigation-ai{padding:8px}.investigation-ai-compose{flex-direction:column}.investigation-ai-compose button{width:100%;min-height:38px}.investigation-ai-log{max-height:180px}}
+</style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/satellite.js@6.0.1/dist/satellite.min.js"></script>
 </head>
-<body>
+<body class="investigation-mode">
     <div class="holographic-scanlines"></div>
 
     <!-- GRUPO SUPERIOR ESQUERDO REORGANIZADO PARA EVITAR CONFLITO -->
@@ -1134,6 +1634,7 @@
             <div class="risk-drawer" id="risk-drawer">
                 <div style="font-size:0.78rem; font-weight:bold; color:var(--cor-alerta); border-bottom:1px solid rgba(255,0,85,0.3); padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
                     <span>🚨 Avisos de Riscos Críticos & Alertas Globais</span>
+                    <button type="button" id="close-risk" aria-label="Fechar avisos" style="flex:0 0 32px;width:32px;height:32px;border:1px solid rgba(255,0,85,.45);border-radius:8px;background:rgba(255,0,85,.12);color:#ff6b91;font-size:1.15rem;line-height:1;cursor:pointer;">×</button>
                 </div>
                 <p style="font-size: 0.7rem; color: #b0c4de;">Monitoramento em tempo real de NEOs, reajustes sísmicos e perturbações:</p>
                 <div style="max-height: 180px; overflow-y: auto; -webkit-overflow-scrolling: touch;">
@@ -1155,6 +1656,9 @@
                 </div>
             </div>
         </div>
+        <button class="archive-launcher" id="btn-open-archive" type="button" title="Abrir arquivo completo da teoria">
+            <span>✧</span><span>Arquivo da Teoria</span>
+        </button>
     </div>
 
     <div class="ui-top-bar">
@@ -1195,20 +1699,66 @@
                 <span class="btn-icon">🌐</span>
                 <span class="btn-text">Girar</span>
             </button>
+            <button class="btn mobile-more-trigger" id="btn-mobile-more" title="Mais ferramentas" aria-expanded="false">⋮</button>
+            <div class="mobile-more-drawer" id="mobile-more-drawer" aria-label="Mais ferramentas"></div>
         </div>
     </div>
+
+    <div class="feature-hub" id="feature-hub">
+      <button class="feature-hub-trigger" id="btn-feature-hub" aria-expanded="false" title="Central de investigação">⌘ <span class="desktop-hub-label">MÓDULOS</span></button>
+      <div class="feature-hub-drawer" id="feature-hub-drawer">
+        <div class="feature-hub-title">CENTRAL DE INVESTIGAÇÃO · CONTROLES AO VIVO</div>
+        <div class="performance-control" role="group" aria-label="Qualidade gráfica">
+          <span>QUALIDADE GRÁFICA</span>
+          <div><button type="button" id="btn-performance" class="quality-choice active" aria-pressed="true">Desempenho</button><button type="button" id="btn-complete" class="quality-choice" aria-pressed="false">Completo</button></div>
+          <small id="quality-description">Resolução e animações reduzidas para computadores mais modestos.</small>
+        </div>
+        <button class="feature-toggle" data-feature="connections"><span>🔺 Sistema de conexões</span><span class="state">OFF</span></button>
+        <button class="feature-toggle" data-feature="radar" aria-pressed="false"><span>📡 Radar de anomalias</span><span class="state">OFF</span></button>
+        <button class="feature-toggle" data-feature="timeline"><span>🕒 Linha do tempo</span><span class="state">OFF</span></button>
+        <button class="feature-toggle" data-feature="mode"><span>🧭 Modo investigação</span><span class="state">OFF</span></button>
+        <button class="feature-toggle" data-feature="lab"><span>📊 Laboratório de padrões</span><span class="state">OFF</span></button>
+      </div>
+    </div>
+    <section class="feature-panel radar-panel" id="radar-panel" aria-live="polite" aria-hidden="true">
+      <button class="feature-panel-close" data-close-feature="radar" aria-label="Fechar radar">×</button>
+      <div class="radar-head"><div><div class="radar-kicker">MALHA OCULTA // MONITORAMENTO GLOBAL</div><h3>◉ RADAR DE EVENTOS</h3></div><div class="radar-live-pill"><i></i> LIVE FEEDS</div></div>
+      <div class="radar-controls"><label>Janela <select id="radar-time-filter"><option value="24">Últimas 24 horas</option><option value="6">Últimas 6 horas</option><option value="72">Últimas 72 horas</option><option value="168">Últimos 7 dias</option></select></label><label>Magnitude mínima <select id="radar-mag-filter"><option value="0">Todas</option><option value="2.5">M 2.5+</option><option value="4">M 4.0+</option><option value="5">M 5.0+</option><option value="6">M 6.0+</option></select></label><button id="radar-refresh-now" type="button">↻ Atualizar dados</button></div>
+      <div class="radar-layout"><div class="radar-scope-wrap"><canvas id="radar-scope" width="520" height="520" aria-label="Radar cartográfico global"></canvas><div class="radar-scope-caption">MAPA GLOBAL • USGS + GDACS + POSIÇÃO ISS</div><div class="radar-scope-caption">● SISMOS  ▲ ALERTAS GDACS  ● ISS • Asteroides permanecem em painel orbital, pois não são posições sobre a superfície terrestre.</div></div><div class="radar-side"><div id="radar-live-content"></div><div class="radar-feed-title">SATÉLITES RASTREADOS • POSIÇÃO PROPAGADA</div><div id="radar-satellite-list" class="radar-feed-list"><div class="radar-empty">Carregando elementos orbitais CelesTrak...</div></div><div class="radar-feed-title">ASTEROIDES • VETORES GEOCÊNTRICOS JPL</div><div id="radar-asteroid-track-list" class="radar-neo-list"><div class="radar-empty">Calculando efemérides...</div></div><div class="radar-feed-title">ÚLTIMOS REGISTROS</div><div id="radar-feed-list" class="radar-feed-list">Aguardando feeds...</div><div class="radar-feed-title">APROXIMAÇÕES NEO • NASA</div><div id="radar-neo-list" class="radar-neo-list">Sincronizando catálogo...</div></div></div>
+      <div class="radar-foot"><span id="radar-usgs-source">USGS: aguardando</span><span id="radar-nasa-source">NASA: aguardando</span><span id="radar-iss-source">ISS: aguardando</span></div>
+    </section>
+    <section class="feature-panel timeline-panel" id="timeline-panel" aria-live="polite"><button class="feature-panel-close" data-close-feature="timeline" aria-label="Fechar linha do tempo">×</button><div class="timeline-head"><div><div class="radar-kicker">MALHA OCULTA // HISTÓRICO DE EVENTOS</div><h3>🕒 LINHA DO TEMPO</h3><p>Registros organizados do mais recente para o mais antigo.</p></div><span class="timeline-live">● SINCRONIZAÇÃO</span></div><div class="timeline-toolbar"><input id="timeline-search" type="search" placeholder="Buscar local ou evento..." aria-label="Buscar na linha do tempo"><select id="timeline-type"><option value="all">Todos os registros</option><option value="quake">Abalos sísmicos</option><option value="point">12 pontos da Malha</option></select></div><div class="timeline-summary" id="timeline-summary"></div><div id="timeline-live-content" class="timeline-list"></div></section>
+    <section class="feature-panel lab-panel" id="lab-panel" aria-live="polite" aria-hidden="true">
+      <button class="feature-panel-close" data-close-feature="lab" aria-label="Fechar laboratório">×</button>
+      <div class="lab-header"><div><div class="radar-kicker">MALHA OCULTA // ANÁLISE QUANTITATIVA</div><h3>📊 LABORATÓRIO DE PADRÕES</h3><p>Comparação dos 12 nós, histórico observável, geometria das conexões e integridade das fontes.</p></div><span class="lab-live">● DADOS DE FONTES</span></div>
+      <div class="lab-actions"><label class="lab-muted">Janela de análise <select id="lab-window"><option value="7">7 dias</option><option value="30" selected>30 dias</option></select></label><button id="lab-refresh" type="button">↻ Sincronizar análise</button><span id="lab-updated" class="lab-muted">Aguardando dados...</span></div>
+      <div class="lab-grid"><div class="lab-kpi"><span>SISMOS NA JANELA</span><b id="lab-kpi-quakes">—</b><small>USGS • catálogo mensal</small></div><div class="lab-kpi"><span>ALERTAS GDACS</span><b id="lab-kpi-hazards">—</b><small>GDACS • feed consultado dos últimos 7 dias</small></div><div class="lab-kpi"><span>NÓS COM REGISTROS</span><b id="lab-kpi-nodes">—</b><small>Raio de 800 km / 1.200 km</small></div><div class="lab-kpi"><span>EVENTOS PERTO DAS LINHAS</span><b id="lab-kpi-lines">—</b><small>Corredor geométrico de 100 km</small></div></div>
+      <div class="lab-columns"><section class="lab-section"><h4>COMPARADOR DOS 12 NÓS • SISMOS USGS</h4><div class="lab-chart-wrap"><canvas id="lab-node-chart" class="lab-chart" aria-label="Gráfico comparativo de eventos por ponto"></canvas></div><div class="lab-table-wrap"><table class="lab-table"><thead><tr><th>NÓ</th><th>SISMOS ≤800 KM</th><th>MAIOR MAG.</th><th>ALERTAS ≤1200 KM</th></tr></thead><tbody id="lab-node-table"><tr><td colspan="4">Carregando catálogo...</td></tr></tbody></table></div></section>
+      <section class="lab-section"><h4>HISTÓRICO POR DIA • SISMOS USGS</h4><div class="lab-chart-wrap"><canvas id="lab-history-chart" class="lab-chart tall" aria-label="Gráfico temporal de registros sísmicos"></canvas></div><p id="lab-history-caption">A série é calculada a partir dos horários de origem dos registros USGS recebidos.</p></section></div>
+      <div class="lab-columns"><section class="lab-section"><h4>DETECTOR DE COINCIDÊNCIAS GEOMÉTRICAS</h4><div class="lab-geometry-controls"><label>Distância máxima<select id="lab-geometry-radius"><option value="50">50 km</option><option value="100" selected>100 km</option><option value="250">250 km</option><option value="500">500 km</option></select></label><label>Eventos<select id="lab-geometry-type"><option value="all">Sismos + alertas</option><option value="quake">Somente sismos</option><option value="hazard">Somente alertas</option></select></label><input id="lab-geometry-search" type="search" placeholder="Filtrar conexão ou local..."><button id="lab-geometry-run" type="button">Calcular coincidências</button></div><div id="lab-geometry-results" class="lab-findings"><div class="lab-finding">Detector pausado para poupar o computador. Clique em “Calcular coincidências” quando quiser executar a análise.</div></div><p class="lab-note">O detector mede proximidade espacial entre sismos catalogados e os arcos geodésicos da malha. Isso identifica coincidências geográficas, não prova causalidade nem significância estatística. Para testar significância, será necessário comparar com distribuição aleatória e histórico de longo prazo equivalente.</p></section>
+      <section class="lab-section"><h4>SAÚDE DAS FONTES</h4><div id="lab-source-health" class="lab-health"></div><p class="lab-muted">“OK” significa que a última consulta foi concluída; não significa cobertura total nem ausência de atraso na publicação.</p></section></div>
+      <div class="lab-note">Metodologia: sismos são registros instrumentais do USGS; alertas são eventos publicados pelo GDACS. Cada ponto usa os raios indicados. A janela de 30 dias depende do catálogo mensal e do período coberto pela fonte. Clima, notícias e alertas não são somados como se fossem o mesmo tipo de evento. Resultados observados não confirmam a hipótese dos portões.</div>
+    </section>
+    <section class="feature-panel investigation-panel" id="investigation-panel" aria-live="polite">
+      <button class="feature-panel-close" data-close-feature="mode" aria-label="Fechar modo investigação">×</button>
+      <div class="investigation-head"><div><div class="radar-kicker">MALHA OCULTA // FOCO NOS 12 NÓS</div><h3>⌖ MODO INVESTIGAÇÃO</h3><p>Hora local de cada epicentro • sincronização automática das fontes</p></div><span class="investigation-live">● MONITORAMENTO</span></div>
+      <div class="investigation-summary" id="investigation-summary"></div><div class="investigation-firms-config"><div class="firms-server-status"><b>NASA FIRMS • CONSULTA PELO SERVIDOR</b><small>A chave MAP_KEY fica protegida nas variáveis de ambiente da Vercel. A consulta busca focos VIIRS dos últimos 2 dias no raio aproximado de 1.000 km do vórtice selecionado.</small></div><button type="button" id="firms-save-key">↻ Consultar focos deste vórtice</button><a href="https://firms.modaps.eosdis.nasa.gov/api/area/" target="_blank" rel="noopener noreferrer">NASA FIRMS ↗</a><small>Horário original do sensor em UTC; a ficha converte para o fuso local estimado pelas coordenadas. Foco térmico é uma detecção de calor, não confirmação automática de incêndio.</small></div>
+      <div class="investigation-workspace"><nav class="investigation-place-list" id="investigation-place-list" aria-label="Escolher ponto de investigação"></nav><div class="investigation-detail" id="investigation-detail"><div class="radar-empty">Selecione um dos 12 pontos para abrir a ficha de investigação.</div></div></div>
+      <section class="investigation-ai" aria-label="Assistente de inteligência artificial"><div class="investigation-ai-head"><strong>✦ ASSISTENTE DE INVESTIGAÇÃO</strong><small id="investigation-ai-status">IA aguardando pergunta</small><button type="button" class="investigation-ai-clear" id="investigation-ai-clear">Limpar</button></div><div class="investigation-ai-log" id="investigation-ai-log" role="log" aria-live="polite">Pergunte sobre o vórtice selecionado, compare os registros disponíveis ou peça ajuda para interpretar uma coincidência. A IA receberá os dados carregados nesta ficha.</div><div class="investigation-ai-compose"><textarea id="investigation-ai-question" rows="2" maxlength="1800" placeholder="Ex.: Há alguma coincidência relevante entre os sismos e as linhas próximas? (Enter envia; Shift+Enter quebra linha)"></textarea><button type="button" id="investigation-ai-send">Enviar pergunta</button></div><div class="investigation-ai-foot">As respostas usam os registros fornecidos pelo site. A IA deve separar fatos, correlações e hipóteses; não trata coincidências como prova. Requer OPENAI_API_KEY configurada na Vercel e uso da API OpenAI.</div></section>
+      <div class="investigation-source-note">Horário sísmico convertido para o fuso IANA estimado pelas coordenadas do epicentro via serviço de fuso horário; a API usa a cidade cadastrada mais próxima, então em áreas oceânicas, remotas ou perto de fronteiras de fuso pode haver aproximação. USGS consultado a cada 60 s; CelesTrak e ISS a cada 20 s. Fontes: USGS (sismos), GDACS (alertas globais), Open-Meteo (condições/modelos meteorológicos, não imagem de satélite) e GDELT (notícias públicas). GDACS atualiza seu feed tipicamente a cada 6 minutos; Open-Meteo depende da atualização dos modelos. Atualização depende da publicação das fontes. Ausência de resultados não comprova ausência de ocorrências; notícias não confirmam acidentes ou desaparecimentos sem verificação independente.</div>
+    </section>
 
     <!-- TELEMETRIA GLOBAL EM FORMATO DE BOTÃO COMPACTO NO MOBILE -->
     <div class="live-earth-panel" id="live-earth-panel" title="Clique para expandir/recolher a Telemetria Global">
         <h4>🌍 Telemetria <span id="telemetry-indicator">[+]</span></h4>
         <div class="telemetry-content-body">
-            <div class="telemetry-item-row" id="schumann-freq">• Frequência Schumann: 7.83 Hz [ESTÁVEL]</div>
+            <div class="telemetry-item-row" id="schumann-freq">• Frequência Schumann: sem feed ao vivo conectado</div>
             <div class="telemetry-item-row" id="live-iss-status">• Rastreio ISS: Sincronizando órbita...</div>
             <div class="telemetry-item-row" id="earth-quakes">• Último Sismo: Analisando feed USGS...</div>
             <div class="telemetry-item-row" id="hurricane-status" style="border-left-color: var(--cor-alerta);">• Ciclones / Perturbações: Monitorando...</div>
             <div class="telemetry-item-row" id="asteroid-status" style="border-left-color: var(--cor-alerta);">• Asteroides NASA: Sincronizando NEOs...</div>
-            <div class="telemetry-item-row" id="geomagnetic-status" style="border-left-color: var(--cor-secundaria);">• Campo Magnético: Kp Index 2</div>
-            <div class="telemetry-item-row" id="live-weather-status" style="border-left-color: var(--cor-secundaria);">• Clima Satélite: NOAA Ativo</div>
+            <div class="telemetry-item-row" id="geomagnetic-status" style="border-left-color: var(--cor-secundaria);">• Campo Magnético: sem feed Kp ao vivo conectado</div>
+            <div class="telemetry-item-row" id="live-weather-status" style="border-left-color: var(--cor-secundaria);">• Clima global/modelo meteorológico: conectando...</div>
         </div>
     </div>
 
@@ -1291,6 +1841,31 @@
         <p>A grande conexão desta teoria com o <em>Livro de Enoque</em> sugere que estes doze pontos correspondem aos antigos portões celestes. Historiograficamente, levanta-se a hipótese de terem servido como locais de passagem ou de descida associados aos Vigilantes e à dispersão dos Nephilim na Antiguidade.</p>
     </div>
 
+
+    <!-- ARQUIVO EXPANSÍVEL DA TEORIA: navegação e conteúdo independentes -->
+    <section class="archive-overlay" id="theory-archive" aria-hidden="true">
+        <div class="archive-window" role="dialog" aria-modal="true" aria-label="Arquivo da Malha Oculta">
+            <aside class="archive-sidebar">
+                <div class="archive-brand">
+                    <small>Arquivo de investigação</small>
+                    <h2>✧ A Malha Oculta</h2>
+                </div>
+                <nav class="archive-nav" id="archive-navigation" aria-label="Partes da teoria"></nav>
+            </aside>
+            <main class="archive-main">
+                <div class="archive-topline">
+                    <small>DOCUMENTO • HIPÓTESES E CONEXÕES</small>
+                    <button class="archive-close" id="close-theory-archive" aria-label="Fechar arquivo">&times;</button>
+                </div>
+                <article class="archive-content" id="archive-article">
+                    <div class="archive-disclaimer">nada comprovado, apenas conspirações malucas kkkk</div>
+                    <h1>A arquitetura do doze</h1>
+                    <p>Selecione uma parte no menu para abrir a investigação.</p>
+                </article>
+            </main>
+        </div>
+    </section>
+
     <div id="canvas-container"></div>
     <div id="labels-container"></div>
 
@@ -1355,9 +1930,42 @@
         ];
 
         let scene, camera, renderer, controls, earthMesh, cloudsMesh, atmosphereMesh;
+        let graphicsQuality = 'performance';
+        let lastRenderAt = 0;
+        let animationFrameCount = 0;
+        let asteroidUpdateTimer = null;
         let isRotating = true;
+        let connectionLayer = null;
+        const featureState = { connections:false, radar:false, timeline:false, mode:false, lab:false };
+        let vortexNewsCache = {};
+        let vortexFirmsCache = {};
+        const vortexFirmsPending = new Set();
+        let investigationAiHistory = [];
+        let lastVortexNewsFetch = 0;
+        let vortexNewsBusy = false;
+        let selectedInvestigationVortexId = 1;
+        let globalHazardFeatures = [];
+        let globalHazardLayer = null;
+        let lastHazardUpdate = null;
+        let selectedVortexWeather = null;
+        let hazardFetchBusy = false;
+        let rotationBeforeInvestigation = true;
+        let featureRefreshTimer = null;
+        let radarAnimationFrame = null;
+        let radarSweepAngle = 0;
+        let lastUSGSUpdate = null;
+        let lastNASAUpdate = null;
+        let lastISSUpdate = null;
+        let latestQuakeFeatures = [];
+        let labQuakeFeatures = [];
+        let lastLabQuakeUpdate = null;
+        let labQuakeBusy = false;
+        let labLastRefresh = 0;
+        const labSourceState = { USGS:{ok:false,at:null,error:"Aguardando consulta"}, GDACS:{ok:false,at:null,error:"Aguardando consulta"}, GDELT:{ok:false,at:null,error:"Aguardando consulta"}, "OPEN-METEO":{ok:false,at:null,error:"Aguardando consulta"} };
+        let liveFeedErrors = { usgs:false, nasa:false, iss:false };
         let currentVortexId = null;
         let targetCameraPos = null;
+        let activeTrackingKey = null;
         let issGroup = null;
         let issPosData = { lat: 0, lon: 0, alt: 400 };
         let issElementLabel = null;
@@ -1368,6 +1976,15 @@
         let asteroidGroups = [];
         let asteroidLabels = [];
         let asteroidDataList = [];
+        let trackedSatellites = [];
+        let satelliteMarkers = [];
+        let satelliteElementsEpoch = null;
+        let asteroidEphemerides = [];
+        let lastSatelliteCatalogUpdate = null;
+        let lastAsteroidVectorUpdate = null;
+        const quakeTimezoneCache = new Map();
+        const quakeTimezonePending = new Set();
+        let satellitePropagationTimer = null;
 
         let lightningMeshes = [];
         let volcanoMarkers = [];
@@ -1394,51 +2011,72 @@
 
         function init() {
             const container = document.getElementById('canvas-container');
+            if (!container || !window.THREE) {
+                console.error('Malha Oculta: container ou biblioteca Three.js indisponível.');
+                return;
+            }
 
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.set(0, 0, 360);
+            try {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(45, Math.max(1, window.innerWidth) / Math.max(1, window.innerHeight), 0.1, 1000);
+                camera.position.set(0, 0, 360);
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, powerPreference: 'high-performance' });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, graphicsQuality==='performance'?1:1.5));
+                renderer.shadowMap.enabled = false;
+                container.replaceChildren(renderer.domElement);
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true; controls.dampingFactor = 0.05;
+                controls.enableZoom = true; controls.minDistance = 135; controls.maxDistance = 500;
+                controls.rotateSpeed = 0.8; controls.minPolarAngle = 0; controls.maxPolarAngle = Math.PI;
+                scene.add(new THREE.AmbientLight(0xffffff, 1.3));
+                const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
+                sunLight.position.set(500, 300, 400); scene.add(sunLight);
 
-            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-            container.appendChild(renderer.domElement);
+                // O globo e o loop de renderização são iniciados antes dos módulos opcionais.
+                createUltraHDAtlasEarth();
+                window.addEventListener('resize', onWindowResize, { passive: true });
+                animate();
 
-            controls = new THREE.OrbitControls(camera, renderer.domElement);
-            controls.enableDamping = true;
-            controls.dampingFactor = 0.05;
-            controls.enableZoom = true;
-            controls.minDistance = 135;
-            controls.maxDistance = 500;
-            controls.rotateSpeed = 0.8;
-            controls.minPolarAngle = 0; 
-            controls.maxPolarAngle = Math.PI;
+                const safeInit = (name, fn) => {
+                    try { fn(); }
+                    catch (error) { console.error(`Módulo ${name} não iniciou; globo preservado:`, error); }
+                };
+                safeInit('vórtices', createVorticesAndGrid);
+                safeInit('conexões', createConnectionLayer);
+                safeInit('rótulos geográficos', createGeoLabels);
+                safeInit('ISS', createHighDetailISS);
+                safeInit('menu de vórtices', populateVortexGridDrawer);
+                safeInit('interface', setupUI);
+                safeInit('qualidade gráfica',()=>setGraphicsQuality('performance'));
+                safeInit('chat', listenGlobalChat);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 1.3);
-            scene.add(ambientLight);
-
-            const sunLight = new THREE.DirectionalLight(0xffffff, 1.4);
-            sunLight.position.set(500, 300, 400);
-            scene.add(sunLight);
-
-            createUltraHDAtlasEarth();
-            createVorticesAndGrid();
-            createGeoLabels();
-            createHighDetailISS();
-            populateVortexGridDrawer();
-            
-            fetchLiveAsteroids();
-            listenGlobalChat();
-
-            initLiveLightningSystem();
-            initLiveVolcanoes();
-
-            fetchLiveEarthData();
-            setInterval(fetchLiveEarthData, 30000);
-
-            window.addEventListener('resize', onWindowResize);
-            setupUI();
-            animate();
+                // Cada feed é isolado: falha de API nunca interrompe o globo ou os outros módulos.
+                const safeFeed = (name, fn, interval) => {
+                    try { Promise.resolve(fn()).catch(error => console.warn(`${name}:`, error)); }
+                    catch (error) { console.warn(`${name}:`, error); }
+                    if (interval) setInterval(() => {
+                        try { Promise.resolve(fn()).catch(error => console.warn(`${name}:`, error)); }
+                        catch (error) { console.warn(`${name}:`, error); }
+                    }, interval);
+                };
+                safeFeed('NASA NEO', fetchLiveAsteroids, 6 * 60 * 60 * 1000);
+                safeFeed('CelesTrak', fetchSatelliteCatalog, 5 * 60 * 1000);
+                satellitePropagationTimer = setInterval(() => safeInit('propagação orbital', propagateTrackedSatellites), 20000);
+                asteroidUpdateTimer = setInterval(() => safeInit('atualização orbital dos asteroides', updateAsteroidPositions), graphicsQuality==='performance'?2000:1000);
+                safeFeed('JPL Horizons', fetchAsteroidEphemerides, 10 * 60 * 1000);
+                safeFeed('NOAA', fetchLiveSpaceWeather, 5 * 60 * 1000);
+                safeFeed('USGS', fetchLiveEarthData, 60000);
+                safeFeed('ISS', fetchLiveISS, 20000);
+                safeFeed('GDACS perigos globais', fetchGlobalHazards, 6 * 60 * 1000);
+                safeFeed('Clima por ponto', fetchSelectedVortexWeather, 5 * 60 * 1000);
+            } catch (error) {
+                console.error('Falha ao iniciar o núcleo 3D da Malha Oculta:', error);
+                const fallback = document.createElement('div');
+                fallback.style.cssText = 'position:fixed;inset:20% 8%;z-index:99999;padding:20px;background:#071321;color:#fff;border:1px solid #00d9ff;border-radius:12px;font:14px/1.5 sans-serif;text-align:center';
+                fallback.textContent = 'Não foi possível iniciar o motor 3D. Atualize a página e verifique se o navegador permite WebGL. Os módulos de dados não devem impedir o carregamento do globo.';
+                document.body.appendChild(fallback);
+            }
         }
 
         function createUltraHDAtlasEarth() {
@@ -1448,40 +2086,38 @@
             const cloudsUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@master/examples/textures/planets/earth_clouds_1024.png';
             const textureLoader = new THREE.TextureLoader();
 
-            const earthMat = new THREE.MeshPhongMaterial({
-                color: 0xffffff,
-                shininess: 35,
-                specular: new THREE.Color(0x333333)
-            });
-
+            // Textura local de contingência: o planeta continua visível mesmo se o CDN falhar.
+            const fallbackCanvas = document.createElement('canvas');
+            fallbackCanvas.width = 1024; fallbackCanvas.height = 512;
+            const ctx = fallbackCanvas.getContext('2d');
+            const ocean = ctx.createLinearGradient(0, 0, 0, 512);
+            ocean.addColorStop(0, '#174b78'); ocean.addColorStop(.5, '#0b3764'); ocean.addColorStop(1, '#082849');
+            ctx.fillStyle = ocean; ctx.fillRect(0, 0, 1024, 512);
+            ctx.fillStyle = '#4b8765'; ctx.strokeStyle = '#80b58a'; ctx.lineWidth = 3;
+            const continents = [
+                [[120,95],[175,62],[245,82],[275,125],[250,165],[220,205],[190,245],[165,220],[145,170]],
+                [[255,245],[300,265],[320,320],[300,390],[270,445],[245,390],[235,325]],
+                [[455,100],[510,75],[555,95],[590,135],[575,175],[535,190],[500,165]],
+                [[500,205],[550,215],[575,270],[560,335],[530,395],[500,350],[485,280]],
+                [[650,105],[710,75],[790,95],[850,140],[830,190],[775,205],[720,175],[675,155]],
+                [[735,245],[790,255],[820,310],[800,370],[760,395],[735,345]]
+            ];
+            continents.forEach(poly => { ctx.beginPath(); poly.forEach((pt,i)=>i?ctx.lineTo(pt[0],pt[1]):ctx.moveTo(pt[0],pt[1])); ctx.closePath(); ctx.fill(); ctx.stroke(); });
+            const fallbackTexture = new THREE.CanvasTexture(fallbackCanvas);
+            const earthMat = new THREE.MeshPhongMaterial({ map:fallbackTexture, color:0x55585d, shininess:18, specular:new THREE.Color(0x222222) });
             earthMesh = new THREE.Mesh(earthGeo, earthMat);
             scene.add(earthMesh);
 
-            textureLoader.load(textureUrl, (map) => {
-                earthMat.map = map;
-                earthMat.needsUpdate = true;
-            });
-
-            textureLoader.load(specularUrl, (specMap) => {
-                earthMat.specularMap = specMap;
-                earthMat.needsUpdate = true;
-            });
+            textureLoader.load(textureUrl, map => { earthMat.map = map; earthMat.needsUpdate = true; }, undefined, err => console.warn('Textura detalhada indisponível; usando mapa de contingência.', err));
+            textureLoader.load(specularUrl, specMap => { earthMat.specularMap = specMap; earthMat.needsUpdate = true; }, undefined, err => console.warn('Mapa especular indisponível.', err));
 
             const cloudsGeo = new THREE.SphereGeometry(101.8, 64, 64);
-            const cloudsMat = new THREE.MeshStandardMaterial({
-                color: 0xffffff,
-                transparent: true,
-                opacity: 0.55,
-                blending: THREE.AdditiveBlending
-            });
-
+            const cloudsMat = new THREE.MeshStandardMaterial({ color:0xffffff, transparent:true, opacity:0.25, blending:THREE.AdditiveBlending });
             cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMat);
+            cloudsMesh.visible = false; // Visual padrão de investigação: sem camada de nuvens para reduzir composição.
+            cloudsMesh.visible = false;
             scene.add(cloudsMesh);
-
-            textureLoader.load(cloudsUrl, (cloudMap) => {
-                cloudsMat.map = cloudMap;
-                cloudsMat.needsUpdate = true;
-            });
+            textureLoader.load(cloudsUrl, cloudMap => { cloudsMat.map = cloudMap; cloudsMat.needsUpdate = true; cloudsMesh.visible = true; }, undefined, err => { cloudsMesh.visible = false; console.warn('Textura de nuvens indisponível.', err); });
 
             const atmosGeo = new THREE.SphereGeometry(104.5, 64, 64);
             const atmosMat = new THREE.MeshBasicMaterial({
@@ -1718,78 +2354,48 @@
             labelsContainer.appendChild(issElementLabel);
         }
 
+        // NASA NeoWs: DEMO_KEY tem limite baixo; para uso contínuo, substitua por sua chave gratuita em NASA_API_KEY.
+        const NASA_API_KEY = 'DEMO_KEY'; // Solicite uma chave própria gratuita em api.nasa.gov para maior limite.
         async function fetchLiveAsteroids() {
+            const status = document.getElementById('asteroid-status');
             try {
-                const todayStr = new Date().toISOString().split('T')[0];
-                const res = await fetch(`https://api.nasa.gov/neo/rest/v1/feed?start_date=${todayStr}&end_date=${todayStr}&api_key=DEMO_KEY`);
-                if (res.ok) {
-                    const data = await res.json();
-                    const nearObjects = data.near_earth_objects[todayStr] || [];
-                    asteroidDataList = nearObjects.slice(0, 5); 
-                    
-                    document.getElementById('asteroid-status').innerText = `• Asteróides NASA: ${asteroidDataList.length} NEOs monitorados hoje`;
-                    buildAsteroidObjects(asteroidDataList);
-                    updateRiskTable();
-                } else {
-                    throw new Error("Erro na API da NASA");
-                }
-            } catch (e) {
-                asteroidDataList = [
-                    { name: "(2026 XA)", close_approach_data: [{ miss_distance: { lunar: 3.2, kilometers: "1234500" } }] },
-                    { name: "(APOPHIS)", close_approach_data: [{ miss_distance: { lunar: 8.5, kilometers: "3265000" } }] }
-                ];
-                document.getElementById('asteroid-status').innerText = `• Asteróides NASA: Modo Radar Ativo (2 NEOs críticos)`;
+                const startDate = new Date();
+                const endDate = new Date(startDate.getTime() + 6 * 86400000);
+                const fmt = d => d.toISOString().slice(0,10);
+                const url = `https://api.nasa.gov/neo/rest/v1/feed?start_date=${fmt(startDate)}&end_date=${fmt(endDate)}&api_key=${NASA_API_KEY}`;
+                const res = await fetch(url, { cache:'no-store' });
+                if (!res.ok) throw new Error(`NASA HTTP ${res.status}`);
+                const data = await res.json();
+                asteroidDataList = Object.values(data.near_earth_objects || {}).flat().sort((a,b) => {
+                    const da = a.close_approach_data?.[0]?.close_approach_date_full || a.close_approach_data?.[0]?.close_approach_date || '';
+                    const db = b.close_approach_data?.[0]?.close_approach_date_full || b.close_approach_data?.[0]?.close_approach_date || '';
+                    return da.localeCompare(db);
+                });
+                lastNASAUpdate = new Date(); liveFeedErrors.nasa = false;
+                if (status) status.innerText = `• Asteroides NASA: ${asteroidDataList.length} aproximações catalogadas (próximos 7 dias)`;
                 buildAsteroidObjects(asteroidDataList);
+                fetchAsteroidEphemerides();
                 updateRiskTable();
+                if (featureState.radar) refreshRadarPanel();
+            } catch (e) {
+                liveFeedErrors.nasa = true;
+                if (status) status.innerText = `• Asteroides NASA: feed indisponível (${e.message}); sem posições simuladas`;
+                asteroidDataList = [];
+                buildAsteroidObjects([]);
+                if (featureState.radar) refreshRadarPanel();
             }
         }
 
+        // O feed NeoWs fornece datas, distâncias e velocidades de aproximação, não vetores orbitais instantâneos.
+        // Por isso, não inventamos coordenadas 3D nem desenhamos asteroides em posições fictícias ao redor da Terra.
         function buildAsteroidObjects(asteroids) {
-            const labelsContainer = document.getElementById('labels-container');
-            
-            asteroids.forEach((ast, index) => {
-                const astGeo = new THREE.DodecahedronGeometry(1.8 + (index * 0.3), 1);
-                const astMat = new THREE.MeshStandardMaterial({ 
-                    color: 0x887766, 
-                    roughness: 0.9,
-                    metalness: 0.2,
-                    emissive: 0x331100
-                });
-                const mesh = new THREE.Mesh(astGeo, astMat);
-
-                const angle = (index / asteroids.length) * Math.PI * 2;
-                const distance = 160 + (index * 25);
-                mesh.position.set(
-                    Math.cos(angle) * distance,
-                    (Math.random() - 0.5) * 60,
-                    Math.sin(angle) * distance
-                );
-
-                scene.add(mesh);
-                
-                let distText = "Distância desconhecida";
-                if (ast.close_approach_data && ast.close_approach_data[0]) {
-                    const lunarDist = parseFloat(ast.close_approach_data[0].miss_distance.lunar).toFixed(1);
-                    distText = `${lunarDist} LD (~${Math.round(ast.close_approach_data[0].miss_distance.kilometers / 1000)} mil km)`;
-                }
-
-                asteroidGroups.push({ 
-                    mesh: mesh, 
-                    angle: angle, 
-                    speed: 0.0008 + (index * 0.0002), 
-                    distance: distance,
-                    name: ast.name,
-                    distText: distText
-                });
-
-                const label = document.createElement('div');
-                label.className = 'asteroid-label';
-                labelsContainer.appendChild(label);
-                asteroidLabels.push({ element: label, groupData: asteroidGroups[asteroidGroups.length - 1] });
-            });
+            asteroidGroups.forEach(item => { if (item.mesh) scene.remove(item.mesh); });
+            asteroidLabels.forEach(item => item.element?.remove());
+            asteroidGroups = [];
+            asteroidLabels = [];
         }
 
-        async function fetchLiveEarthData() {
+        async function fetchLiveISS() {
             try {
                 const resIss = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
                 if (resIss.ok) {
@@ -1797,9 +2403,11 @@
                     issPosData.lat = data.latitude;
                     issPosData.lon = data.longitude;
                     issPosData.alt = data.altitude;
+                    issPosData.velocity = Number(data.velocity || 0) / 3600; // API WhereTheISS retorna km/h; converter para km/s
 
-                    const issText = `• Rastreio ISS: Lat ${data.latitude.toFixed(1)}° | Lon ${data.longitude.toFixed(1)}°`;
-                    document.getElementById('live-iss-status').innerText = issText;
+                    lastISSUpdate = new Date(); liveFeedErrors.iss = false;
+                    const issText = `• Rastreio ISS: ${data.latitude.toFixed(2)}° lat, ${data.longitude.toFixed(2)}° lon | ${data.altitude.toFixed(0)} km alt | ${(Number(data.velocity||0)/3600).toFixed(3)} km/s`; 
+                    const issStatus=document.getElementById('live-iss-status'); if(issStatus)issStatus.innerText = issText;
                     
                     if (issGroup) {
                         const newPos = latLonToVector3(issPosData.lat, issPosData.lon, 110);
@@ -1817,14 +2425,56 @@
                     }
                 }
             } catch (e) {
-                document.getElementById('live-iss-status').innerText = "• Rastreio ISS: Modo Simulado [Ativo]";
+                liveFeedErrors.iss = true;
+                const issStatus=document.getElementById('live-iss-status'); if(issStatus)issStatus.innerText = "• Rastreio ISS: feed indisponível — posição anterior mantida";
             }
+        }
 
+        // Converte o instante UTC do USGS para o fuso da região do epicentro.
+        // Hourora resolve o fuso pela cidade cadastrada mais próxima; o resultado é armazenado em cache.
+        function quakeTimezoneKey(q){
+            const c=q?.geometry?.coordinates||[];
+            return c.length>=2?`${Number(c[1]).toFixed(2)},${Number(c[0]).toFixed(2)}`:null;
+        }
+        function formatQuakeLocalTime(q){
+            const key=quakeTimezoneKey(q),tz=key?quakeTimezoneCache.get(key):null;
+            const stamp=Number(q?.properties?.time);
+            if(!Number.isFinite(stamp))return 'horário não informado';
+            const date=new Date(stamp);
+            if(!tz)return `${date.toLocaleString('pt-BR',{timeZone:'UTC',hour12:false})} UTC (identificando fuso local...)`;
+            const local=date.toLocaleString('pt-BR',{timeZone:tz,hour12:false,day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+            return `${local} (${tz.replace('_',' ')})`;
+        }
+        async function resolveQuakeTimezone(q){
+            const key=quakeTimezoneKey(q);if(!key||quakeTimezoneCache.has(key)||quakeTimezonePending.has(key))return;
+            const c=q.geometry.coordinates,lat=Number(c[1]),lng=Number(c[0]);
+            quakeTimezonePending.add(key);
+            try{
+                const r=await fetch(`https://hourora.app/api/v1/lookup?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}`,{cache:'force-cache'});
+                if(!r.ok)throw new Error(`fuso HTTP ${r.status}`);
+                const d=await r.json();if(d.zone){new Intl.DateTimeFormat('pt-BR',{timeZone:d.zone});quakeTimezoneCache.set(key,d.zone);}
+            }catch(e){console.warn('Fuso local do sismo indisponível:',e);}
+            finally{quakeTimezonePending.delete(key);}
+        }
+        async function warmQuakeTimezones(quakes){
+            const selected=(quakes||[]).slice(0,8);
+            await Promise.all(selected.map(resolveQuakeTimezone));
+            if(featureState.mode)refreshInvestigationPanel();
+            // Atualiza os rótulos do globo com o fuso local assim que a resolução chega.
+            globalQuakeObjects.forEach(item=>{
+                const q=item.quake;if(!q||!item.element)return;
+                const p=q.properties||{},c=q.geometry?.coordinates||[];
+                item.element.innerHTML=`⚠️ <b>Sismo Registrado</b><br>Data/hora local: ${formatQuakeLocalTime(q)}<br>Magnitude: <b>M${Number(p.mag||0).toFixed(1)}</b> | Prof: ${Number(c[2]||0).toFixed(0)} km<br>Local: ${escapeHtml(p.place||'Local não informado')}<br>Horário original do catálogo: UTC`;
+            });
+        }
+
+        async function fetchLiveEarthData() {
             try {
-                const resEq = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson');
+                const resEq = await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson');
                 if (resEq.ok) {
                     const eqData = await resEq.json();
                     const quakes = eqData.features || [];
+                    latestQuakeFeatures = quakes; lastUSGSUpdate = new Date(); liveFeedErrors.usgs = false; labSourceState.USGS={ok:true,at:lastUSGSUpdate,error:""};
 
                     globalQuakeObjects.forEach(item => {
                         earthMesh.remove(item.mesh);
@@ -1856,22 +2506,11 @@
                             qMesh.position.copy(qPos);
                             earthMesh.add(qMesh);
 
-                            const dateObj = new Date(timeOccurred);
-                            const dataFormatada = dateObj.toLocaleDateString('pt-BR');
-                            const horaFormatada = dateObj.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-                            
-                            let danosFeridos = mag >= 6.5 ? "Relatos de danos estruturais e feridos leves." : "Sem registros de feridos ou danos graves.";
-
                             const label = document.createElement('div');
                             label.className = 'quake-detail-label';
-                            label.innerHTML = `⚠️ <b>Sismo Registrado</b><br>` +
-                                              `Data: ${dataFormatada} às ${horaFormatada}<br>` +
-                                              `Magnitude: <b>M${mag.toFixed(1)}</b> | Prof: ${depth.toFixed(0)}km<br>` +
-                                              `Local: ${place}<br>` +
-                                              `${danosFeridos}`;
+                            label.innerHTML = `⚠️ <b>Sismo Registrado</b><br>Data/hora local: ${formatQuakeLocalTime(q)}<br>Magnitude: <b>M${mag.toFixed(1)}</b> | Prof: ${depth.toFixed(0)} km<br>Local: ${escapeHtml(place||'Local não informado')}<br>Horário original do catálogo: UTC`;
                             labelsContainer.appendChild(label);
-
-                            globalQuakeObjects.push({ mesh: qMesh, element: label, pos: qPos });
+                            globalQuakeObjects.push({ mesh: qMesh, element: label, pos: qPos, quake:q });
                         }
 
                         VORTICES.forEach(v => {
@@ -1903,13 +2542,13 @@
                                 seismicAlertMarkers.push(ringMesh);
 
                                 const maxMag = Math.max(...list.map(i => i.mag));
-                                let probFutura = maxMag >= 5.5 ? "Alta probabilidade de réplicas" : "Probabilidade moderada";
+                                let probFutura = "Registros catalogados em raio de 800 km (não é previsão)";
 
                                 const label = document.createElement('div');
                                 label.className = 'seismic-alert-label';
                                 label.innerHTML = `⚠️ Vórtice #${vId}: ALERTA<br>` +
                                                   `• Abalos: ${list.length} (Máx M${maxMag.toFixed(1)})<br>` +
-                                                  `• Previsão: <b>${probFutura}</b>`;
+                                                  `• Observação: <b>${probFutura}</b>`;
                                 labelsContainer.appendChild(label);
                                 seismicAlertLabels.push({ element: label, pos: pos });
                             }
@@ -1921,45 +2560,94 @@
                         document.getElementById('earth-quakes').innerText = `• Último Sismo: M${latest.mag} em ${latest.place}`;
                     }
                     updateRiskTable();
+                    warmQuakeTimezones(quakes.filter(q=>Number(q.properties?.mag||0)>=4));
                 }
             } catch (e) {
+                liveFeedErrors.usgs=true;labSourceState.USGS={ok:false,at:lastUSGSUpdate,error:String(e.message||e)};
                 document.getElementById('earth-quakes').innerText = `• Último Sismo: Rede USGS Ativa`;
             }
 
+            // Os ciclones/alertas globais são desenhados pelo feed GDACS; não criamos tempestades simuladas.
+            if (lastHazardUpdate) renderGlobalHazards();
+            const schumann = document.getElementById('schumann-freq');
+            if (schumann) schumann.innerText = '• Schumann: sem sensor/feed ao vivo conectado';
+            const geomag = document.getElementById('geomagnetic-status');
+            if (geomag) geomag.innerText = '• Campo geomagnético: sem feed Kp ao vivo conectado';
+            const weather = document.getElementById('live-weather-status');
+            if (weather && !selectedVortexWeather) weather.innerText = '• Clima global: conectando modelo meteorológico...';
+            if (featureState.radar) refreshRadarPanel();
+        }
+
+        // GDACS: alertas oficiais globais de desastres. Atualização típica do feed: ~6 min.
+        async function fetchGlobalHazards(){
+            if(hazardFetchBusy)return; hazardFetchBusy=true;
+            const status=document.getElementById('hurricane-status');
+            try{
+                const to=new Date(),from=new Date(Date.now()-7*86400000);
+                const fmt=d=>d.toISOString().slice(0,10);
+                const url=`https://www.gdacs.org/gdacsapi/api/events/geteventlist/SEARCH?eventlist=EQ;TC;FL;VO;WF&fromdate=${fmt(from)}&todate=${fmt(to)}&alertlevel=red;orange`;
+                const r=await fetch(url,{cache:'no-store'}); if(!r.ok)throw new Error(`GDACS HTTP ${r.status}`);
+                const data=await r.json();
+                globalHazardFeatures=(data.features||data||[]).filter(x=>x&&x.geometry&&x.geometry.coordinates);
+                lastHazardUpdate=new Date();labSourceState.GDACS={ok:true,at:lastHazardUpdate,error:""};
+                const storms=globalHazardFeatures.filter(f=>String(f.properties?.eventtype||f.properties?.eventType||'').toUpperCase().includes('TC')).length;
+                if(status){status.innerText=`• Ciclones/tempestades: ${storms} alerta(s) GDACS • ${lastHazardUpdate.toLocaleTimeString('pt-BR')}`;status.dataset.live='true';}
+                renderGlobalHazards(); if(featureState.mode)refreshInvestigationPanel();
+            }catch(e){labSourceState.GDACS={ok:false,at:lastHazardUpdate,error:String(e.message||e)};if(status){status.innerText='• Ciclones/tempestades: feed GDACS indisponível; última leitura preservada';status.dataset.live='false';}console.warn('GDACS:',e);}
+            finally{hazardFetchBusy=false;}
+        }
+
+        function renderGlobalHazards(){
+            if(!earthMesh||!window.THREE)return;
+            if(globalHazardLayer)earthMesh.remove(globalHazardLayer);
+            globalHazardLayer=new THREE.Group();
+            const pointOf=f=>{let c=f.geometry?.coordinates;if(!c)return null;if(Array.isArray(c[0]))c=c[0];if(!Array.isArray(c)||c.length<2||typeof c[0]!=='number')return null;return {lon:Number(c[0]),lat:Number(c[1])};};
+            globalHazardFeatures.forEach(f=>{
+                const p=f.properties||{},loc=pointOf(f);if(!loc||!Number.isFinite(loc.lat)||!Number.isFinite(loc.lon))return;
+                const level=String(p.alertlevel||p.alertLevel||'green').toLowerCase();
+                const type=String(p.eventtype||p.eventType||'').toUpperCase();
+                const isRed=level==='red',isOrange=level==='orange';
+                const color=isRed?0xff3048:isOrange?0xff9b35:0xffc34d;
+                const pos=latLonToVector3(loc.lat,loc.lon,102.2);
+                const geo=type==='TC'?new THREE.ConeGeometry(1.5,3.8,3):new THREE.SphereGeometry(isRed?1.45:1.05,10,10);
+                const mat=new THREE.MeshBasicMaterial({color,transparent:true,opacity:.96,depthTest:true});
+                const glow=new THREE.Mesh(new THREE.SphereGeometry(isRed?3.8:2.8,12,12),new THREE.MeshBasicMaterial({color:0x18dfff,transparent:true,opacity:.24,depthWrite:false}));glow.position.copy(pos.clone().multiplyScalar(1.006));globalHazardLayer.add(glow);
+                const marker=new THREE.Mesh(geo,mat);marker.position.copy(pos);marker.lookAt(pos.clone().multiplyScalar(2));marker.userData.hazard=f;globalHazardLayer.add(marker);
+                if(isRed){const core=new THREE.Mesh(new THREE.SphereGeometry(2.5,12,12),new THREE.MeshBasicMaterial({color:0xbaff32,transparent:true,opacity:.95}));core.position.copy(pos.clone().multiplyScalar(1.025));globalHazardLayer.add(core);for(let i=0;i<4;i++){const dot=new THREE.Mesh(new THREE.SphereGeometry(.48,8,8),new THREE.MeshBasicMaterial({color:0x19d85b}));dot.position.copy(pos.clone().add(new THREE.Vector3((i-1.5)*1.8,1.5+i*.35,0)));globalHazardLayer.add(dot);}}
+            });
+            earthMesh.add(globalHazardLayer);globalHazardLayer.visible=!!featureState.mode;
+        }
+
+        // Open-Meteo fornece condições/modelos meteorológicos, não imagem de satélite.
+        async function fetchSelectedVortexWeather(){
+            const v=VORTICES.find(x=>x.id===selectedInvestigationVortexId)||VORTICES[0];
+            const el=document.getElementById('live-weather-status');if(!el)return;
+            try{
+                const url=`https://api.open-meteo.com/v1/forecast?latitude=${v.lat}&longitude=${v.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m&timezone=auto`;
+                const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(`Open-Meteo HTTP ${r.status}`);
+                const d=await r.json();selectedVortexWeather={...d.current,location:v.name,updated:new Date()};labSourceState["OPEN-METEO"]={ok:true,at:new Date(),error:""};
+                el.innerText=`• Clima/modelo em ${v.name.replace(/^\d+\. /,'')}: ${d.current.temperature_2m}°C • vento ${d.current.wind_speed_10m} km/h • rajadas ${d.current.wind_gusts_10m} km/h`;
+                el.dataset.live='true';if(featureState.mode)refreshInvestigationPanel();
+            }catch(e){labSourceState["OPEN-METEO"]={ok:false,at:labSourceState["OPEN-METEO"].at,error:String(e.message||e)};el.innerText='• Clima/modelo: fonte temporariamente indisponível';el.dataset.live='false';console.warn('Open-Meteo:',e);if(featureState.lab)renderLabHealth();}
+        }
+
+        async function fetchLiveSpaceWeather() {
+            const el = document.getElementById('geomagnetic-status');
+            if (!el) return;
             try {
-                globalStormObjects.forEach(item => {
-                    earthMesh.remove(item.mesh);
-                    item.element.remove();
-                });
-                globalStormObjects = [];
-
-                const activeStorms = [
-                    { name: "Furacão Categoria 4", lat: 18.5, lon: -65.2, type: "Furacão" },
-                    { name: "Alerta de Tornado", lat: 35.2, lon: -97.5, type: "Tornado" }
-                ];
-
-                const stormGeo = new THREE.RingGeometry(2.0, 4.0, 16);
-                const stormMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff, side: THREE.DoubleSide, transparent: true, opacity: 0.9 });
-                const labelsContainer = document.getElementById('labels-container');
-
-                activeStorms.forEach(storm => {
-                    const sPos = latLonToVector3(storm.lat, storm.lon, 101.5);
-                    const sMesh = new THREE.Mesh(stormGeo, stormMat.clone());
-                    sMesh.position.copy(sPos);
-                    sMesh.lookAt(sMesh.clone().multiplyScalar(2));
-                    earthMesh.add(sMesh);
-
-                    const label = document.createElement('div');
-                    label.className = 'storm-label';
-                    label.innerHTML = `🌀 <b>${storm.type}</b><br>${storm.name}`;
-                    labelsContainer.appendChild(label);
-
-                    globalStormObjects.push({ mesh: sMesh, element: label, pos: sPos });
-                });
-
-                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: ${activeStorms.length} sistemas ativos`;
-            } catch(e) {
-                document.getElementById('hurricane-status').innerText = `• Ciclones / Perturbações: NOAA Ativo`;
+                const res = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json', {cache:'no-store'});
+                if (!res.ok) throw new Error(`NOAA HTTP ${res.status}`);
+                const rows = await res.json();
+                const latest = rows.slice(1).filter(r => r[1] && r[1] !== '');
+                const row = latest[latest.length - 1];
+                if (!row) throw new Error('Sem leitura Kp');
+                const kp = Number(row[1]);
+                const stamp = row[0] ? new Date(row[0] + 'Z').toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) : 'hora indisponível';
+                el.innerText = `• Índice geomagnético Kp: ${kp.toFixed(1)} (NOAA • ${stamp} UTC)`;
+                el.dataset.live = 'true';
+            } catch (e) {
+                el.innerText = '• Índice geomagnético Kp: feed NOAA indisponível';
+                el.dataset.live = 'false';
             }
         }
 
@@ -1975,7 +2663,7 @@
                         `<td>☄️ NEO</td>` +
                         `<td><b>${ast.name}</b></td>` +
                         `<td>${dist}</td>` +
-                        `<td style="color: var(--cor-alerta); font-weight: bold;">ORBITAL</td>` +
+                        `<td style="color: var(--cor-alerta); font-weight: bold;">APROXIMAÇÃO</td>` +
                         `</tr>`;
             });
 
@@ -2150,7 +2838,7 @@
                 const lat = Math.asin(pos.y / r) * (180 / Math.PI);
                 const lon = Math.atan2(pos.z, -pos.x) * (180 / Math.PI);
 
-                item.element.innerHTML = `☄️ <b>${item.groupData.name}</b><br>Dist: ${item.groupData.distText}`;
+                item.element.innerHTML = `☄️ <b>${escapeHtml(item.groupData.name)}</b><br>${item.groupData.distText}`;
 
                 tempV.copy(mesh.position);
                 tempV.project(camera);
@@ -2224,6 +2912,629 @@
             });
         }
 
+
+        function createConnectionLayer() {
+            if (!scene || !earthMesh) return;
+            if (connectionLayer) {
+                earthMesh.remove(connectionLayer);
+                connectionLayer.traverse(o => { if (o.geometry) o.geometry.dispose(); if (o.material) { if (Array.isArray(o.material)) o.material.forEach(m=>m.dispose()); else o.material.dispose(); } });
+            }
+            connectionLayer = new THREE.Group();
+            const radius = 102.15;
+            const vectors = VORTICES.map(v => latLonToVector3(v.lat, v.lon, 1).normalize());
+            const addGeodesicArc = (a,b,i,j) => {
+                const dot = THREE.MathUtils.clamp(a.dot(b), -1, 1);
+                const angle = Math.acos(dot);
+                const steps = Math.max(48, Math.ceil(angle * 90));
+                const points = [];
+                for (let k=0;k<=steps;k++) {
+                    const t=k/steps;
+                    let v;
+                    if (angle < 1e-7) v=a.clone();
+                    else if (Math.PI-angle < 1e-5) {
+                        const axis = new THREE.Vector3(0,1,0).cross(a).normalize();
+                        v=a.clone().applyAxisAngle(axis, angle*t);
+                    } else {
+                        const sin=Math.sin(angle);
+                        v=a.clone().multiplyScalar(Math.sin((1-t)*angle)/sin).add(b.clone().multiplyScalar(Math.sin(t*angle)/sin));
+                    }
+                    points.push(v.normalize().multiplyScalar(radius));
+                }
+                const geometry=new THREE.BufferGeometry().setFromPoints(points);
+                const material=new THREE.LineBasicMaterial({color:((i+j)%3===0)?0x00eaff:0x8d65ff,transparent:true,opacity:.56,depthTest:true});
+                const line=new THREE.Line(geometry,material);line.renderOrder=6;line.userData.connectionLine=true;connectionLayer.add(line);
+            };
+            // Grafo completo K12: cada um dos 12 pontos se conecta uma vez a cada outro (12*11/2 = 66 arcos).
+            for(let i=0;i<vectors.length;i++) for(let j=i+1;j<vectors.length;j++) addGeodesicArc(vectors[i],vectors[j],i,j);
+            // Nós brilhantes nas coordenadas geográficas exatas dos 12 vértices.
+            vectors.forEach((v,i)=>{
+                const node=new THREE.Mesh(new THREE.SphereGeometry(1.45,12,12),new THREE.MeshBasicMaterial({color:0x9ffcff,transparent:true,opacity:.95}));
+                node.position.copy(v.clone().multiplyScalar(radius+0.35));node.userData.vortexNode=VORTICES[i].id;connectionLayer.add(node);
+            });
+            earthMesh.add(connectionLayer);
+            connectionLayer.visible=!!featureState.connections;
+        }
+
+        function setFeature(key, enabled) {
+            if (!(key in featureState)) return;
+            featureState[key] = !!enabled;
+            const button=document.querySelector(`.feature-toggle[data-feature="${key}"]`);
+            if(button){button.classList.toggle('active',!!enabled);const state=button.querySelector('.state');if(state)state.textContent=enabled?'ON':'OFF';button.setAttribute('aria-pressed',String(!!enabled));}
+            if(key==='connections'){
+                if(enabled && (!connectionLayer || !connectionLayer.children.length)) createConnectionLayer();
+                if(connectionLayer) connectionLayer.visible=!!enabled;
+            }
+            if(key==='radar'){
+                const panel=document.getElementById('radar-panel');if(panel){panel.classList.toggle('open',!!enabled);panel.setAttribute('aria-hidden',String(!enabled));}
+                if(enabled){refreshRadarPanel();if(!radarAnimationFrame)animateRadar();}
+                else if(radarAnimationFrame){cancelAnimationFrame(radarAnimationFrame);radarAnimationFrame=null;}
+            }
+            if(key==='timeline'){const panel=document.getElementById('timeline-panel');if(panel)panel.classList.toggle('open',!!enabled);if(enabled)refreshTimelinePanel();}
+            if(key==='lab'){const panel=document.getElementById('lab-panel');if(panel){panel.classList.toggle('open',!!enabled);panel.setAttribute('aria-hidden',String(!enabled));}if(enabled){refreshLabAnalysis();if(Date.now()-labLastRefresh>10*60*1000)fetchLabQuakes();}}
+            if(key==='mode'){
+                // O visual de investigação já é o padrão permanente; este botão abre/fecha apenas o dossiê.
+                if(globalHazardLayer)globalHazardLayer.visible=!!enabled;
+                const panel=document.getElementById('investigation-panel');if(panel)panel.classList.toggle('open',!!enabled);
+                if(enabled){
+                    rotationBeforeInvestigation=isRotating;
+                    isRotating=false;const rotate=document.getElementById('btn-rotate');if(rotate)rotate.classList.remove('active');
+                    refreshInvestigationPanel();
+                    if(Date.now()-lastVortexNewsFetch>2*60*1000)fetchVortexNews();
+                    fetchSelectedVortexWeather();
+                    const activeVortex=VORTICES.find(x=>x.id===selectedInvestigationVortexId);if(activeVortex)fetchVortexFires(activeVortex);
+                    if(Date.now()-labLastRefresh>10*60*1000)fetchLabQuakes();
+                } else {
+                    isRotating=rotationBeforeInvestigation;const rotate=document.getElementById('btn-rotate');if(rotate)rotate.classList.toggle('active',isRotating);
+                }
+            }
+        }
+
+        async function fetchVortexFires(v,force=false){
+            if(!v)return;
+            const cached=vortexFirmsCache[v.id];
+            if(!force&&cached?.status==='ok'&&cached.at&&Date.now()-new Date(cached.at).getTime()<5*60*1000)return;
+            if(vortexFirmsPending.has(v.id))return;
+            vortexFirmsPending.add(v.id);
+            if(featureState.mode)refreshInvestigationPanel();
+            try{
+                const params=new URLSearchParams({lat:String(v.lat),lon:String(v.lon),radiusKm:'1000',days:'2'});
+                const response=await fetch(`/api/firms?${params.toString()}`,{headers:{'Accept':'application/json'},cache:'no-store'});
+                const data=await response.json().catch(()=>({}));
+                if(!response.ok)throw new Error(data.error||`Consulta NASA FIRMS indisponível (HTTP ${response.status})`);
+                const items=Array.isArray(data.items)?data.items:[];
+                vortexFirmsCache[v.id]={status:'ok',items,at:new Date(data.fetchedAt||Date.now()),url:'https://firms.modaps.eosdis.nasa.gov/map/',source:data.source||'VIIRS_SNPP_NRT'};
+            }catch(error){
+                vortexFirmsCache[v.id]={status:'error',items:vortexFirmsCache[v.id]?.items||[],error:String(error.message||error),at:new Date()};
+            }finally{
+                vortexFirmsPending.delete(v.id);
+                if(featureState.mode)refreshInvestigationPanel();
+            }
+        }
+        function firmsLocalDate(item){if(!item.date)return 'Data informada pelo sensor indisponível';const raw=String(item.time||'0000').padStart(4,'0'),stamp=Date.parse(`${item.date}T${raw.slice(0,2)}:${raw.slice(2,4)}:00Z`);if(!Number.isFinite(stamp))return `${item.date} ${raw.slice(0,2)}:${raw.slice(2,4)} UTC`;const fake={geometry:{coordinates:[item.lon,item.lat,0]},properties:{time:stamp}};return formatQuakeLocalTime(fake);}
+
+        function selectInvestigationVortex(id){
+            selectedInvestigationVortexId=Number(id);
+            selectedVortexWeather=null;refreshInvestigationPanel();fetchSelectedVortexWeather();const selected=VORTICES.find(x=>x.id===selectedInvestigationVortexId);if(selected)fetchVortexFires(selected);
+        }
+
+        function refreshInvestigationPanel(){
+            const list=document.getElementById('investigation-place-list');
+            const detail=document.getElementById('investigation-detail');
+            if(!list||!detail)return;
+            const now=Date.now(),cutoff=now-24*60*60*1000;
+            const getQuakes=v=>(latestQuakeFeatures||[]).filter(q=>{
+                const t=Number(q.properties?.time||0),c=q.geometry?.coordinates||[];
+                return t>=cutoff&&c.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]))<=800;
+            }).sort((a,b)=>(b.properties?.time||0)-(a.properties?.time||0));
+            list.innerHTML=VORTICES.map(v=>`<button type="button" class="investigation-place ${v.id===selectedInvestigationVortexId?'active':''}" data-investigation-vortex="${v.id}">${escapeHtml(v.name)}</button>`).join('');
+            list.querySelectorAll('[data-investigation-vortex]').forEach(btn=>btn.addEventListener('click',()=>selectInvestigationVortex(btn.dataset.investigationVortex)));
+            const v=VORTICES.find(x=>x.id===selectedInvestigationVortexId)||VORTICES[0];
+            const quakes=(labQuakeFeatures.length?labQuakeFeatures:latestQuakeFeatures).filter(q=>{const t=Number(q.properties?.time||0),c=q.geometry?.coordinates||[];return t>=Date.now()-30*86400000&&c.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]))<=800;}).sort((a,b)=>(b.properties?.time||0)-(a.properties?.time||0)),news=vortexNewsCache[v.id]||[];
+            const monthQuakes=(labQuakeFeatures||[]).filter(q=>{const c=q.geometry?.coordinates||[];return Number(q.properties?.time)>=Date.now()-30*86400000&&c.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]))<=800;});
+            const monthMax=monthQuakes.length?Math.max(...monthQuakes.map(q=>Number(q.properties?.mag||0))).toFixed(1):'—';
+            quakes.forEach(q=>{const key=quakeTimezoneKey(q);if(key&&!quakeTimezoneCache.has(key)&&!quakeTimezonePending.has(key))resolveQuakeTimezone(q).then(()=>{if(featureState.mode&&selectedInvestigationVortexId===v.id)refreshInvestigationPanel();});});
+            const quakeRows=quakes.slice(0,100).map(q=>{const p=q.properties||{},c=q.geometry?.coordinates||[],distance=calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]));return `<div class="vortex-event"><b>⚡ Sismo M${Number(p.mag||0).toFixed(1)}</b> — ${escapeHtml(p.place||'Local não informado')}<small>Hora local do epicentro: ${formatQuakeLocalTime(q)} • ${distance.toFixed(0)} km do ponto • ${Number(c[2]||0).toFixed(1)} km de profundidade • coordenadas ${Number(c[1]).toFixed(4)}°, ${Number(c[0]).toFixed(4)}° • <a href="${escapeHtml(p.url||'https://earthquake.usgs.gov/earthquakes/search/')}" target="_blank" rel="noopener noreferrer">USGS ↗</a></small></div>`;}).join('');
+            const newsRows=news.map(n=>`<div class="vortex-event news"><b>📰 ${escapeHtml(n.title||'Notícia')}</b><small>${escapeHtml(n.source||'GDELT')} • ${n.date?new Date(n.date).toLocaleString('pt-BR'):'data não informada'} ${n.url?`• <a href="${escapeHtml(n.url)}" target="_blank" rel="noopener noreferrer">Abrir fonte ↗</a>`:''}</small></div>`).join('');
+            const fireData=vortexFirmsCache[v.id]||{status:'missing-key',items:[]};(fireData.items||[]).slice(0,30).forEach(f=>{const fake={geometry:{coordinates:[f.lon,f.lat,0]}};const tzKey=quakeTimezoneKey(fake);if(tzKey&&!quakeTimezoneCache.has(tzKey)&&!quakeTimezonePending.has(tzKey))resolveQuakeTimezone(fake).then(()=>{if(featureState.mode&&selectedInvestigationVortexId===v.id)refreshInvestigationPanel();});});const fireRows=(fireData.items||[]).slice(0,30).map(f=>`<div class="vortex-event"><b>🔥 Foco térmico VIIRS</b><small>${f.lat.toFixed(4)}°, ${f.lon.toFixed(4)}° • brilho ${escapeHtml(String(f.bright))} • confiança ${escapeHtml(String(f.confidence))} • ${escapeHtml(firmsLocalDate(f))} • <a href="${f.url}" target="_blank" rel="noopener noreferrer">NASA FIRMS ↗</a></small></div>`).join('');
+            const fireStatus=fireData.status==='ok'?`${fireData.items.length} detecção(ões) no recorte consultado; atualização ${fireData.at?.toLocaleString('pt-BR')||'—'}`:fireData.status==='error'?`Falha na consulta: ${escapeHtml(fireData.error||'erro desconhecido')}`:'Consulta indisponível. Configure NASA_FIRMS_MAP_KEY nas Environment Variables da Vercel e publique um novo deploy.';
+            const hazards=globalHazardFeatures.filter(f=>{const c=f.geometry?.coordinates;if(!c)return false;const xy=Array.isArray(c[0])?c[0]:c;return Array.isArray(xy)&&xy.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(xy[1]),Number(xy[0]))<=1200;}).slice(0,10);
+            const hazardRows=hazards.map(f=>{const p=f.properties||{},name=p.name||p.eventname||p.eventName||'Alerta GDACS',level=String(p.alertlevel||p.alertLevel||'').toUpperCase();return `<div class="vortex-event news"><b>⚠ ${escapeHtml(name)}</b><small>GDACS • ${escapeHtml(level||'alerta')} • ${escapeHtml(p.fromdate||p.fromDate||p.todate||'data não informada')} • ${p.url?`<a href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer">Registro original ↗</a>`:'<a href="https://www.gdacs.org/" target="_blank" rel="noopener noreferrer">GDACS ↗</a>'}</small></div>`;}).join('');
+            const w=selectedVortexWeather;const weatherRow=w?`${w.temperature_2m}°C • sensação ${w.apparent_temperature}°C • umidade ${w.relative_humidity_2m}% • chuva ${w.precipitation} mm • vento ${w.wind_speed_10m} km/h • rajadas ${w.wind_gusts_10m} km/h`:'Aguardando consulta meteorológica para este ponto.';
+            detail.innerHTML=`<h4>${escapeHtml(v.name)}</h4><div class="vortex-region">${escapeHtml(v.region)} • ${v.lat.toFixed(2)}°, ${v.lon.toFixed(2)}°</div><div class="investigation-hazard-legend"><span><i style="background:#24d9ff"></i>EVENTO</span><span><i style="background:#baff32"></i>NÚCLEO CRÍTICO</span><span><i style="background:#ff9b35"></i>ALERTA LARANJA</span><span><i style="background:#ff3048"></i>ALERTA VERMELHO</span></div><table class="investigation-table"><tbody><tr><th>COORDENADAS</th><td>${v.lat.toFixed(4)}°, ${v.lon.toFixed(4)}°</td></tr><tr><th>FENÔMENOS CADASTRADOS</th><td>${escapeHtml(v.desc||'Sem descrição cadastrada.')}</td></tr><tr><th>HIPÓTESE DA MALHA</th><td>${escapeHtml(v.theory||'Sem hipótese cadastrada.')}</td></tr><tr><th>CLIMA • MODELO</th><td>${weatherRow}</td></tr><tr><th>ALERTAS GDACS</th><td>${hazards.length} alerta(s) em até 1.200 km</td></tr><tr><th>INCÊNDIOS • NASA FIRMS</th><td>${fireStatus}</td></tr><tr><th>SISMOS • 24H</th><td>${quakes.length} registro(s) USGS em até 800 km</td></tr><tr><th>SISMOS • 30 DIAS</th><td>${labLastRefresh?`${monthQuakes.length} registro(s) em até 800 km • maior magnitude M${monthMax}`:'Catálogo mensal USGS carregando...'}</td></tr><tr><th>NOTÍCIAS • 24H</th><td>${news.length} resultado(s) públicos indexados</td></tr><tr><th>ÚLTIMA SINCRONIZAÇÃO</th><td>USGS: ${lastUSGSUpdate?lastUSGSUpdate.toLocaleString('pt-BR'):'aguardando'} • GDACS: ${lastHazardUpdate?lastHazardUpdate.toLocaleString('pt-BR'):'aguardando'}</td></tr></tbody></table><div class="investigation-events"><div class="vortex-no-event">A ficha lista até 100 registros sísmicos mais recentes do raio de 800 km (30 dias); o total encontrado aparece no título. Cada registro inclui magnitude, profundidade, coordenadas, horário local estimado e link USGS.</div><h5>INCÊNDIOS DETECTADOS POR SATÉLITE • NASA FIRMS</h5>${fireRows||`<div class="vortex-no-event">${fireStatus}</div>`}<h5>ALERTAS DE CICLONES, ENCHENTES E DESASTRES • GDACS</h5>${hazardRows||'<div class="vortex-no-event">Nenhum alerta GDACS retornado no recorte consultado. Isso não significa ausência de risco.</div>'}<h5>REGISTROS SÍSMICOS PRÓXIMOS • USGS (30 DIAS) — ${quakes.length} ENCONTRADO(S)</h5>${quakeRows||'<div class="vortex-no-event">Nenhum sismo localizado pelo USGS até 800 km nas últimas 24 horas.</div>'}<h5>NOTÍCIAS E REGISTROS HISTÓRICOS • GDELT (12 MESES)</h5>${newsRows||'<div class="vortex-no-event">Sem resultado recente nesta busca. Isso não significa que nenhum evento ocorreu.</div>'}</div>`;
+            const quakeCount=VORTICES.reduce((n,node)=>n+getQuakes(node).length,0);
+            const newsCount=Object.values(vortexNewsCache).reduce((n,a)=>n+a.length,0);
+            const summary=document.getElementById('investigation-summary');
+            if(summary)summary.innerHTML=`<span>12 NÓS <b>ATIVOS</b></span><span>SISMOS PRÓXIMOS <b>${quakeCount}</b></span><span>ALERTAS GDACS <b>${globalHazardFeatures.length}</b></span><span>NOTÍCIAS <b>${newsCount}</b></span><span>NOTÍCIAS <b>12 MESES</b></span><span>USGS ATUALIZADO <b>${lastUSGSUpdate?lastUSGSUpdate.toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo',hour12:false}):'AGUARDANDO'}</b></span>`;
+        }
+
+        async function fetchVortexNews(){
+            if(vortexNewsBusy || Date.now()-lastVortexNewsFetch<2*60*1000)return;
+            vortexNewsBusy=true;
+            const cutoff=new Date(Date.now()-365*24*60*60*1000);
+            const start=cutoff.toISOString().replace(/[-:T.Z]/g,'').slice(0,14);
+            const terms=['Bermuda Triangle','Philippine Sea Japan','Tasman Sea Australia New Zealand','Easter Island Rapa Nui','South Atlantic Ocean Brazil Argentina','Mozambique Channel Madagascar','Arctic North Pole','Antarctica South Pole','Aleutian Alaska North Pacific','Central Brazil Goiás','Congo Basin','South Indian Ocean'];
+            let gdeltFailures=0;
+            try{
+                for(let i=0;i<VORTICES.length;i+=3){
+                    const batch=VORTICES.slice(i,i+3);
+                    await Promise.all(batch.map(async(v,offset)=>{
+                        const idx=i+offset,query=`("${terms[idx]}" AND (aircraft OR aviation OR missing OR disappearance OR ship OR incident))`;
+                        const url=`https://api.gdeltproject.org/api/v2/doc/doc?query=${encodeURIComponent(query)}&mode=ArtList&format=json&maxrecords=5&sort=DateDesc&startdatetime=${start}`;
+                        try{const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('GDELT HTTP '+r.status);const d=await r.json();vortexNewsCache[v.id]=(d.articles||[]).slice(0,5).map(a=>({title:a.title,source:a.domain||a.source||'GDELT',date:a.seendate?new Date(a.seendate):null,url:a.url}));}
+                        catch(e){gdeltFailures++;console.warn('Notícias do nó '+v.id+' indisponíveis:',e);vortexNewsCache[v.id]=vortexNewsCache[v.id]||[];}
+                    }));
+                }
+                lastVortexNewsFetch=Date.now();labSourceState.GDELT={ok:gdeltFailures===0,at:new Date(),error:gdeltFailures?`${gdeltFailures}/12 consultas falharam`:""};
+            }catch(e){labSourceState.GDELT={ok:false,at:lastVortexNewsFetch?new Date(lastVortexNewsFetch):null,error:String(e.message||e)};}finally{vortexNewsBusy=false;if(featureState.mode)refreshInvestigationPanel();if(featureState.lab)renderLabHealth();}
+        }
+
+        // CelesTrak fornece elementos orbitais (OMM); satellite.js propaga a órbita para o instante atual.
+        // Isso é posição calculada a partir dos elementos mais recentes, não telemetria de bordo em tempo real.
+        async function fetchSatelliteCatalog() {
+            const list = document.getElementById('radar-satellite-list');
+            if (!window.satellite || typeof window.satellite.json2satrec !== 'function') {
+                if (list) list.innerHTML = '<div class="radar-empty">Biblioteca SGP4 indisponível. Verifique a conexão.</div>';
+                return;
+            }
+            try {
+                const groups = ['stations','visual','weather'];
+                const responses = await Promise.all(groups.map(async group => {
+                    const url = `https://celestrak.org/NORAD/elements/gp.php?GROUP=${group}&FORMAT=JSON`;
+                    const r = await fetch(url, {cache:'no-store'});
+                    if (!r.ok) throw new Error(`CelesTrak ${group}: HTTP ${r.status}`);
+                    return r.json();
+                }));
+                const unique = new Map();
+                responses.flat().forEach(omm => {
+                    const id = Number(omm.NORAD_CAT_ID);
+                    if (!id || id === 25544 || !omm.EPOCH) return; // ISS já possui rastreador próprio
+                    if (!unique.has(id)) unique.set(id, omm);
+                });
+                trackedSatellites = [...unique.values()].slice(0, 240).map(omm => {
+                    try { return { omm, satrec: window.satellite.json2satrec(omm), state:null, marker:null }; }
+                    catch (_) { return null; }
+                }).filter(Boolean);
+                lastSatelliteCatalogUpdate = new Date();
+                propagateTrackedSatellites();
+            } catch (e) {
+                console.warn('Falha no catálogo CelesTrak', e);
+                if (list) list.innerHTML = `<div class="radar-empty">Catálogo de satélites indisponível: ${escapeHtml(e.message)}. Última posição não será inventada.</div>`;
+            }
+        }
+
+        function propagateTrackedSatellites() {
+            if (!trackedSatellites.length || !window.satellite) return;
+            const now = new Date();
+            const gmst = window.satellite.gstime(now);
+            trackedSatellites.forEach(item => {
+                try {
+                    const state = window.satellite.propagate(item.satrec, now);
+                    if (!state || !state.position || !state.velocity) return;
+                    const geo = window.satellite.eciToGeodetic(state.position, gmst);
+                    const lat = window.satellite.degreesLat(geo.latitude);
+                    const lon = window.satellite.degreesLong(geo.longitude);
+                    const speed = Math.hypot(state.velocity.x,state.velocity.y,state.velocity.z);
+                    const alt = geo.height;
+                    if (![lat,lon,speed,alt].every(Number.isFinite)) return;
+                    item.state = {lat,lon,alt,speed,time:now};
+                    if (!item.marker) {
+                        const marker = new THREE.Mesh(new THREE.SphereGeometry(0.85,8,8), new THREE.MeshBasicMaterial({color:0x55baff}));
+                        marker.userData.satellite = item;
+                        earthMesh.add(marker); item.marker = marker; satelliteMarkers.push(marker);
+                    }
+                    // Marcador mostra o ponto subsatélite sobre o globo; altitude real fica nos dados.
+                    item.marker.position.copy(latLonToVector3(lat,lon,100.9));
+                } catch (_) { /* mantém a última propagação válida */ }
+            });
+            if (featureState.radar) refreshRadarPanel();
+        }
+
+        function renderSatelliteTrackingList() {
+            const el = document.getElementById('radar-satellite-list');
+            if (!el) return;
+            const items = trackedSatellites.filter(x=>x.state).slice(0,240);
+            if (!items.length && !issPosData) { el.innerHTML = '<div class="radar-empty">Aguardando elementos orbitais válidos do CelesTrak...</div>'; return; }
+            const age = lastSatelliteCatalogUpdate ? Math.max(0,Math.round((Date.now()-lastSatelliteCatalogUpdate.getTime())/60000)) : null;
+            const issCard = issPosData && Number.isFinite(issPosData.lat) ? `<div class="track-card"><strong>🛰 ISS • Estação Espacial Internacional</strong><br><span class="track-coord">Lat ${issPosData.lat.toFixed(3)}° | Lon ${issPosData.lon.toFixed(3)}°</span><br>Altitude: ${Number(issPosData.alt||0).toFixed(1)} km • Velocidade: ${Number(issPosData.velocity||0).toFixed(3)} km/s<small>Posição via WhereTheISS • atualização ${lastISSUpdate?lastISSUpdate.toLocaleTimeString('pt-BR'):'aguardando'}</small></div>` : '';
+            el.innerHTML = `<div class="radar-empty">Telemetria orbital calculada via elementos CelesTrak/SGP4. Estes satélites não transmitem dados sísmicos ou de asteroides para este site; eventos são obtidos de USGS/NASA/JPL.</div>` + issCard + items.map(item=>{const s=item.state;const name=escapeHtml(item.omm.OBJECT_NAME||'Satélite');const epoch=item.omm.EPOCH?new Date(item.omm.EPOCH):null;const epochAge=epoch&&!Number.isNaN(epoch.getTime())?Math.max(0,Math.round((Date.now()-epoch.getTime())/3600000))+' h':'indisponível';return `<div class="track-card"><strong>🛰 ${name}</strong><br><span class="track-coord">Lat ${s.lat.toFixed(3)}° | Lon ${s.lon.toFixed(3)}°</span><br>Altitude: ${s.alt.toFixed(1)} km • Velocidade: ${s.speed.toFixed(3)} km/s<small>NORAD ${item.omm.NORAD_CAT_ID} • posição propagada ${s.time.toLocaleTimeString('pt-BR')} • época dos elementos: ${epochAge} atrás • catálogo consultado ${age===null?'':`há ${age} min`}</small></div>`;}).join('');
+        }
+
+        // NeoWs lista aproximações; Horizons calcula o vetor geocêntrico instantâneo (posição e velocidade).
+        // Asteroides não têm latitude/longitude terrestre: mostramos RA/Dec, distância da Terra e velocidade espacial.
+        async function fetchAsteroidEphemerides() {
+            const el = document.getElementById('radar-asteroid-track-list');
+            if (!asteroidDataList.length) { if(el) el.innerHTML='<div class="radar-empty">Aguardando catálogo NEO da NASA.</div>'; return; }
+            const candidates = [...asteroidDataList].sort((a,b)=>{
+                const da=Number(a.close_approach_data?.[0]?.miss_distance?.kilometers||Infinity);
+                const db=Number(b.close_approach_data?.[0]?.miss_distance?.kilometers||Infinity);
+                return da-db;
+            }).slice(0,8);
+            const now = new Date();
+            const stamp = d => d.toISOString().replace('T',' ').slice(0,19);
+            const start=stamp(now), stop=stamp(new Date(now.getTime()+2*60000));
+            const results=[];
+            for (const neo of candidates) {
+                const designation = String(neo.designation || neo.name || '').replace(/[()]/g,'').trim();
+                if (!designation) continue;
+                try {
+                    const params = new URLSearchParams({format:'json',COMMAND:`'DES=${designation};'`,OBJ_DATA:'NO',MAKE_EPHEM:'YES',EPHEM_TYPE:'VECTORS',CENTER:"'500@399'",START_TIME:`'${start}'`,STOP_TIME:`'${stop}'`,STEP_SIZE:"'1 m'",VEC_TABLE:'2',OUT_UNITS:'KM-S',REF_PLANE:'FRAME'});
+                    const response=await fetch(`https://ssd.jpl.nasa.gov/api/horizons.api?${params.toString()}`,{cache:'no-store'});
+                    if(!response.ok) throw new Error(`Horizons HTTP ${response.status}`);
+                    const payload=await response.json();
+                    const raw=payload.result||'';
+                    const section=raw.split('$$SOE')[1]?.split('$$EOE')[0]?.trim();
+                    if(!section) throw new Error(payload.error||'Sem vetor retornado');
+                    const row=section.split(/\r?\n/).find(x=>x.trim()&&!x.includes('$$'))||'';
+                    const cols=row.split(',').slice(1).map(x=>Number(x.trim())).filter(Number.isFinite);
+                    if(cols.length<6) throw new Error('Formato de vetor inesperado');
+                    const [x,y,z,vx,vy,vz]=cols;
+                    const distance=Math.hypot(x,y,z), speed=Math.hypot(vx,vy,vz);
+                    const ra=(Math.atan2(y,x)*180/Math.PI+360)%360;
+                    const dec=Math.asin(z/distance)*180/Math.PI;
+                    results.push({name:neo.name||designation,designation,ra,dec,distance,speed,velocity:{x:vx,y:vy,z:vz},position:{x,y,z},approach:neo.close_approach_data?.[0]||{},hazard:!!neo.is_potentially_hazardous_asteroid,time:now});
+                } catch(err) { console.warn('Horizons',designation,err); }
+            }
+            asteroidEphemerides=results; lastAsteroidVectorUpdate=new Date();
+            buildAsteroidVectorMarkers();
+            if(featureState.radar) refreshRadarPanel(); else renderAsteroidTrackingList();
+        }
+
+        function buildAsteroidVectorMarkers() {
+            asteroidLabels.forEach(item=>{ if(item.element) item.element.remove(); if(item.groupData?.mesh) scene.remove(item.groupData.mesh); });
+            asteroidLabels=[];
+            const labelsContainer=document.getElementById('labels-container');
+            asteroidEphemerides.forEach((a,index)=>{
+                const v=new THREE.Vector3(a.position.x,a.position.z,-a.position.y).normalize();
+                const mesh=new THREE.Mesh(new THREE.SphereGeometry(1.35,10,10),new THREE.MeshBasicMaterial({color:a.hazard?0xff4d86:0xffbd55}));
+                mesh.position.copy(v.multiplyScalar(139+(index%3)*5));
+                scene.add(mesh);
+                const label=document.createElement('div');
+                label.className='asteroid-label';
+                label.innerHTML=`☄ <b>${escapeHtml(a.name)}</b><br>RA ${a.ra.toFixed(2)}° • Dec ${a.dec.toFixed(2)}°`;
+                labelsContainer.appendChild(label);
+                asteroidLabels.push({element:label,groupData:{mesh,name:a.name,distText:`${a.distance.toLocaleString('pt-BR',{maximumFractionDigits:0})} km da Terra`,source:a}});
+            });
+        }
+
+        // Animação visual a 200 ms: extrapola localmente o último vetor JPL com a velocidade publicada.
+        // Isso suaviza a representação, mas NÃO cria novas medições nem aumenta a frequência do Horizons.
+        function updateAsteroidPositions() {
+            if (!asteroidLabels.length || !window.THREE) return;
+            const now = Date.now();
+            asteroidLabels.forEach((item,index) => {
+                const a=item.groupData?.source, mesh=item.groupData?.mesh;
+                if(!a||!mesh||!a.position||!a.velocity) return;
+                const dt=Math.max(0,Math.min(120000,(now-a.time.getTime())/1000));
+                const x=a.position.x+a.velocity.x*dt;
+                const y=a.position.y+a.velocity.y*dt;
+                const z=a.position.z+a.velocity.z*dt;
+                const v=new THREE.Vector3(x,z,-y).normalize();
+                mesh.position.copy(v.multiplyScalar(139+(index%3)*5));
+                const distance=Math.hypot(x,y,z);
+                item.groupData.distText=`${distance.toLocaleString('pt-BR',{maximumFractionDigits:0})} km da Terra`;
+            });
+        }
+
+        function renderAsteroidTrackingList() {
+            const el=document.getElementById('radar-asteroid-track-list');
+            if(!el) return;
+            if(!asteroidEphemerides.length) { el.innerHTML='<div class="radar-empty">Efemérides JPL ainda não disponíveis. O catálogo de aproximações não substitui uma posição instantânea.</div>'; return; }
+            el.innerHTML=asteroidEphemerides.map(a=>`<div class="track-card asteroid"><strong>☄ ${escapeHtml(a.name)}</strong><br><span class="track-coord">RA ${a.ra.toFixed(3)}° | Dec ${a.dec.toFixed(3)}°</span><br>Distância geocêntrica: ${a.distance.toLocaleString('pt-BR',{maximumFractionDigits:0})} km<br>Velocidade: ${a.speed.toFixed(3)} km/s<br>XYZ: ${a.position.x.toFixed(0)}, ${a.position.y.toFixed(0)}, ${a.position.z.toFixed(0)} km<br>Vx/Vy/Vz: ${a.velocity.x.toFixed(3)}, ${a.velocity.y.toFixed(3)}, ${a.velocity.z.toFixed(3)} km/s<small>Vetor geocêntrico JPL/Horizons • ${a.time.toLocaleTimeString('pt-BR')} UTC • ${a.hazard?'classificado como potencialmente perigoso':'sem classificação de potencial perigo'}</small></div>`).join('');
+        }
+
+        function refreshRadarPanel() {
+            const el = document.getElementById('radar-live-content');
+            if (!el) return;
+            const hours=Number(document.getElementById('radar-time-filter')?.value||24);
+            const minMag=Number(document.getElementById('radar-mag-filter')?.value||0);
+            const cutoff=Date.now()-hours*3600000;
+            const quakes=(latestQuakeFeatures||[]).filter(q=>(Number(q.properties?.time)||0)>=cutoff && Number(q.properties?.mag||0)>=minMag);
+            const neoCount = asteroidDataList.length;
+            const fmtAge = d => d ? `${Math.max(0,Math.round((Date.now()-d.getTime())/1000))}s atrás` : 'sem leitura';
+            el.innerHTML = `<div class="feature-stat"><span>Eventos sísmicos • 24h</span><b>${quakes.length}</b></div><div class="feature-stat"><span>NEOs no horizonte • 7 dias</span><b>${neoCount}</b></div><div class="feature-stat"><span>ISS</span><b>${liveFeedErrors.iss?'SEM SINAL':'RASTREANDO'}</b></div><div class="feature-stat"><span>USGS atualizado</span><b>${fmtAge(lastUSGSUpdate)}</b></div><div class="feature-stat"><span>NASA atualizado</span><b>${fmtAge(lastNASAUpdate)}</b></div><p class="radar-empty">Varredura visual cartográfica dos eventos publicados pelos feeds. Não é um radar físico nem prevê terremotos.</p>`;
+            const feed = document.getElementById('radar-feed-list');
+            const top = [...quakes].sort((a,b)=>(b.properties?.time||0)-(a.properties?.time||0)).slice(0,7);
+            feed.innerHTML = top.length ? top.map(q => { const p=q.properties||{}; const c=q.geometry?.coordinates||[]; return `<div class="radar-feed-item"><strong>M${Number(p.mag||0).toFixed(1)} • ${escapeHtml(p.place||'Local não informado')}</strong><small>${new Date(p.time).toLocaleString('pt-BR')} • profundidade ${Number(c[2]||0).toFixed(0)} km</small></div>`; }).join('') : '<div class="radar-empty">Nenhum evento no feed atual.</div>';
+            const neo = document.getElementById('radar-neo-list');
+            const upcoming = asteroidDataList.slice(0,6);
+            neo.innerHTML = upcoming.length ? upcoming.map(a => { const ca=a.close_approach_data?.[0]||{}; const km=Number(ca.miss_distance?.kilometers||0); const date=ca.close_approach_date_full||ca.close_approach_date||'data indisponível'; return `<div class="radar-neo-item"><strong>☄ ${escapeHtml(a.name||'NEO')}</strong><small>Maior aproximação: ${escapeHtml(date)} • ${km?km.toLocaleString('pt-BR',{maximumFractionDigits:0})+' km':'distância indisponível'}${a.is_potentially_hazardous_asteroid?' • classificação potencialmente perigoso':''}</small></div>`; }).join('') : '<div class="radar-empty">Sem dados NEO disponíveis no momento.</div>';
+            renderSatelliteTrackingList();
+            renderAsteroidTrackingList();
+            document.getElementById('radar-usgs-source').textContent = `USGS: ${liveFeedErrors.usgs?'ERRO':'ATUALIZADO'}`;
+            document.getElementById('radar-nasa-source').textContent = `NASA: ${liveFeedErrors.nasa?'ERRO':'ATUALIZADO'}`;
+            document.getElementById('radar-iss-source').textContent = `ISS: ${liveFeedErrors.iss?'SEM SINAL':'ATUALIZADO'}`;
+            drawRadarScope();
+        }
+
+        function drawRadarScope() {
+            const canvas = document.getElementById('radar-scope');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const w=canvas.width, h=canvas.height, cx=w/2, cy=h/2, r=Math.min(w,h)*.435;
+            ctx.clearRect(0,0,w,h);
+            ctx.save();
+            ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.clip();
+            ctx.fillStyle='#03121b'; ctx.fillRect(cx-r,cy-r,r*2,r*2);
+
+            // Projeção azimutal equidistante centrada em (0°, 0°): cada evento
+            // é colocado a partir da latitude/longitude real, com direção e
+            // distância angular corretas em relação ao centro do radar.
+            const project=(lat,lon)=>{
+                const phi=Number(lat)*Math.PI/180, lam=Number(lon)*Math.PI/180;
+                if(!Number.isFinite(phi)||!Number.isFinite(lam)) return null;
+                const cosc=Math.max(-1,Math.min(1,Math.cos(phi)*Math.cos(lam)));
+                const c=Math.acos(cosc), sinc=Math.sin(c);
+                const k=c<1e-8?1:(Math.abs(sinc)<1e-8?1:c/sinc);
+                const x=k*Math.cos(phi)*Math.sin(lam), y=k*Math.sin(phi);
+                return {x:cx+(x/Math.PI)*r,y:cy-(y/Math.PI)*r};
+            };
+
+            // Anéis de distância angular e grade geográfica de referência.
+            ctx.strokeStyle='rgba(40,255,208,.27)'; ctx.lineWidth=1;
+            for(let i=1;i<=4;i++){ctx.beginPath();ctx.arc(cx,cy,r*i/4,0,Math.PI*2);ctx.stroke();}
+            for(let a=0;a<Math.PI*2;a+=Math.PI/6){ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.stroke();}
+            ctx.strokeStyle='rgba(100,190,190,.16)';
+            for(let lat=-60;lat<=60;lat+=30){
+                ctx.beginPath(); let begun=false;
+                for(let lon=-180;lon<=180;lon+=3){const pt=project(lat,lon);if(!pt)continue;if(!begun){ctx.moveTo(pt.x,pt.y);begun=true;}else ctx.lineTo(pt.x,pt.y);}
+                ctx.stroke();
+            }
+            for(let lon=-150;lon<=180;lon+=30){
+                ctx.beginPath();let begun=false;
+                for(let lat=-89;lat<=89;lat+=2){const pt=project(lat,lon);if(!pt)continue;if(!begun){ctx.moveTo(pt.x,pt.y);begun=true;}else ctx.lineTo(pt.x,pt.y);}
+                ctx.stroke();
+            }
+
+            // Varredura animada sobre o mapa geográfico.
+            const grad=ctx.createConicGradient(radarSweepAngle,cx,cy);
+            grad.addColorStop(0,'rgba(0,255,170,0)');grad.addColorStop(.82,'rgba(0,255,170,0)');grad.addColorStop(1,'rgba(0,255,170,.24)');
+            ctx.fillStyle=grad;ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,0,Math.PI*2);ctx.closePath();ctx.fill();
+            ctx.strokeStyle='#42ffd0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(radarSweepAngle)*r,cy+Math.sin(radarSweepAngle)*r);ctx.stroke();
+
+            const hours=Number(document.getElementById('radar-time-filter')?.value||24);
+            const minMag=Number(document.getElementById('radar-mag-filter')?.value||0);
+            const cutoff=Date.now()-hours*3600000;
+            // Terremotos: latitude/longitude e magnitude diretamente do USGS.
+            (latestQuakeFeatures||[]).filter(q=>(Number(q.properties?.time)||0)>=cutoff && Number(q.properties?.mag||0)>=minMag).forEach(q=>{
+                const c=q.geometry?.coordinates;if(!c)return;const pt=project(c[1],c[0]);if(!pt)return;
+                const mag=Number(q.properties?.mag||0),color=mag>=6?'#ff3048':mag>=4.5?'#ff9b35':'#24d9ff';
+                ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=mag>=5?12:7;ctx.beginPath();ctx.arc(pt.x,pt.y,mag>=6?6:mag>=4.5?4.5:3,0,Math.PI*2);ctx.fill();
+            });
+            ctx.shadowBlur=0;
+
+            // Alertas GDACS: usa o centroide da geometria publicada pelo feed.
+            (globalHazardFeatures||[]).forEach(f=>{
+                const g=f.geometry;if(!g||!g.coordinates)return;let xy=null;
+                const first=g.coordinates;
+                if(g.type==='Point')xy=first;
+                else {const flat=[];const walk=v=>{if(Array.isArray(v)&&v.length>=2&&typeof v[0]==='number'&&typeof v[1]==='number')flat.push(v);else if(Array.isArray(v))v.forEach(walk);};walk(first);if(flat.length){xy=[flat.reduce((a,v)=>a+v[0],0)/flat.length,flat.reduce((a,v)=>a+v[1],0)/flat.length];}}
+                if(!xy)return;const pt=project(xy[1],xy[0]);if(!pt)return;
+                const level=String(f.properties?.alertlevel||f.properties?.alertLevel||'').toLowerCase();
+                const color=level.includes('red')?'#ff3048':level.includes('orange')?'#ff9b35':'#ffd166';
+                ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=10;ctx.beginPath();ctx.moveTo(pt.x,pt.y-7);ctx.lineTo(pt.x+6,pt.y+5);ctx.lineTo(pt.x-6,pt.y+5);ctx.closePath();ctx.fill();
+            });
+            ctx.shadowBlur=0;
+
+            // ISS: posição geográfica real mais recente recebida da fonte.
+            if(issPosData&&Number.isFinite(Number(issPosData.lat))&&Number.isFinite(Number(issPosData.lon))){
+                const pt=project(issPosData.lat,issPosData.lon);if(pt){ctx.fillStyle='#55baff';ctx.strokeStyle='#d9f3ff';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(pt.x,pt.y,6,0,Math.PI*2);ctx.fill();ctx.stroke();}
+            }
+            ctx.restore();
+            ctx.strokeStyle='rgba(66,255,208,.75)';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.stroke();
+            ctx.fillStyle='#80b6ac';ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('0° / GREENWICH',cx,cy-r-9);
+            ctx.textAlign='left';ctx.fillText('N',cx+5,cy-r+14);ctx.fillText('S',cx+5,cy+r-7);
+            ctx.textAlign='center';ctx.fillText('PROJEÇÃO GLOBAL • AZIMUTAL',cx, h-8);
+        }
+
+        function animateRadar() {
+            if (!featureState.radar) { radarAnimationFrame=null; return; }
+            radarSweepAngle=(radarSweepAngle+.018)%(Math.PI*2);
+            drawRadarScope();
+            radarAnimationFrame=requestAnimationFrame(animateRadar);
+        }
+
+        // Catálogo mensal independente para análises históricas; não substitui o feed diário do globo.
+        async function fetchLabQuakes(force=false){
+            if(labQuakeBusy || (!force && Date.now()-labLastRefresh<10*60*1000))return;
+            labQuakeBusy=true;
+            const refresh=document.getElementById('lab-refresh');if(refresh){refresh.disabled=true;refresh.textContent='⟳ Consultando USGS...';}
+            try{
+                const response=await fetch('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson',{cache:'no-store'});
+                if(!response.ok)throw new Error('USGS HTTP '+response.status);
+                const data=await response.json();labQuakeFeatures=(data.features||[]).filter(q=>q.geometry?.coordinates&&Number.isFinite(Number(q.properties?.time)));
+                lastLabQuakeUpdate=new Date();labLastRefresh=Date.now();labSourceState.USGS={ok:true,at:lastLabQuakeUpdate,error:""};
+            }catch(error){labSourceState.USGS={ok:false,at:lastUSGSUpdate||lastLabQuakeUpdate,error:String(error.message||error)};console.warn('Laboratório USGS:',error);}
+            finally{labQuakeBusy=false;if(refresh){refresh.disabled=false;refresh.textContent='↻ Sincronizar análise';}if(featureState.lab)refreshLabAnalysis();}
+        }
+        function labDistanceToArcKm(point,a,b){
+            const rad=Math.PI/180, toVec=(lat,lon)=>{const p=lat*rad,l=lon*rad;return [Math.cos(p)*Math.cos(l),Math.cos(p)*Math.sin(l),Math.sin(p)];};
+            const dot=(u,v)=>Math.max(-1,Math.min(1,u[0]*v[0]+u[1]*v[1]+u[2]*v[2]));
+            const A=toVec(a.lat,a.lon),B=toVec(b.lat,b.lon),P=toVec(point.lat,point.lon),omega=Math.acos(dot(A,B));
+            if(!Number.isFinite(omega)||omega<1e-8)return 6371*Math.acos(dot(A,P));
+            const sin=Math.sin(omega);let best=Infinity;
+            for(let i=0;i<=10;i++){const t=i/10,wa=Math.sin((1-t)*omega)/sin,wb=Math.sin(t*omega)/sin;const Q=[wa*A[0]+wb*B[0],wa*A[1]+wb*B[1],wa*A[2]+wb*B[2]];const n=Math.hypot(...Q);const angle=Math.acos(dot(P,Q.map(x=>x/n)));best=Math.min(best,angle*6371);}
+            return best;
+        }
+        function labCanvasChart(id,labels,series,opts={}){
+            const canvas=document.getElementById(id);if(!canvas)return;const rect=canvas.getBoundingClientRect(),w=Math.max(280,Math.floor(rect.width||canvas.parentElement?.clientWidth||500)),h=opts.height||220,dpr=Math.min(window.devicePixelRatio||1,2);
+            canvas.width=w*dpr;canvas.height=h*dpr;canvas.style.height=h+'px';const ctx=canvas.getContext('2d');ctx.scale(dpr,dpr);ctx.clearRect(0,0,w,h);
+            const pad={l:36,r:12,t:16,b:38},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b,max=Math.max(1,...series.map(x=>x.value));
+            ctx.font='10px monospace';ctx.textAlign='right';ctx.textBaseline='middle';
+            for(let i=0;i<=4;i++){const y=pad.t+ph*i/4;ctx.strokeStyle='#233b57';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillStyle='#7893b1';ctx.fillText(String(Math.round(max*(4-i)/4)),pad.l-7,y);}
+            if(!labels.length){ctx.fillStyle='#8da7c4';ctx.textAlign='center';ctx.fillText('Sem registros nesta janela',w/2,h/2);return;}
+            const step=pw/labels.length,bw=Math.max(5,Math.min(28,step*.58));
+            series.forEach((item,i)=>{const bh=ph*item.value/max,x=pad.l+i*step+(step-bw)/2,y=pad.t+ph-bh;const grad=ctx.createLinearGradient(0,y,0,pad.t+ph);grad.addColorStop(0,'#43e2d1');grad.addColorStop(1,'#2679ff');ctx.fillStyle=grad;ctx.fillRect(x,y,bw,Math.max(1,bh));});
+            ctx.fillStyle='#91a9c7';ctx.textAlign='center';ctx.textBaseline='top';const stride=Math.max(1,Math.ceil(labels.length/(w<420?6:12)));labels.forEach((label,i)=>{if(i%stride===0)ctx.fillText(label.length>10?label.slice(0,9)+'…':label,pad.l+i*step+step/2,h-pad.b+8);});
+        }
+        function renderLabHealth(){
+            const el=document.getElementById('lab-source-health');if(!el)return;
+            const dynamic=[{name:'USGS',x:labSourceState.USGS},{name:'GDACS',x:labSourceState.GDACS},{name:'NASA FIRMS',x:(()=>{const latest=Object.values(vortexFirmsCache).find(x=>x?.status);return latest?{ok:latest.status==='ok',at:latest.at||null,error:latest.error||''}:{ok:false,at:null,error:'Aguardando consulta via Vercel Functions; requer NASA_FIRMS_MAP_KEY'};})()},{name:'GDELT',x:labSourceState.GDELT},{name:'OPEN-METEO',x:labSourceState['OPEN-METEO']},{name:'NASA / NeoWs',x:{ok:!liveFeedErrors.nasa&&!!lastNASAUpdate,at:lastNASAUpdate,error:liveFeedErrors.nasa?'Última consulta NASA falhou':''}},{name:'ISS / WhereTheISS',x:{ok:!liveFeedErrors.iss&&!!lastISSUpdate,at:lastISSUpdate,error:liveFeedErrors.iss?'Última consulta ISS falhou':''}},{name:'CELESTRAK / SGP4',x:{ok:!!lastSatelliteCatalogUpdate,at:lastSatelliteCatalogUpdate,error:lastSatelliteCatalogUpdate?'':'Catálogo orbital ainda não consultado'}}];el.innerHTML=dynamic.map(({name,x})=>{const cls=x.ok?'ok':x.at?'warn':'bad',state=x.ok?'CONSULTA OK':x.at?'FALHA • ÚLTIMO DADO PRESERVADO':'AGUARDANDO';const when=x.at?new Date(x.at).toLocaleString('pt-BR'):'sem consulta concluída';return `<div class="lab-health-item ${cls}"><b>${name}</b><span>${state}</span><span>${escapeHtml(when)}</span>${x.error?`<span>${escapeHtml(x.error).slice(0,110)}</span>`:''}</div>`;}).join('');
+        }
+        function refreshLabAnalysis(){
+            // Atualização leve: estatísticas dos nós e série temporal. A geometria fica sob demanda.
+            const windowDays=Number(document.getElementById('lab-window')?.value||30),cutoff=Date.now()-windowDays*86400000;
+            const source=labQuakeFeatures.length?labQuakeFeatures:latestQuakeFeatures;
+            const quakePoints=[];
+            for(const q of source){const c=q.geometry?.coordinates,p=q.properties||{},time=Number(p.time);if(!Array.isArray(c)||c.length<2||time<cutoff)continue;const lat=Number(c[1]),lon=Number(c[0]);if(Number.isFinite(lat)&&Number.isFinite(lon))quakePoints.push({lat,lon,mag:Number(p.mag||0),time,place:p.place||'Local não informado'});}
+            labCachedQuakePoints=quakePoints;
+            const hazards=globalHazardFeatures||[];
+            const rows=VORTICES.map(v=>{let count=0,max=0,near=0;for(const q of quakePoints){if(calculateDistanceKm(v.lat,v.lon,q.lat,q.lon)<=800){count++;if(q.mag>max)max=q.mag;}}for(const f of hazards){let c=f.geometry?.coordinates;if(Array.isArray(c?.[0]))c=c[0];if(Array.isArray(c)&&c.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]))<=1200)near++;}return {v,count,max,near};});
+            const nodes=rows.filter(r=>r.count||r.near).length;
+            const kpi=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value);};
+            kpi('lab-kpi-quakes',quakePoints.length);kpi('lab-kpi-hazards',hazards.length);kpi('lab-kpi-nodes',nodes+'/12');kpi('lab-kpi-lines','—');
+            const body=document.getElementById('lab-node-table');if(body)body.innerHTML=rows.map(r=>`<tr><td>${escapeHtml(r.v.name.replace(/^\d+\.\s*/,''))}</td><td>${r.count}</td><td>${r.count?'M'+r.max.toFixed(1):'—'}</td><td>${r.near}</td></tr>`).join('');
+            labCanvasChart('lab-node-chart',rows.map(r=>r.v.name.replace(/^\d+\.\s*/,'')),rows.map(r=>({value:r.count})),{height:170});
+            const bucketCount=windowDays===7?7:30,buckets=Array.from({length:bucketCount},(_,i)=>({label:i===bucketCount-1?'HOJE':new Date(Date.now()-(bucketCount-1-i)*86400000).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}),value:0}));
+            for(const q of quakePoints){const age=Math.max(0,Math.floor((Date.now()-q.time)/86400000)),idx=bucketCount-1-age;if(idx>=0&&idx<buckets.length)buckets[idx].value++;}
+            labCanvasChart('lab-history-chart',buckets.map(x=>x.label),buckets,{height:180});
+            const findings=document.getElementById('lab-geometry-results');if(findings&&!labGeometryHasRun)findings.innerHTML='<div class="lab-finding">Detector em espera. A análise geométrica será executada somente quando você clicar no botão, para evitar travamentos.</div>';
+            const updated=document.getElementById('lab-updated');if(updated)updated.textContent=`Resumo atualizado ${new Date().toLocaleTimeString('pt-BR')} • USGS: ${lastLabQuakeUpdate?lastLabQuakeUpdate.toLocaleTimeString('pt-BR'):'feed diário como contingência'}`;
+            renderLabHealth();
+        }
+        let labCachedQuakePoints=[];
+        let labGeometryHasRun=false;
+        function runLabGeometryAnalysis(){
+            const findings=document.getElementById('lab-geometry-results');if(!findings)return;
+            const radius=Number(document.getElementById('lab-geometry-radius')?.value||100),kind=document.getElementById('lab-geometry-type')?.value||'all',query=(document.getElementById('lab-geometry-search')?.value||'').trim().toLocaleLowerCase('pt-BR');
+            const events=(kind==='hazard'?[]:labCachedQuakePoints.map(q=>({...q,kind:'quake',label:`M${q.mag.toFixed(1)} • ${q.place}`})));
+            if(kind!=='quake')for(const f of (globalHazardFeatures||[])){let c=f.geometry?.coordinates;if(Array.isArray(c?.[0]))c=c[0];if(!Array.isArray(c)||c.length<2)continue;const lat=Number(c[1]),lon=Number(c[0]);if(Number.isFinite(lat)&&Number.isFinite(lon))events.push({lat,lon,kind:'hazard',label:f.properties?.name||f.properties?.eventname||'Alerta GDACS'});}
+            // Limite explícito: os 180 registros mais recentes evitam bloquear máquinas modestas.
+            events.sort((a,b)=>(b.time||0)-(a.time||0));const sample=events.slice(0,180),edges=[];
+            for(let i=0;i<VORTICES.length;i++)for(let j=i+1;j<VORTICES.length;j++)edges.push([VORTICES[i],VORTICES[j]]);
+            const results=[];let matched=0;
+            for(const [a,b] of edges){const hits=[];for(const e of sample){if(labDistanceToArcKm(e,a,b)<=radius){hits.push(e);matched++;}}if(!query||`${a.name} ${b.name} ${hits.map(x=>x.label).join(' ')}`.toLocaleLowerCase('pt-BR').includes(query))results.push({a,b,hits});}
+            results.sort((a,b)=>b.hits.length-a.hits.length);kpi('lab-kpi-lines',matched);
+            findings.innerHTML=`<div class="lab-finding"><strong>${matched} proximidades encontradas</strong> em ${sample.length} registros analisados (limite de 180), considerando ${edges.length} conexões e raio de ${radius} km.</div>`+results.filter(x=>x.hits.length).slice(0,10).map(x=>`<div class="lab-finding"><strong>${escapeHtml(x.a.name.replace(/^\d+\.\s*/,''))} ↔ ${escapeHtml(x.b.name.replace(/^\d+\.\s*/,''))}</strong><br>${x.hits.length} evento(s) próximo(s)<br><span>${x.hits.slice(0,3).map(e=>escapeHtml(e.label)).join(' • ')}</span></div>`).join('')+`<div class="lab-muted">Análise simplificada sob demanda; não calcula cruzamentos entre todos os arcos. Proximidade espacial não demonstra causalidade ou anomalia estatística.</div>`;
+            labGeometryHasRun=true;
+        }
+        function kpi(id,value){const el=document.getElementById(id);if(el)el.textContent=String(value);}
+
+        function refreshTimelinePanel() {
+            const el=document.getElementById('timeline-live-content');
+            if(!el)return;
+            const query=(document.getElementById('timeline-search')?.value||'').trim().toLocaleLowerCase('pt-BR');
+            const type=document.getElementById('timeline-type')?.value||'all';
+            const entries=[];
+            if(type==='all'||type==='quake'){
+                (latestQuakeFeatures||[]).forEach(q=>{const p=q.properties||{},c=q.geometry?.coordinates||[];const t=Number(p.time)||0;if(!t)return;entries.push({kind:'quake',time:t,title:`M${Number(p.mag||0).toFixed(1)} • ${p.place||'Local não informado'}`,desc:`Profundidade ${Number(c[2]||0).toFixed(1)} km • ${p.type||'Evento sísmico'}`,tag:'USGS • ABALO SÍSMICO'});});
+            }
+            if(type==='all'||type==='point')VORTICES.forEach(v=>entries.push({kind:'point',time:0,title:v.name,desc:`Ponto geográfico cadastrado na Malha Oculta • ${v.region}`,tag:'PONTO DE INVESTIGAÇÃO'}));
+            const filtered=entries.filter(e=>!query||`${e.title} ${e.desc} ${e.tag}`.toLocaleLowerCase('pt-BR').includes(query)).sort((a,b)=>b.time-a.time);
+            const summary=document.getElementById('timeline-summary');if(summary)summary.textContent=`${filtered.length} REGISTROS • ORDEM CRONOLÓGICA • ${new Date().toLocaleString('pt-BR')}`;
+            el.innerHTML=filtered.length?filtered.map(e=>`<article class="timeline-entry ${e.kind}"><div class="timeline-date">${e.time?new Date(e.time).toLocaleString('pt-BR',{dateStyle:'medium',timeStyle:'short'}):'PONTO FIXO • SEM HORÁRIO DE EVENTO'}</div><strong>${escapeHtml(e.title)}</strong><p>${escapeHtml(e.desc)}</p><span class="timeline-tag">${e.tag}</span></article>`).join(''):'<div class="timeline-empty">Nenhum registro corresponde aos filtros selecionados.</div>';
+        }
+
+        function setGraphicsQuality(mode){
+            graphicsQuality=mode==='complete'?'complete':'performance';
+            if(renderer){
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,graphicsQuality==='performance'?1:1.5));
+                renderer.setSize(window.innerWidth,window.innerHeight);
+            }
+            if(asteroidUpdateTimer){clearInterval(asteroidUpdateTimer);asteroidUpdateTimer=null;}
+            asteroidUpdateTimer=setInterval(()=>{try{updateAsteroidPositions();}catch(error){console.warn('Atualização orbital dos asteroides:',error);}},graphicsQuality==='performance'?2000:1000);
+            const perf=document.getElementById('btn-performance'),full=document.getElementById('btn-complete'),desc=document.getElementById('quality-description');
+            if(perf){perf.classList.toggle('active',graphicsQuality==='performance');perf.setAttribute('aria-pressed',String(graphicsQuality==='performance'));}
+            if(full){full.classList.toggle('active',graphicsQuality==='complete');full.setAttribute('aria-pressed',String(graphicsQuality==='complete'));}
+            if(desc)desc.textContent=graphicsQuality==='performance'?'Resolução e animações reduzidas para computadores mais modestos.':'Maior resolução e animações mais fluidas; exige mais do computador.';
+        }
+
+        function setupInvestigationAssistant(){
+            const send=document.getElementById('investigation-ai-send');
+            const input=document.getElementById('investigation-ai-question');
+            const clear=document.getElementById('investigation-ai-clear');
+            if(!send||!input||!clear)return;
+            const submit=()=>sendInvestigationQuestion();
+            send.addEventListener('click',submit);
+            input.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submit();}});
+            clear.addEventListener('click',()=>{investigationAiHistory=[];const log=document.getElementById('investigation-ai-log');if(log)log.textContent='Conversa limpa. Faça uma pergunta sobre os dados disponíveis.';const status=document.getElementById('investigation-ai-status');if(status)status.textContent='IA aguardando pergunta';});
+        }
+        function buildInvestigationAiContext(v){
+            const cutoff=Date.now()-30*86400000;
+            const quakes=(labQuakeFeatures.length?labQuakeFeatures:latestQuakeFeatures).filter(q=>{const c=q.geometry?.coordinates||[],t=Number(q.properties?.time||0);return t>=cutoff&&c.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(c[1]),Number(c[0]))<=800;}).sort((a,b)=>(b.properties?.time||0)-(a.properties?.time||0)).slice(0,15).map(q=>{const p=q.properties||{},c=q.geometry?.coordinates||[];return {type:'earthquake',magnitude:p.mag,place:p.place,depth_km:c[2],latitude:c[1],longitude:c[0],time_utc:p.time?new Date(p.time).toISOString():null,source:'USGS',url:p.url||null};});
+            const fires=(vortexFirmsCache[v.id]?.items||[]).slice(0,15);
+            const hazards=globalHazardFeatures.filter(f=>{const c=f.geometry?.coordinates;if(!c)return false;const xy=Array.isArray(c[0])?c[0]:c;return Array.isArray(xy)&&xy.length>=2&&calculateDistanceKm(v.lat,v.lon,Number(xy[1]),Number(xy[0]))<=1200;}).slice(0,8).map(f=>({name:f.properties?.name||f.properties?.eventname||'Alerta GDACS',level:f.properties?.alertlevel||f.properties?.alertLevel||null,date:f.properties?.fromdate||f.properties?.fromDate||null,url:f.properties?.url||'https://www.gdacs.org/'}));
+            const news=(vortexNewsCache[v.id]||[]).slice(0,8).map(n=>({title:n.title,source:n.source,date:n.date,url:n.url}));
+            return {vortex:{id:v.id,name:v.name,region:v.region,latitude:v.lat,longitude:v.lon,description:v.desc,hypothesisFromSite:v.theory},methodology:{earthquakeRadiusKm:800,hazardRadiusKm:1200,fireRadiusKm:1000,periodDays:30,warning:'A ausência de registro nesta amostra não prova ausência do fenômeno. Proximidade espacial não demonstra causalidade.'},earthquakes:quakes,fires,alerts:hazards,news};
+        }
+        async function sendInvestigationQuestion(){
+            const input=document.getElementById('investigation-ai-question'),send=document.getElementById('investigation-ai-send'),log=document.getElementById('investigation-ai-log'),status=document.getElementById('investigation-ai-status');
+            const question=(input?.value||'').trim();if(!question||!send||!log)return;
+            const v=VORTICES.find(x=>x.id===selectedInvestigationVortexId)||VORTICES[0];
+            const context=buildInvestigationAiContext(v);
+            investigationAiHistory.push({role:'user',content:question});investigationAiHistory=investigationAiHistory.slice(-8);
+            log.textContent+=`\n\nVOCÊ: ${question}\n\nASSISTENTE: Analisando os registros disponíveis...`;log.scrollTop=log.scrollHeight;
+            input.value='';send.disabled=true;send.textContent='Analisando...';if(status)status.textContent=`Analisando ${v.name}`;
+            try{
+                const response=await fetch('/api/assistant',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({question,context,history:investigationAiHistory.slice(0,-1)})});
+                const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||`Assistente indisponível (HTTP ${response.status})`);
+                const answer=String(data.answer||'A IA não retornou texto.');investigationAiHistory.push({role:'assistant',content:answer});investigationAiHistory=investigationAiHistory.slice(-8);
+                log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${answer}`);if(status)status.textContent='Resposta concluída';
+            }catch(error){log.textContent=log.textContent.replace('ASSISTENTE: Analisando os registros disponíveis...',`ASSISTENTE: ${error.message||'Erro de conexão.'}`);if(status)status.textContent='Falha na consulta';}
+            finally{send.disabled=false;send.textContent='Enviar pergunta';log.scrollTop=log.scrollHeight;}
+        }
+
+        function setupFeatureHub() {
+            const perfButton=document.getElementById('btn-performance');if(perfButton)perfButton.addEventListener('click',()=>setGraphicsQuality('performance'));
+            const fullButton=document.getElementById('btn-complete');if(fullButton)fullButton.addEventListener('click',()=>setGraphicsQuality('complete'));
+            const hub = document.getElementById('btn-feature-hub');
+            const drawer = document.getElementById('feature-hub-drawer');
+            ['timeline-search','timeline-type'].forEach(id=>{const node=document.getElementById(id);if(node)node.addEventListener(id==='timeline-search'?'input':'change',refreshTimelinePanel);});
+            const labWindow=document.getElementById('lab-window');if(labWindow)labWindow.addEventListener('change',()=>{if(featureState.lab)refreshLabAnalysis();});
+            ['lab-geometry-radius','lab-geometry-type'].forEach(id=>{const n=document.getElementById(id);if(n)n.addEventListener('change',()=>{if(featureState.lab&&labGeometryHasRun)runLabGeometryAnalysis();});});const geomSearch=document.getElementById('lab-geometry-search');if(geomSearch){let labSearchTimer;geomSearch.addEventListener('input',()=>{clearTimeout(labSearchTimer);labSearchTimer=setTimeout(()=>{if(featureState.lab&&labGeometryHasRun)runLabGeometryAnalysis();},500);});}const geomRun=document.getElementById('lab-geometry-run');if(geomRun)geomRun.addEventListener('click',()=>runLabGeometryAnalysis());
+            const firmsButton=document.getElementById('firms-save-key');if(firmsButton)firmsButton.addEventListener('click',async()=>{const v=VORTICES.find(x=>x.id===selectedInvestigationVortexId);if(!v)return;firmsButton.disabled=true;firmsButton.textContent='Consultando NASA FIRMS...';try{await fetchVortexFires(v,true);}finally{firmsButton.disabled=false;firmsButton.textContent='↻ Consultar focos deste vórtice';}});setupInvestigationAssistant();const labRefresh=document.getElementById('lab-refresh');if(labRefresh)labRefresh.addEventListener('click',()=>{fetchLabQuakes(true);Promise.allSettled([fetchGlobalHazards(),fetchVortexNews()]).then(()=>refreshLabAnalysis());});
+            ['radar-time-filter','radar-mag-filter'].forEach(id=>{const node=document.getElementById(id);if(node)node.addEventListener('change',()=>{if(featureState.radar)refreshRadarPanel();});});
+            const radarRefresh=document.getElementById('radar-refresh-now');if(radarRefresh)radarRefresh.addEventListener('click',async()=>{radarRefresh.disabled=true;radarRefresh.textContent='⟳ Consultando...';try{await Promise.allSettled([fetchLiveEarthData(),fetchGlobalHazards(),fetchLiveAsteroids()]);refreshRadarPanel();}finally{radarRefresh.disabled=false;radarRefresh.textContent='↻ Atualizar dados';}});
+            hub.addEventListener('click', e => {
+                e.stopPropagation();
+                const open = drawer.classList.toggle('open');
+                hub.setAttribute('aria-expanded', String(open));
+            });
+            document.querySelectorAll('.feature-toggle').forEach(button => {
+                button.addEventListener('click', () => {
+                    const key = button.dataset.feature;
+                    setFeature(key, !featureState[key]);
+                });
+            });
+            document.querySelectorAll('[data-close-feature]').forEach(button => button.addEventListener('click', () => setFeature(button.dataset.closeFeature, false)));
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#feature-hub')) drawer.classList.remove('open');
+            });
+            featureRefreshTimer = setInterval(() => {
+                if (featureState.radar) refreshRadarPanel();
+                if (featureState.timeline) refreshTimelinePanel();
+                if (featureState.mode) refreshInvestigationPanel();
+                if (featureState.mode && Date.now()-lastVortexNewsFetch>2*60*1000) fetchVortexNews();
+            }, 20000);
+        }
+
+        function setupMobileOverflow() {
+            const trigger = document.getElementById('btn-mobile-more');
+            const drawer = document.getElementById('mobile-more-drawer');
+            const bar = document.querySelector('.controls-bar');
+            const ids = ['btn-toggle-audio','btn-open-chat','btn-open-theory'];
+            const syncPlacement = () => {
+                const mobile = window.matchMedia('(max-width: 1024px)').matches;
+                ids.forEach(id => {
+                    const button = document.getElementById(id);
+                    if (!button) return;
+                    button.classList.add('mobile-overflow-item');
+                    if (mobile && button.parentElement !== drawer) drawer.appendChild(button);
+                    if (!mobile && button.parentElement !== bar) bar.insertBefore(button, trigger);
+                });
+                if (!mobile) drawer.classList.remove('open');
+            };
+            syncPlacement();
+            window.addEventListener('resize', syncPlacement);
+            trigger.addEventListener('click', e => {
+                e.stopPropagation();
+                const open = drawer.classList.toggle('open');
+                trigger.setAttribute('aria-expanded', String(open));
+            });
+            document.addEventListener('click', e => {
+                if (!e.target.closest('#mobile-more-drawer') && !e.target.closest('#btn-mobile-more')) drawer.classList.remove('open');
+            });
+        }
+
         function closeAllOverlays(except = null) {
             const vortexDrawer = document.getElementById('vortex-grid-drawer');
             const riskDrawer = document.getElementById('risk-drawer');
@@ -2231,7 +3542,12 @@
             const theoryModal = document.getElementById('theory-modal');
             const chatPanel = document.getElementById('chat-panel');
             const liveEarthPanel = document.getElementById('live-earth-panel');
+            const theoryArchive = document.getElementById('theory-archive');
 
+            if (except !== 'archive' && theoryArchive) {
+                theoryArchive.classList.remove('open');
+                theoryArchive.setAttribute('aria-hidden', 'true');
+            }
             if (except !== 'vortex') vortexDrawer.classList.remove('open');
             if (except !== 'risk') riskDrawer.classList.remove('open');
             if (except !== 'info') infoPanel.classList.remove('visible');
@@ -2246,7 +3562,29 @@
             }
         }
 
+        function refreshTrackingButtons() {
+            const states = [
+                ['btn-toggle-live', 'iss'],
+                ['btn-toggle-asteroid', 'asteroids']
+            ];
+            states.forEach(([id, key]) => {
+                const button = document.getElementById(id);
+                if (button) button.classList.toggle('tracking-active', activeTrackingKey === key);
+            });
+        }
+
         function focusOnVortex(vortex) {
+            const key = `vortex-${vortex.id}`;
+            if (activeTrackingKey === key) {
+                activeTrackingKey = null;
+                targetCameraPos = null;
+                currentVortexId = null;
+                document.getElementById('info-panel').classList.remove('visible');
+                refreshTrackingButtons();
+                return;
+            }
+            activeTrackingKey = key;
+            refreshTrackingButtons();
             closeAllOverlays('info');
             currentVortexId = vortex.id;
             displayVortexInfo(vortex);
@@ -2265,6 +3603,14 @@
 
         function focusOnISS() {
             if (!issGroup) return;
+            if (activeTrackingKey === 'iss') {
+                activeTrackingKey = null;
+                targetCameraPos = null;
+                refreshTrackingButtons();
+                return;
+            }
+            activeTrackingKey = 'iss';
+            refreshTrackingButtons();
             closeAllOverlays();
             isRotating = false;
             const btnRotate = document.getElementById('btn-rotate');
@@ -2279,14 +3625,14 @@
         }
 
         function focusOnAsteroids() {
-            if (asteroidGroups.length === 0) return;
-            closeAllOverlays();
-            isRotating = false;
-            const btnRotate = document.getElementById('btn-rotate');
-            if (btnRotate) btnRotate.classList.remove('active');
-
-            const targetMesh = asteroidGroups[0].mesh;
-            targetCameraPos = targetMesh.position.clone().normalize().multiplyScalar(220);
+            if (activeTrackingKey === 'asteroids') {
+                activeTrackingKey = null; targetCameraPos = null; refreshTrackingButtons();
+                setFeature('radar', false); return;
+            }
+            activeTrackingKey = 'asteroids'; refreshTrackingButtons(); closeAllOverlays();
+            setFeature('radar', true);
+            const panel=document.getElementById('radar-panel');
+            if(panel) panel.scrollIntoView({block:'nearest'});
         }
 
         function displayVortexInfo(data) {
@@ -2544,7 +3890,138 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
 
+
+        // Conteúdo do arquivo em namespace próprio para não interferir nos painéis existentes.
+        const THEORY_ARCHIVE_SECTIONS = [
+            {
+                title: "A arquitetura do doze",
+                html: `<p class="archive-lead">O ponto de partida é a hipótese de que doze regiões da Terra formariam uma estrutura conectada, uma espécie de malha planetária.</p>
+                <p>No modelo geométrico desta investigação, os dois polos funcionam como extremos de referência, enquanto outros dez pontos são distribuídos pelo globo. A ideia é observar se linhas, triângulos e cruzamentos revelam uma organização que não aparece quando cada local é estudado isoladamente.</p>
+                <h3>A geometria proposta</h3><p>O icosaedro possui 12 vértices, 20 faces triangulares e 30 arestas. A investigação usa essa geometria como referência visual para testar uma distribuição de doze pontos, incluindo a hipótese de intervalos longitudinais de 72° em determinadas faixas.</p>
+                <div class="archive-note">A geometria é uma ferramenta de organização da hipótese. A coincidência entre um desenho geométrico e locais reais precisa ser testada com coordenadas e critérios definidos antes da análise.</div>`
+            },
+            {
+                title: "A teoria de Ivan Sanderson",
+                html: `<p class="archive-lead">Em 1972, Ivan T. Sanderson popularizou a ideia dos chamados “Doze Vórtices Viles”, regiões do planeta associadas, em sua proposta, a ocorrências incomuns.</p>
+                <p>O interesse desta pesquisa não é simplesmente copiar o mapa de Sanderson. A teoria dos doze pontos tem uma geometria própria. A proposta é comparar as regiões atribuídas aos vórtices com a malha construída aqui e observar aproximações, diferenças e possíveis padrões.</p>
+                <h3>O que comparar</h3><ul><li>Distribuição geográfica dos locais.</li><li>Relatos históricos de desaparecimentos e incidentes marítimos ou aéreos.</li><li>Avistamentos luminosos e relatos de interferência.</li><li>Proximidade com zonas tectônicas, magnéticas ou oceanográficas.</li></ul>
+                <div class="archive-note">A associação entre esses locais e fenômenos extraordinários é controversa; cada ocorrência deve ser verificada individualmente.</div>`
+            },
+            {
+                title: "A geometria do icosaedro",
+                html: `<p>O icosaedro é um sólido platônico formado por 20 faces triangulares, 30 arestas e 12 vértices. Por possuir exatamente doze vértices, tornou-se uma referência para a distribuição dos pontos desta teoria.</p>
+                <p>A hipótese procura projetar essa estrutura sobre o globo terrestre e investigar se os vértices ou cruzamentos se aproximam de regiões conhecidas por relatos incomuns. A projeção precisa considerar que a Terra é aproximadamente esférica e que mapas planos distorcem distâncias e ângulos.</p>
+                <h3>Pergunta central</h3><p>Quando os doze pontos são conectados por um mesmo critério geométrico, surgem alinhamentos ou concentrações que não seriam esperados ao acaso?</p>`
+            },
+            {
+                title: "Os portões celestes de Enoque",
+                html: `<p class="archive-lead">O Livro de Enoque descreve portões celestes associados aos movimentos do Sol, da Lua, das estrelas e dos ventos.</p>
+                <p>Especialmente na seção astronômica (capítulos 72–82), os portões fazem parte de uma cosmologia ordenada: por eles os astros surgem e se põem, seguindo ciclos e posições determinados. A investigação considera a possibilidade de que essa linguagem antiga preserve uma visão simbólica de uma arquitetura maior da criação.</p>
+                <p>A comparação com os doze pontos terrestres é uma interpretação desta pesquisa, não uma identificação explícita feita pelo texto antigo. O objetivo é explorar se a estrutura dos portões pode dialogar simbolicamente com a malha planetária.</p>`
+            },
+            {
+                title: "Os Vigilantes e o conhecimento proibido",
+                html: `<p>Em 1 Enoque 6–16, os Vigilantes descem à Terra, liderados por Semjaza, e transgridem a ordem estabelecida. Azazel é associado à transmissão de conhecimentos como fabricação de armas, trabalho com metais, adornos e práticas de encantamento; outros ensinamentos também são atribuídos aos Vigilantes.</p>
+                <p>Dentro da hipótese esotérica, esse episódio levanta uma pergunta: se determinados conhecimentos foram transmitidos à humanidade, como suas tradições foram preservadas, transformadas ou ocultadas ao longo dos séculos?</p>
+                <div class="archive-note">A ligação dos Vigilantes com pontos geográficos específicos é uma hipótese interpretativa do projeto; 1 Enoque não fornece um mapa dos doze locais.</div>`
+            },
+            {
+                title: "Goetia e a tradição salomônica",
+                html: `<p>A tradição salomônica reúne textos de magia ritual atribuídos a Salomão. A <em>Ars Goetia</em>, primeira parte do <em>Lemegeton</em> ou <em>Pequena Chave de Salomão</em>, apresenta 72 espíritos, com nomes, hierarquias e descrições.</p>
+                <p>A <em>Chave de Salomão</em> e o <em>Lemegeton</em> são obras distintas, embora pertençam ao universo da magia salomônica. Seus sistemas incluem correspondências planetárias, horas, selos, nomes e operações rituais.</p>
+                <h3>Possível diálogo com a malha</h3><p>O número 72 pode ser observado em relação a divisões de 12, mas essa relação numérica, sozinha, não demonstra que os textos descrevam os mesmos doze pontos terrestres. Na investigação, a Goetia entra como uma tradição de hierarquias e correspondências a ser comparada, sem forçar equivalências.</p>`
+            },
+            {
+                title: "Sephiroth e Qliphoth",
+                html: `<p>Na Cabala, as dez Sephiroth são apresentadas como emanações ou dimensões da manifestação divina, organizadas na Árvore da Vida. Em tradições cabalísticas e ocultistas posteriores, as Qliphoth são descritas como “cascas”, forças de desequilíbrio ou aspectos sombrios associados à estrutura da Árvore.</p>
+                <p>Para esta teoria, esses conceitos oferecem uma linguagem simbólica para pensar ordem, ruptura, equilíbrio e forças ocultas. A hipótese pergunta se a estrutura dos doze pontos poderia ser interpretada como uma camada terrestre de uma arquitetura espiritual mais ampla.</p>
+                <div class="archive-note">As Sephiroth são dez, não doze; qualquer correspondência com os doze pontos precisa ser construída e justificada, não presumida.</div>`
+            },
+            {
+                title: "A Bíblia e o simbolismo do doze",
+                html: `<p>O número doze aparece repetidamente na Bíblia: as doze tribos de Israel, os doze apóstolos e, em Apocalipse 21, as doze portas da Nova Jerusalém, associadas aos nomes das tribos e guardadas por anjos.</p>
+                <p>Outras passagens descrevem conflitos espirituais e autoridades invisíveis. Daniel 10 menciona o príncipe da Pérsia, o príncipe da Grécia e Miguel; Efésios 6:12 fala de principados, potestades e forças espirituais. Esses textos alimentam a dimensão espiritual da hipótese.</p>
+                <p>A pesquisa investiga o simbolismo do doze e a linguagem de portões, guardiões e hierarquias. Não afirma que a Bíblia esteja descrevendo coordenadas geográficas modernas.</p>`
+            },
+            {
+                title: "Uma possível arquitetura em comum",
+                html: `<p>Esta é a zona de convergência da teoria: geometria planetária, relatos de Sanderson, portões celestes de Enoque, Vigilantes, magia salomônica, Sephiroth, Qliphoth e simbolismo bíblico.</p>
+                <p>A hipótese considera que tradições diferentes possam preservar fragmentos de uma mesma arquitetura — alguns descritos como lugares, outros como portões, hierarquias, ciclos ou forças. A tarefa é comparar estruturas e símbolos sem apagar as diferenças entre as fontes.</p>
+                <h3>Critério de investigação</h3><p>Primeiro registrar o que cada tradição realmente diz; depois identificar semelhanças; por fim, formular a conexão hipotética. Assim, a teoria permanece rastreável e não transforma toda semelhança em prova.</p>`
+            },
+            {
+                title: "As doze regiões e seus fenômenos",
+                html: `<p>O mapa atual reúne doze regiões de interesse: Triângulo das Bermudas, Triângulo do Dragão, Mar de Tasman, Ilha de Páscoa, Anomalia do Atlântico Sul, Canal de Moçambique, Polo Norte, Polo Sul, Pacífico Norte, Centro-Oeste/Sudeste do Brasil, Bacia do Congo e Oceano Índico Sul.</p>
+                <p>Os relatos associados incluem desaparecimentos, luzes, falhas de comunicação, atividade tectônica, fenômenos ópticos, sons submarinos e anomalias magnéticas. Cada região deve ter um registro próprio, com data, fonte, localização e explicações alternativas.</p>
+                <div class="archive-note">Nem todos os fenômenos listados têm o mesmo nível de documentação. A existência de uma anomalia física, como a Anomalia do Atlântico Sul, não comprova a existência de um portal.</div>`
+            },
+            {
+                title: "Portais, proteção e contenção",
+                html: `<p>Dentro da cosmologia hipotética do projeto, os portões poderiam ser interpretados não apenas como passagens, mas também como limites, pontos de contenção ou mecanismos de proteção de uma ordem maior.</p>
+                <p>Essa leitura dialoga simbolicamente com narrativas de guardiões, vigilantes, selos, hierarquias e fronteiras entre domínios. Desaparecimentos, luzes ou interferências seriam tratados como possíveis sinais a investigar — nunca como confirmação automática de uma passagem.</p>`
+            },
+            {
+                title: "Potências, conhecimento e ocultismo",
+                html: `<p>Uma das perguntas da investigação é se conhecimentos esotéricos antigos teriam sido preservados em círculos restritos, instituições ou tradições de poder. A hipótese considera que governantes e grupos influentes, ao longo da história, poderiam ter tido contato com práticas mágicas e sistemas simbólicos.</p>
+                <p>Isso não permite afirmar que governos atuais utilizem magia ou que exista uma organização secreta específica. O projeto pode examinar documentos, patronato, sociedades esotéricas e episódios históricos verificáveis, separando registros de especulação.</p>`
+            },
+            {
+                title: "O Triângulo do Dragão e as sincronicidades",
+                html: `<p>O Triângulo do Dragão é um dos pontos centrais do imaginário de desaparecimentos no Pacífico. A investigação observa relatos de embarcações perdidas, luzes sobre o mar e atividade tectônica na região, comparando-os com o Triângulo das Bermudas.</p>
+                <p>Também registra coincidências temporais apontadas durante o monitoramento do projeto, como publicações, alertas e eventos sísmicos próximos no tempo. A sequência “um incidente, duas coincidências, três padrões” funciona como provocação investigativa: quando uma repetição merece ser examinada com mais rigor?</p>
+                <div class="archive-note">Uma coincidência temporal não demonstra causalidade. Datas, coordenadas e fontes precisam ser conferidas antes de classificar um evento como padrão.</div>`
+            },
+            {
+                title: "Anomalia do Atlântico Sul e regiões extremas",
+                html: `<p>A Anomalia do Atlântico Sul é uma região real em que o campo magnético terrestre é relativamente mais fraco, o que tem consequências para satélites e partículas energéticas. É um fenômeno geofísico mensurável e um dos elementos concretos do mapa.</p>
+                <p>Outras regiões, como a Antártida, o Ártico, o Pacífico e áreas oceânicas profundas, são de interesse por seu isolamento, condições ambientais extremas, atividade geológica ou limitações de observação. A pesquisa procura separar o fenômeno medido do significado esotérico que a hipótese atribui a ele.</p>`
+            },
+            {
+                title: "Guerra cibernética e infraestrutura global",
+                html: `<p>A malha também é observada em sua dimensão tecnológica. Satélites, cabos submarinos, redes elétricas, sistemas de navegação, telecomunicações e centros de dados formam uma infraestrutura interdependente.</p>
+                <p>Falhas, ataques cibernéticos e interrupções podem produzir efeitos em cadeia. Na hipótese do projeto, essa fragilidade tecnológica poderia compor uma camada humana da rede — uma infraestrutura que conecta regiões distantes e cuja interrupção poderia amplificar crises.</p>
+                <p>Essa dimensão é investigável por meio de alertas oficiais, incidentes documentados e relatórios técnicos, sem presumir que toda falha tenha origem coordenada.</p>`
+            },
+            {
+                title: "O Reset: hipótese de convergência",
+                html: `<p>O “Reset” é o cenário hipotético em que diferentes camadas de instabilidade convergiriam: fenômenos naturais, fragilidade tecnológica, tensões humanas e, dentro da cosmologia esotérica do projeto, um possível desequilíbrio espiritual.</p>
+                <p>A teoria pergunta se os doze pontos seriam apenas locais isolados ou partes de um sistema maior cuja ruptura produziria consequências em escala global. O termo “Reset” é usado aqui como hipótese narrativa e investigativa, não como previsão de um acontecimento confirmado.</p>
+                <h3>O que ainda precisa ser demonstrado</h3><ul><li>Que os doze pontos obedecem a um critério geográfico consistente.</li><li>Que os fenômenos se repetem de modo estatisticamente relevante.</li><li>Que existe uma conexão entre as regiões, além da semelhança dos relatos.</li><li>Que as correspondências esotéricas têm base textual e histórica.</li></ul>`
+            },
+            {
+                title: "Método e perguntas em aberto",
+                html: `<p>Para que a Malha Oculta cresça sem perder sua identidade, cada hipótese deve ser registrada com sua origem. O arquivo distingue quatro camadas:</p>
+                <ul><li><strong>Registro:</strong> o que uma fonte, documento ou dado realmente informa.</li><li><strong>Fenômeno:</strong> o evento observável ou relato documentado.</li><li><strong>Correspondência:</strong> a semelhança geométrica, histórica ou simbólica encontrada.</li><li><strong>Hipótese:</strong> a interpretação que propõe uma conexão entre os elementos.</li></ul>
+                <p>As perguntas centrais permanecem: por que doze? Os pontos formam uma geometria estável? Os portões de Enoque podem ser comparados simbolicamente à distribuição terrestre? As tradições mágicas preservam estruturas que dialogam com essa arquitetura? E quais dados poderiam confirmar ou enfraquecer essas conexões?</p>
+                <div class="archive-note">A força da investigação está em manter as perguntas abertas e documentar também aquilo que não se encaixa.</div>`
+            }
+        ];
+
+        function renderTheoryArchive(index = 0) {
+            const nav = document.getElementById('archive-navigation');
+            const article = document.getElementById('archive-article');
+            if (!nav || !article) return;
+            nav.innerHTML = '';
+            THEORY_ARCHIVE_SECTIONS.forEach((section, i) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = i === index ? 'active' : '';
+                button.innerHTML = `<span>${String(i + 1).padStart(2, '0')}</span>${section.title}`;
+                button.addEventListener('click', () => renderTheoryArchive(i));
+                nav.appendChild(button);
+            });
+            const section = THEORY_ARCHIVE_SECTIONS[index];
+            article.innerHTML = `<div class="archive-disclaimer">nada comprovado, apenas conspirações malucas kkkk</div><h1>${section.title}</h1>${section.html}<div class="archive-note">Parte ${index + 1} de ${THEORY_ARCHIVE_SECTIONS.length} • A Malha Oculta</div>`;
+            const activeButton = nav.children[index];
+            if (activeButton && window.matchMedia('(max-width: 1024px)').matches) {
+                activeButton.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            }
+            article.scrollTop = 0;
+        }
+
         function setupUI() {
+            setupFeatureHub();
+            setupMobileOverflow();
             const infoPanel = document.getElementById('info-panel');
             const theoryModal = document.getElementById('theory-modal');
             const chatPanel = document.getElementById('chat-panel');
@@ -2552,8 +4029,50 @@
             const btnToggleVortex = document.getElementById('btn-toggle-vortex');
             const btnToggleRisk = document.getElementById('btn-toggle-risk');
             const riskDrawer = document.getElementById('risk-drawer');
+            const closeRisk = document.getElementById('close-risk');
+            if (closeRisk) closeRisk.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); riskDrawer.classList.remove('open'); });
             const telemetryHud = document.getElementById('telemetry-hud');
             const liveEarthPanel = document.getElementById('live-earth-panel');
+            const theoryArchive = document.getElementById('theory-archive');
+            const archiveArticle = document.getElementById('archive-article');
+            const archiveNavigation = document.getElementById('archive-navigation');
+
+            // Mantém a roda do mouse dentro das áreas roláveis do arquivo.
+            [archiveArticle, archiveNavigation].forEach((area) => {
+                if (!area) return;
+                area.addEventListener('wheel', (event) => {
+                    event.stopPropagation();
+                }, { passive: true });
+            });
+
+            document.getElementById('btn-open-archive').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const willOpen = !theoryArchive.classList.contains('open');
+                closeAllOverlays(willOpen ? 'archive' : null);
+                if (willOpen) {
+                    renderTheoryArchive(0);
+                    theoryArchive.classList.add('open');
+                    theoryArchive.setAttribute('aria-hidden', 'false');
+                }
+            });
+            document.getElementById('close-theory-archive').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                theoryArchive.classList.remove('open');
+                theoryArchive.setAttribute('aria-hidden', 'true');
+            });
+            theoryArchive.addEventListener('click', (e) => {
+                if (e.target === theoryArchive) {
+                    theoryArchive.classList.remove('open');
+                    theoryArchive.setAttribute('aria-hidden', 'true');
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    theoryArchive.classList.remove('open');
+                    theoryArchive.setAttribute('aria-hidden', 'true');
+                }
+            });
 
             liveEarthPanel.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -2633,7 +4152,7 @@
             const mouse = new THREE.Vector2();
 
             window.addEventListener('pointermove', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.chat-panel') || e.target.closest('.top-left-group') || e.target.closest('.live-earth-panel')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.archive-overlay') || e.target.closest('.chat-panel') || e.target.closest('.top-left-group') || e.target.closest('.live-earth-panel')) return;
                 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -2651,7 +4170,7 @@
             });
 
             window.addEventListener('pointerdown', (e) => {
-                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.chat-panel') || e.target.closest('.top-left-group') || e.target.closest('.live-earth-panel')) return;
+                if (e.target.closest('.ui-top-bar') || e.target.closest('.info-panel') || e.target.closest('.theory-modal') || e.target.closest('.archive-overlay') || e.target.closest('.chat-panel') || e.target.closest('.top-left-group') || e.target.closest('.live-earth-panel')) return;
 
                 mouse.x = (e.clientX / window.innerWidth) * 2 - 1;
                 mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
@@ -2677,9 +4196,15 @@
                 }
             });
 
-            document.getElementById('close-panel').addEventListener('click', () => {
+            document.getElementById('close-panel').addEventListener('pointerdown', (e) => {
+                e.stopPropagation();
+            });
+            document.getElementById('close-panel').addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 infoPanel.classList.remove('visible');
-                targetCameraPos = null; 
+                if (activeTrackingKey && activeTrackingKey.startsWith('vortex-')) activeTrackingKey = null;
+                targetCameraPos = null;
             });
 
             document.getElementById('close-theory').addEventListener('click', () => theoryModal.classList.remove('visible'));
@@ -2691,10 +4216,13 @@
             document.getElementById('btn-rotate').addEventListener('click', (e) => {
                 isRotating = !isRotating;
                 targetCameraPos = null;
-                e.target.classList.toggle('active', isRotating);
+                e.currentTarget.classList.toggle('active', isRotating);
             });
 
             document.getElementById('btn-reset').addEventListener('click', () => {
+                Object.keys(featureState).forEach(key => { if (featureState[key]) setFeature(key, false); });
+                activeTrackingKey = null;
+                refreshTrackingButtons();
                 targetCameraPos = null;
                 camera.position.set(0, 0, 360);
                 earthMesh.rotation.set(0, 0, 0);
@@ -2705,13 +4233,21 @@
         }
 
         function onWindowResize() {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            if (!camera || !renderer) return;
+            const width = Math.max(1, window.innerWidth);
+            const height = Math.max(1, window.innerHeight);
+            camera.aspect = width / height;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, graphicsQuality==='performance'?1:1.5));
         }
 
-        function animate() {
+        function animate(timestamp=0) {
             requestAnimationFrame(animate);
+            const frameInterval = graphicsQuality==='performance' ? 1000/30 : 0;
+            if(frameInterval && timestamp-lastRenderAt<frameInterval) return;
+            lastRenderAt=timestamp;
+            animationFrameCount++;
 
             if (isRotating && earthMesh) {
                 earthMesh.rotation.y += 0.002;
@@ -2720,7 +4256,8 @@
                 }
             }
 
-            asteroidGroups.forEach(ast => {
+            if(graphicsQuality==='complete' || animationFrameCount%2===0) asteroidGroups.forEach(ast => {
+                if (!ast.mesh) return;
                 ast.angle += ast.speed;
                 ast.mesh.position.x = Math.cos(ast.angle) * ast.distance;
                 ast.mesh.position.z = Math.sin(ast.angle) * ast.distance;
@@ -2728,7 +4265,7 @@
                 ast.mesh.rotation.y += 0.015;
             });
 
-            lightningMeshes.forEach(item => {
+            if(graphicsQuality==='complete' || animationFrameCount%3===0) lightningMeshes.forEach(item => {
                 item.timer++;
                 if (item.timer > 120) {
                     item.mesh.visible = true;
@@ -2739,7 +4276,7 @@
                 }
             });
 
-            seismicAlertMarkers.forEach(m => {
+            if(graphicsQuality==='complete' || animationFrameCount%2===0) seismicAlertMarkers.forEach(m => {
                 m.rotation.z += 0.02;
             });
 
@@ -2753,11 +4290,16 @@
                 controls.update();
             }
 
-            updateLabels();
+            if(graphicsQuality==='complete' || animationFrameCount%2===0) updateLabels();
             renderer.render(scene, camera);
         }
 
-        window.onload = init;
+        if (document.readyState === 'complete') init();
+        else window.addEventListener('load', init, { once:true });
     </script>
 </body>
 </html>
+
+<style>
+@media(prefers-reduced-motion:reduce){.lab-panel.open{animation:none!important}}
+</style>
