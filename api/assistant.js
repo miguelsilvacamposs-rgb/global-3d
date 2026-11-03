@@ -137,7 +137,7 @@ ${context}`
               maxOutputTokens: 700,
   temperature: 0.8,
   thinkingConfig: {
-    thinkingLevel: "MINIMAL"
+    thinkingLevel: "LOW"
             }
           }),
           signal: AbortSignal.timeout(18000)
@@ -160,10 +160,11 @@ ${context}`
       }
 
       const answer = (data.candidates || [])
-        .flatMap(c => c.content?.parts || [])
-        .map(p => p.text || '')
-        .join('\n')
-        .trim();
+  .flatMap(c => c.content?.parts || [])
+  .filter(p => typeof p.text === 'string')
+  .map(p => p.text)
+  .join('\n')
+  .trim();
 
       if (!answer) {
         lastError = 'O modelo não retornou uma resposta em texto.';
